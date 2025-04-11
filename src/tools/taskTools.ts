@@ -5,6 +5,7 @@ import {
   updateTaskStatus,
   canExecuteTask,
   batchCreateOrUpdateTasks,
+  deleteTask as modelDeleteTask,
 } from "../models/taskModel.js";
 import { TaskStatus } from "../types/index.js";
 
@@ -512,5 +513,58 @@ export async function completeTask({
         text: prompt,
       },
     ],
+  };
+}
+
+// 刪除任務工具
+export const deleteTaskSchema = z.object({
+  taskId: z
+    .string()
+    .describe("待刪除任務的唯一標識符，必須是系統中存在且未完成的任務ID"),
+});
+
+export async function deleteTask({ taskId }: z.infer<typeof deleteTaskSchema>) {
+  const task = await getTaskById(taskId);
+
+  if (!task) {
+    return {
+      content: [
+        {
+          type: "text" as const,
+          text: `## 系統錯誤\n\n找不到ID為 \`${taskId}\` 的任務。請使用「list_tasks」工具確認有效的任務ID後再試。`,
+        },
+      ],
+      isError: true,
+    };
+  }
+
+  if (task.status === TaskStatus.COMPLETED) {
+    return {
+      content: [
+        {
+          type: "text" as const,
+          text: `## 操作被拒絕\n\n任務 "${task.name}" (ID: \`${task.id}\`) 已完成，不允許刪除已完成的任務。\n\n如需清理任務，請聯絡系統管理員。`,
+        },
+      ],
+      isError: true,
+    };
+  }
+
+  const result = await modelDeleteTask(taskId);
+
+  return {
+    content: [
+      {
+        type: "text" as const,
+        text: `## ${result.success ? "操作成功" : "操作失敗"}\n\n${
+          result.message
+        }\n\n${
+          result.success
+            ? `任務 "${task.name}" (ID: \`${task.id}\`) 已成功從系統中刪除。`
+            : ""
+        }`,
+      },
+    ],
+    isError: !result.success,
   };
 }

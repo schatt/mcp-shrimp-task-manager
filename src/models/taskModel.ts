@@ -251,3 +251,42 @@ export async function canExecuteTask(
     blockedBy: blockedBy.length > 0 ? blockedBy : undefined,
   };
 }
+
+// 刪除任務
+export async function deleteTask(
+  taskId: string
+): Promise<{ success: boolean; message: string }> {
+  const tasks = await readTasks();
+  const taskIndex = tasks.findIndex((task) => task.id === taskId);
+
+  if (taskIndex === -1) {
+    return { success: false, message: "找不到指定任務" };
+  }
+
+  // 檢查任務狀態，已完成的任務不允許刪除
+  if (tasks[taskIndex].status === TaskStatus.COMPLETED) {
+    return { success: false, message: "無法刪除已完成的任務" };
+  }
+
+  // 檢查是否有其他任務依賴此任務
+  const allTasks = tasks.filter((_, index) => index !== taskIndex);
+  const dependentTasks = allTasks.filter((task) =>
+    task.dependencies.some((dep) => dep.taskId === taskId)
+  );
+
+  if (dependentTasks.length > 0) {
+    const dependentTaskNames = dependentTasks
+      .map((task) => `"${task.name}" (ID: ${task.id})`)
+      .join(", ");
+    return {
+      success: false,
+      message: `無法刪除此任務，因為以下任務依賴於它: ${dependentTaskNames}`,
+    };
+  }
+
+  // 執行刪除操作
+  tasks.splice(taskIndex, 1);
+  await writeTasks(tasks);
+
+  return { success: true, message: "任務刪除成功" };
+}

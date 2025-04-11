@@ -19,6 +19,8 @@ import {
   verifyTaskSchema,
   completeTask,
   completeTaskSchema,
+  deleteTask,
+  deleteTaskSchema,
 } from "./tools/taskTools.js";
 
 // 導入提示模板
@@ -181,6 +183,19 @@ async function main() {
       },
       async (args) => {
         return await completeTask(args);
+      }
+    );
+
+    server.tool(
+      "delete_task",
+      "刪除未完成的任務，但不允許刪除已完成的任務，確保系統記錄的完整性",
+      {
+        taskId: z
+          .string()
+          .describe("待刪除任務的唯一標識符，必須是系統中存在且未完成的任務ID"),
+      },
+      async (args) => {
+        return await deleteTask(args);
       }
     );
 
