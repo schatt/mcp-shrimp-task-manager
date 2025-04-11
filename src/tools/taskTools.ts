@@ -261,6 +261,24 @@ export const splitTasksSchema = z
             .describe(
               "此任務依賴的前置任務ID或任務名稱列表，支持兩種引用方式，名稱引用更直觀"
             ),
+          relatedFiles: z
+            .array(
+              z.object({
+                path: z
+                  .string()
+                  .min(1, { message: "檔案路徑不能為空" })
+                  .describe("檔案路徑，相對於專案根目錄"),
+                type: z
+                  .nativeEnum(RelatedFileType)
+                  .describe("檔案類型，用於區分不同類型的檔案"),
+                description: z
+                  .string()
+                  .min(1, { message: "檔案描述不能為空" })
+                  .describe("檔案描述，用於說明檔案的用途和內容"),
+              })
+            )
+            .optional()
+            .describe("與任務相關的檔案列表，包含檔案路徑、類型和描述"),
         })
       )
       .min(1, { message: "至少需要提供一個任務，請確保任務列表不為空" })

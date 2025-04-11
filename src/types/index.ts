@@ -71,6 +71,7 @@ export interface SplitTasksArgs {
     description: string; // 詳細的任務描述，包含實施要點、技術細節和驗收標準
     notes?: string; // 補充說明、特殊處理要求或實施建議（選填）
     dependencies?: string[]; // 此任務依賴的前置任務ID列表，形成任務的有向無環依賴圖
+    relatedFiles?: RelatedFile[]; // 與任務相關的文件列表（選填）
   }>;
 }
 

@@ -261,6 +261,7 @@ export async function batchCreateOrUpdateTasks(
     description: string;
     notes?: string;
     dependencies?: string[];
+    relatedFiles?: RelatedFile[];
   }>,
   isOverwrite: boolean
 ): Promise<Task[]> {
@@ -287,7 +288,8 @@ export async function batchCreateOrUpdateTasks(
       taskData.name,
       taskData.description,
       taskData.notes,
-      [] // 空依賴列表
+      [], // 空依賴列表
+      taskData.relatedFiles // 添加關聯檔案
     );
 
     // 將新任務添加到映射表
