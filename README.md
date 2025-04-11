@@ -241,7 +241,7 @@ npm run build
 
 #### 全局配置
 
-1. 打開 Cursor IDE 的全局設定檔案（通常位於 `~/.cursor/settings.json`）
+1. 打開 Cursor IDE 的全局設定檔案（通常位於 `~/.cursor/mcp.json`）
 2. 在 `mcpServers` 部分添加蝦米任務管理器的配置
 
 ```json
@@ -274,14 +274,21 @@ npm run build
       "command": "node",
       "args": ["/path/to/mcp-shrimp-task-manager/dist/index.js"],
       "env": {
-        "DATA_DIR": "./data" // 使用相對路徑，指向專案內的數據目錄
+        "DATA_DIR": "/path/to/project/data" // 必須使用絕對路徑
       }
     }
   }
 }
 ```
 
-**DATA_DIR 參數**是蝦米任務管理器存儲任務數據、對話記錄等信息的目錄，正確設置此參數對於系統的正常運行至關重要。
+**DATA_DIR 參數**是蝦米任務管理器存儲任務數據、對話記錄等信息的目錄，正確設置此參數對於系統的正常運行至關重要。此參數必須使用絕對路徑，使用相對路徑可能導致系統無法正確定位數據目錄，造成數據丟失或功能失效。
+
+> **警告**：DATA_DIR 參數僅支援絕對路徑設置。使用相對路徑可能導致以下問題：
+>
+> - 數據檔案找不到，導致系統初始化失敗
+> - 任務狀態丟失或無法正確保存
+> - 應用程式在不同環境下行為不一致
+> - 系統崩潰或無法啟動
 
 更多關於專案特定配置的詳細說明和最佳實踐，請參閱[使用指南：專案特定配置](docs/usage-guide.md#project-specific-configuration)。
 

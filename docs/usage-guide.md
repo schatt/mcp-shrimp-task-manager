@@ -610,6 +610,33 @@ await mcp.mcp_shrimp_task_manager.clear_conversation_log({
 - **上下文記憶**：保存 LLM 在執行任務時需要的上下文信息
 - **備份與恢復**：支持數據備份和災難恢復機制
 
+**重要說明：`DATA_DIR` 參數僅支援絕對路徑設置**。這是一項技術限制，主要基於以下原因：
+
+1. **路徑解析一致性**：絕對路徑提供確定的檔案位置，無論程式從何處啟動，都能準確定位數據目錄
+2. **跨環境穩定性**：在不同執行環境（如開發、測試、生產）中，相對路徑可能產生不同解析結果
+3. **程序啟動位置獨立性**：蝦米任務管理器可能從不同的工作目錄啟動，相對路徑會導致數據目錄位置不一致
+4. **多進程安全**：當系統在多個進程間運行時，絕對路徑確保所有進程訪問相同的數據目錄
+
+> **警告**：使用相對路徑設置 DATA_DIR 會導致以下嚴重問題：
+>
+> - **系統初始化失敗**：無法找到或創建必要的數據文件，導致系統啟動失敗
+> - **數據不一致**：相同代碼在不同環境執行時可能使用不同的數據目錄，造成數據分散
+> - **任務狀態丟失**：任務狀態和歷史記錄可能找不到或丟失，導致任務執行中斷
+> - **系統不穩定**：路徑解析錯誤可能導致系統在某些情況下工作，在其他情況下失敗
+> - **備份失敗**：備份機制無法正確定位或存儲備份文件，增加數據丟失風險
+
+為確保系統穩定性和數據安全，在配置 `DATA_DIR` 參數時，請始終使用絕對路徑，例如：
+
+```json
+"DATA_DIR": "/Users/username/projects/my-project/data"
+```
+
+而不是相對路徑：
+
+```json
+"DATA_DIR": "./data"  // 請勿使用此方式設定！
+```
+
 ### 專案特定配置的優勢
 
 相比全局配置，在專案目錄中使用專案特定的 `.cursor/mcp.json` 配置有以下明顯優勢：
@@ -649,7 +676,7 @@ await mcp.mcp_shrimp_task_manager.clear_conversation_log({
       "command": "node",
       "args": ["/path/to/mcp-shrimp-task-manager/dist/index.js"],
       "env": {
-        "DATA_DIR": "./data",
+        "DATA_DIR": "/absolute/path/to/data",
         "LOG_LEVEL": "info",
         "MAX_BACKUP_FILES": "5"
       }
@@ -664,7 +691,7 @@ await mcp.mcp_shrimp_task_manager.clear_conversation_log({
 | -------------- | ----------------------------------- | ---------------------------------------------------- |
 | `command`      | 執行命令，通常為 node               | `"node"`                                             |
 | `args`         | 命令參數，指向 dist/index.js 的路徑 | `["/path/to/mcp-shrimp-task-manager/dist/index.js"]` |
-| `env.DATA_DIR` | 數據目錄路徑，可使用絕對或相對路徑  | `"./data"` 或 `"/absolute/path/to/data"`             |
+| `env.DATA_DIR` | 數據目錄路徑，必須使用絕對路徑      | `"/absolute/path/to/data"`                           |
 
 #### 可選環境變數
 
@@ -723,14 +750,14 @@ touch .cursor/mcp.json
 
 使用您喜歡的文本編輯器打開 `mcp.json` 文件，添加以下基本配置：
 
-```json
+```bash
 {
   "mcpServers": {
     "shrimp-task-manager": {
       "command": "node",
       "args": ["/absolute/path/to/mcp-shrimp-task-manager/dist/index.js"],
       "env": {
-        "DATA_DIR": "./data"
+        "DATA_DIR": "/absolute/path/to/data"
       }
     }
   }
@@ -741,31 +768,28 @@ touch .cursor/mcp.json
 
 #### 步驟 4：設定 DATA_DIR 參數
 
-`DATA_DIR` 參數可以使用相對路徑或絕對路徑：
-
-**使用相對路徑（推薦）**：
-
-```json
-"DATA_DIR": "./data"
-```
-
-這會在您的專案根目錄中使用 `data` 目錄存儲任務數據。這種方式有利於專案可移植性。
-
-**使用絕對路徑**：
+`DATA_DIR` 參數必須使用絕對路徑，這是系統正常運行的必要條件。絕對路徑提供了明確的位置指向，確保系統在任何情況下都能正確找到數據目錄。
 
 ```json
 "DATA_DIR": "/Users/username/projects/my-project/data"
 ```
 
-絕對路徑提供了明確的位置指向，但降低了專案的可移植性。
+在設定 DATA_DIR 時，請遵循以下建議：
+
+1. **使用完整的絕對路徑**：從根目錄開始的完整路徑，確保無歧義
+2. **避免使用環境變量**：直接使用硬編碼的路徑，而非依賴環境變量解析
+3. **確保路徑存在**：提前創建該路徑，或在啟動前確認路徑存在
+4. **設置適當權限**：確保運行程序的用戶對該路徑有讀寫權限
+
+> **警告**：系統不支持使用相對路徑設置 DATA_DIR。使用相對路徑會導致數據存取錯誤，可能造成任務狀態丟失、系統不穩定和數據不一致等嚴重問題。
 
 #### 步驟 5：創建數據目錄
 
 確保 `DATA_DIR` 指向的目錄存在：
 
 ```bash
-# 如果使用相對路徑 "./data"
-mkdir -p data
+# 創建絕對路徑指定的數據目錄
+mkdir -p /Users/username/projects/my-project/data
 ```
 
 #### 步驟 6：更新 .gitignore（可選但推薦）
@@ -788,7 +812,7 @@ echo "data/" >> .gitignore
       "command": "node",
       "args": ["/path/to/mcp-shrimp-task-manager/dist/index.js"],
       "env": {
-        "DATA_DIR": "./data",
+        "DATA_DIR": "/absolute/path/to/data",
         "LOG_LEVEL": "info",
         "MAX_BACKUP_FILES": "10",
         "BACKUP_INTERVAL": "12"
@@ -837,7 +861,7 @@ echo "data/" >> .gitignore
       "command": "node",
       "args": ["/Users/developer/tools/mcp-shrimp-task-manager/dist/index.js"],
       "env": {
-        "DATA_DIR": "./data",
+        "DATA_DIR": "/Users/developer/projects/projectA/data",
         "LOG_LEVEL": "info"
       }
     }
@@ -853,7 +877,7 @@ echo "data/" >> .gitignore
       "command": "node",
       "args": ["/Users/developer/tools/mcp-shrimp-task-manager/dist/index.js"],
       "env": {
-        "DATA_DIR": "./data",
+        "DATA_DIR": "/Users/developer/projects/projectB/data",
         "LOG_LEVEL": "debug" // 不同的日誌級別
       }
     }
@@ -863,9 +887,10 @@ echo "data/" >> .gitignore
 
 **最佳實踐**：
 
-- 在每個專案中使用相對路徑 `"./data"` 作為 DATA_DIR，提高可移植性
+- 為每個專案指定唯一的絕對路徑作為 DATA_DIR，確保數據隔離
 - 根據專案需求調整日誌級別和備份策略
 - 使用腳本或別名簡化在多個專案間切換的操作
+- 使用有意義的目錄命名，如包含專案名稱的路徑
 
 #### 2. 團隊協作環境
 
@@ -879,11 +904,9 @@ echo "data/" >> .gitignore
   "mcpServers": {
     "shrimp-task-manager": {
       "command": "node",
-      "args": [
-        "${workspaceFolder}/node_modules/mcp-shrimp-task-manager/dist/index.js"
-      ],
+      "args": ["/opt/shared/mcp-shrimp-task-manager/dist/index.js"],
       "env": {
-        "DATA_DIR": "${workspaceFolder}/data",
+        "DATA_DIR": "/opt/shared/project-data/team-project/data",
         "LOG_LEVEL": "info",
         "MAX_BACKUP_FILES": "10"
       }
@@ -894,10 +917,11 @@ echo "data/" >> .gitignore
 
 **最佳實踐**：
 
-- 使用 `${workspaceFolder}` 變數（在支持的環境中）或相對路徑，確保配置在不同團隊成員的機器上都能正常工作
+- 使用絕對路徑指定數據目錄，確保所有團隊成員能訪問相同的位置
 - 將 `.cursor/mcp.json` 文件納入版本控制，但將數據目錄添加到 `.gitignore`
 - 考慮為共享知識庫專案配置共享的數據目錄（如雲端存儲或版本控制）
 - 明確記錄配置要求，確保新團隊成員能夠快速設置環境
+- 設置統一的團隊路徑標準，確保所有成員使用相同的路徑結構
 
 #### 3. 臨時/測試專案設置
 
@@ -913,7 +937,7 @@ echo "data/" >> .gitignore
       "command": "node",
       "args": ["/path/to/mcp-shrimp-task-manager/dist/index.js"],
       "env": {
-        "DATA_DIR": "/tmp/test-project-data", // 使用臨時目錄
+        "DATA_DIR": "/tmp/test-project-data", // 使用臨時目錄的絕對路徑
         "LOG_LEVEL": "debug",
         "MAX_BACKUP_FILES": "2" // 減少備份量
       }
@@ -924,54 +948,87 @@ echo "data/" >> .gitignore
 
 **最佳實踐**：
 
-- 對於臨時測試，可以使用系統臨時目錄存儲數據
+- 對於臨時測試，可以使用系統臨時目錄的絕對路徑存儲數據
 - 設置更高的日誌級別（如 `"debug"`）以便更詳細地診斷問題
 - 減少備份文件數量，避免不必要的磁盤使用
 - 測試完成後記得清理臨時數據
+- 為臨時數據目錄設置容易識別的命名前綴，方便日後清理
 
-#### 4. 絕對路徑與相對路徑的比較
+#### 4. 跨平台開發環境
 
-選擇絕對路徑或相對路徑取決於您的具體需求。以下是兩種方式的對比分析：
+在需要跨不同操作系統進行開發的場景中，配置需要特別注意。
 
-**絕對路徑**：
-
-```json
-"DATA_DIR": "/Users/username/projects/my-project/data"
-```
-
-優點：
-
-- 提供明確的數據位置，不受當前工作目錄影響
-- 可以指向專案外部的數據存儲，便於共享或集中管理
-- 對於固定的開發環境，配置更明確
-
-缺點：
-
-- 降低專案可移植性，在不同機器上需要調整路徑
-- 在團隊環境中需要每個成員自定義路徑
-- 可能導致硬編碼的路徑依賴
-
-**相對路徑**：
+**示例配置**：
 
 ```json
-"DATA_DIR": "./data"
+// Windows開發環境: .cursor/mcp.json
+{
+  "mcpServers": {
+    "shrimp-task-manager": {
+      "command": "node",
+      "args": ["C:\\Program Files\\mcp-shrimp-task-manager\\dist\\index.js"],
+      "env": {
+        "DATA_DIR": "C:\\Users\\Developer\\AppData\\Local\\shrimp-task-manager\\data",
+        "LOG_LEVEL": "info"
+      }
+    }
+  }
+}
 ```
 
-優點：
+```json
+// macOS開發環境: .cursor/mcp.json
+{
+  "mcpServers": {
+    "shrimp-task-manager": {
+      "command": "node",
+      "args": ["/Applications/mcp-shrimp-task-manager/dist/index.js"],
+      "env": {
+        "DATA_DIR": "/Users/developer/Library/Application Support/shrimp-task-manager/data",
+        "LOG_LEVEL": "info"
+      }
+    }
+  }
+}
+```
 
-- 提高專案可移植性，可以整體移動或分享專案
-- 在團隊環境中更容易標準化
-- 與版本控制系統配合更好，無需針對不同環境修改配置
+**最佳實踐**：
 
-缺點：
+- 在每個平台上使用符合該平台標準的絕對路徑
+- 為不同操作系統創建單獨的配置檔案模板
+- 記錄每個平台的標準安裝路徑和數據目錄
+- 考慮使用平台特定的配置生成腳本
+- 確保 Windows 上的路徑使用雙反斜線或單正斜線
 
-- 相對於當前工作目錄，可能在某些 IDE 或調用方式下有差異
-- 可能需要額外步驟確保目錄存在
-- 在某些複雜的專案結構中可能引起混淆
+#### 5. 持續集成/持續部署環境
 
-**最佳選擇建議**：
+在 CI/CD 系統中，配置需要高度自動化和可重現性。
 
-- **團隊專案**：優先使用相對路徑，提高可移植性和一致性
-- **個人專案**：可以根據個人偏好選擇，但相對路徑通常更靈活
-- **服務器/CI 環境**：通常絕對路徑更可靠，便於自動化配置
-- **混合方式**：在某些情況下，可以在配置中使用環境變數，統一管理路徑
+**示例配置**：
+
+```json
+// CI/CD環境: .cursor/mcp.json
+{
+  "mcpServers": {
+    "shrimp-task-manager": {
+      "command": "node",
+      "args": ["/opt/ci/mcp-shrimp-task-manager/dist/index.js"],
+      "env": {
+        "DATA_DIR": "/opt/ci/build-data/job-${BUILD_ID}/data",
+        "LOG_LEVEL": "warning",
+        "MAX_BACKUP_FILES": "1"
+      }
+    }
+  }
+}
+```
+
+**最佳實踐**：
+
+- 使用絕對路徑並可能結合 CI 系統的環境變量
+- 為每個構建作業使用獨立的數據目錄
+- 設置較低的備份頻率，專注於當前構建
+- 配置定期清理舊的構建數據
+- 使用 CI 系統的緩存機制提高效率
+
+請注意，所有配置場景都統一使用絕對路徑設置 DATA_DIR 參數，這確保了系統的穩定性和數據的一致性。
