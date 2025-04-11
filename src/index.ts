@@ -150,17 +150,13 @@ async function main() {
             z.object({
               name: z
                 .string()
-                .min(5, {
-                  message:
-                    "任務名稱太短，請提供更清晰明確的名稱以便識別任務目的",
-                })
                 .max(100, {
                   message: "任務名稱過長，請保持簡潔，不超過100個字符",
                 })
                 .describe("簡潔明確的任務名稱，應能清晰表達任務目的"),
               description: z
                 .string()
-                .min(20, {
+                .min(10, {
                   message:
                     "任務描述太短，請詳細說明實施要點、技術細節和驗收標準",
                 })
