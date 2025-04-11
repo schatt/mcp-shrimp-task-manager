@@ -289,10 +289,10 @@ const filesResult = await mcp.mcp_shrimp_task_manager.update_task_files({
 
 通過關聯文件功能，系統可以：
 
-1. **自動載入關鍵上下文**：執行任務時自動加載相關文件內容
-2. **提供精確代碼定位**：直接定位到相關代碼，減少搜索時間
+1. **自動生成文件摘要**：執行任務時基於文件元數據生成摘要信息
+2. **提供精確定位信息**：保留文件路徑和行號範圍，方便後續查找
 3. **建立知識網絡**：將分散的相關資源連接成有機整體
-4. **提高執行效率**：減少上下文切換，提高任務連貫性
+4. **提高執行效率**：提供結構化的文件相關信息，減少任務執行時間
 
 ### 7. 優化任務執行時的上下文記憶功能
 
@@ -313,7 +313,7 @@ const filesResult = await mcp.mcp_shrimp_task_manager.update_task_files({
 
 #### 智能上下文加載功能說明
 
-系統在執行任務時會智能處理文件內容，主要特點包括：
+系統在執行任務時會智能處理文件相關信息，主要特點包括：
 
 1. **自動優先級排序**：根據文件類型和關聯程度排序
 
@@ -321,16 +321,16 @@ const filesResult = await mcp.mcp_shrimp_task_manager.update_task_files({
    - 直接依賴的文件次之
    - 參考資料根據相關性排序
 
-2. **智能代碼提取**：對於大型文件，系統會：
+2. **文件摘要生成**：對於關聯文件，系統會：
 
-   - 優先加載指定的行號範圍
-   - 識別關鍵代碼區塊（如函數定義、類定義）
-   - 提取重要的註釋和文檔字符串
+   - 基於文件元數據創建格式化的摘要信息
+   - 優先處理指定的行號範圍信息
+   - 根據文件類型提供適當的上下文提示
 
 3. **上下文壓縮**：在上下文過大時，系統會：
 
-   - 保留核心代碼，刪減非關鍵部分
-   - 對大型文檔生成摘要
+   - 控制摘要內容的總長度
+   - 對文件生成簡潔的描述
    - 優化格式，減少上下文標記使用
 
 4. **執行歷史記憶**：自動包含：
@@ -343,7 +343,7 @@ const filesResult = await mcp.mcp_shrimp_task_manager.update_task_files({
 執行任務時，系統會自動應用上下文記憶功能：
 
 ```javascript
-// 執行任務（系統會自動加載相關文件和上下文）
+// 執行任務（系統會自動生成相關文件摘要）
 const executeResult = await mcp.mcp_shrimp_task_manager.execute_task({
   taskId: "task-uuid-here",
 });
@@ -356,7 +356,7 @@ await mcp.mcp_shrimp_task_manager.update_task_files({
     {
       path: "src/utils/validation.ts",
       type: "依賴文件",
-      description: "包含需要使用的表單驗證函數",
+      description: "包含表單驗證函數，用於實施表單驗證邏輯",
       lineStart: 25,
       lineEnd: 48,
     },
@@ -364,7 +364,7 @@ await mcp.mcp_shrimp_task_manager.update_task_files({
 });
 
 // 繼續執行任務，利用更新後的上下文
-// 系統會結合新文件和之前的執行上下文
+// 系統會根據更新的相關文件信息生成新的摘要
 ```
 
 #### 上下文記憶限制與解決方案
@@ -373,8 +373,8 @@ await mcp.mcp_shrimp_task_manager.update_task_files({
 
 1. **分層資訊呈現**：
 
-   - 核心代碼完整呈現
-   - 次要內容以摘要形式提供
+   - 關鍵文件位置和描述信息優先呈現
+   - 次要內容以簡要摘要形式提供
    - 背景知識以參考鏈接形式提供
 
 2. **動態上下文調整**：

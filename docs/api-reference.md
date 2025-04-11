@@ -7,6 +7,7 @@
 - [核心任務管理 API](#核心任務管理-api)
 - [任務管理 API](#任務管理-api)
 - [工作日誌功能](#工作日誌功能)
+- [實用工具函數](#實用工具函數)
 
 ## 核心任務管理 API
 
@@ -478,3 +479,67 @@ const clearResult = await mcp.mcp_shrimp_task_manager.clear_conversation_log({
 ```
 
 ## 實用工具函數
+
+### 1. 任務相關文件摘要生成
+
+#### `loadTaskRelatedFiles`
+
+生成任務相關文件的內容摘要，基於文件元數據創建格式化的摘要信息，而不實際讀取檔案內容。
+
+**參數：**
+
+| 參數名         | 類型          | 必填 | 描述                                                                                      |
+| -------------- | ------------- | ---- | ----------------------------------------------------------------------------------------- |
+| relatedFiles   | RelatedFile[] | 是   | 相關文件列表 - RelatedFile 物件數組，包含文件的路徑、類型、描述等資訊                     |
+| maxTotalLength | number        | 否   | 摘要內容的最大總長度 - 控制生成摘要的總字符數，避免過大的返回內容，預設值為 15000（選填） |
+
+**RelatedFile 物件屬性：**
+
+| 屬性名      | 類型            | 必填 | 描述                                                                                                                        |
+| ----------- | --------------- | ---- | --------------------------------------------------------------------------------------------------------------------------- |
+| path        | string          | 是   | 文件路徑（相對於項目根目錄或絕對路徑）                                                                                      |
+| type        | RelatedFileType | 是   | 文件關聯類型，可選值：TO_MODIFY（待修改）、REFERENCE（參考資料）、DEPENDENCY（依賴文件）、OUTPUT（輸出結果）、OTHER（其他） |
+| description | string          | 否   | 文件的補充描述（選填）                                                                                                      |
+| lineStart   | number          | 否   | 相關代碼區塊的起始行（選填）                                                                                                |
+| lineEnd     | number          | 否   | 相關代碼區塊的結束行（選填）                                                                                                |
+
+**返回：**
+
+- 返回一個包含兩個屬性的物件：
+  - `content`: 詳細的文件資訊，包含每個檔案的基本資訊和提示訊息
+  - `summary`: 簡潔的檔案列表概覽，適合快速瀏覽
+
+**使用範例：**
+
+```typescript
+import { loadTaskRelatedFiles } from "../utils/fileLoader.js";
+import { RelatedFile, RelatedFileType } from "../types/index.js";
+
+// 定義相關文件列表
+const relatedFiles: RelatedFile[] = [
+  {
+    path: "src/components/Button.tsx",
+    type: RelatedFileType.TO_MODIFY,
+    description: "需要修改按鈕組件以支持新狀態",
+    lineStart: 24,
+    lineEnd: 45,
+  },
+  {
+    path: "docs/design-spec.md",
+    type: RelatedFileType.REFERENCE,
+    description: "包含按鈕設計規範",
+  },
+];
+
+// 生成文件摘要
+const result = await loadTaskRelatedFiles(relatedFiles, 10000);
+console.log(result.summary); // 顯示簡潔的摘要
+console.log(result.content); // 顯示詳細的內容
+```
+
+**重要說明：**
+
+- 此函數不會實際讀取檔案內容，僅基於提供的文件元數據生成摘要信息
+- 返回的摘要按文件類型優先級排序，優先處理待修改的文件
+- 當摘要總長度超過 maxTotalLength 參數時，會停止處理剩餘文件並添加說明
+- 摘要內容包括文件路徑、類型、描述和行範圍等基本信息

@@ -253,7 +253,9 @@ export const splitTasksSchema = z
             .optional()
             .describe("補充說明、特殊處理要求或實施建議（選填）"),
           dependencies: z
-            .array(z.string())
+            .array(z.string(), {
+              message: "必須是字串陣列，支援任務名稱或任務ID(UUID)",
+            })
             .optional()
             .describe(
               "此任務依賴的前置任務ID或任務名稱列表，支持兩種引用方式，名稱引用更直觀"
@@ -672,38 +674,38 @@ export async function executeTask({
       // 記錄加載文件操作
       await addConversationEntry(
         ConversationParticipant.MCP,
-        `正在加載任務相關文件，共 ${task.relatedFiles.length} 個文件`,
+        `正在生成任務相關文件摘要，共 ${task.relatedFiles.length} 個文件`,
         task.id,
-        "加載相關文件"
+        "生成相關文件摘要"
       );
 
-      // 加載相關文件內容，使用增強的智能提取功能
+      // 生成任務相關文件的摘要資訊
       const loadResult = await loadTaskRelatedFiles(task.relatedFiles);
       relatedFilesContent = loadResult.content;
       relatedFilesSummary = loadResult.summary;
 
-      // 記錄加載完成
+      // 記錄摘要生成完成
       await addConversationEntry(
         ConversationParticipant.MCP,
-        `任務相關文件加載完成，成功加載 ${task.relatedFiles.length} 個文件，提取了最相關的代碼片段`,
+        `任務相關文件摘要生成完成，已為 ${task.relatedFiles.length} 個文件生成摘要資訊`,
         task.id,
-        "相關文件加載完成"
+        "相關文件摘要生成完成"
       );
     } catch (error) {
-      console.error("加載任務相關文件時發生錯誤:", error);
+      console.error("生成任務相關文件摘要時發生錯誤:", error);
 
       // 記錄錯誤
       await addConversationEntry(
         ConversationParticipant.MCP,
-        `加載任務相關文件時發生錯誤: ${
+        `生成任務相關文件摘要時發生錯誤: ${
           error instanceof Error ? error.message : String(error)
         }`,
         task.id,
-        "相關文件加載錯誤"
+        "相關文件摘要生成錯誤"
       );
 
       relatedFilesSummary =
-        "## 相關文件內容加載失敗\n\n加載文件時發生錯誤，請手動查看相關文件。";
+        "## 相關文件摘要生成失敗\n\n生成文件摘要時發生錯誤，請手動查看相關文件。";
     }
   } else {
     // 沒有相關文件的情況
@@ -837,7 +839,7 @@ export async function executeTask({
       });
     });
 
-    prompt += `\n使用這些相關文件作為上下文，幫助您理解任務需求和實現細節。文件內容已經過智能提取，保留最相關的部分。\n`;
+    prompt += `\n使用這些相關文件作為上下文，幫助您理解任務需求和實現細節。系統已為文件生成摘要資訊，無需讀取實際檔案內容。\n`;
   }
 
   // 添加上下文信息
