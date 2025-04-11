@@ -127,6 +127,14 @@ export async function updateTaskStatus(
   return await updateTask(taskId, updates);
 }
 
+// 更新任務摘要
+export async function updateTaskSummary(
+  taskId: string,
+  summary: string
+): Promise<Task | null> {
+  return await updateTask(taskId, { summary });
+}
+
 // 批量創建或更新任務
 export async function batchCreateOrUpdateTasks(
   taskDataList: Array<{

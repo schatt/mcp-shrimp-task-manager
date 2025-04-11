@@ -188,6 +188,12 @@ async function main() {
         taskId: z
           .string()
           .describe("待完成任務的唯一標識符，必須是系統中存在的有效任務ID"),
+        summary: z
+          .string()
+          .optional()
+          .describe(
+            "任務完成摘要，簡潔描述實施結果和重要決策（選填，如未提供將自動生成）"
+          ),
       },
       async (args) => {
         return await completeTask(args);

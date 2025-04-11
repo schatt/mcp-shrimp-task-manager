@@ -68,67 +68,57 @@ const KEYWORDS = {
 };
 
 /**
- * 從一段文本中提取關鍵信息作為摘要
- *
- * @param text 完整的對話文本
- * @param maxLength 摘要的最大長度（字符數）
+ * 從文本中提取簡短摘要
+ * @param text 要提取摘要的文本
+ * @param maxLength 摘要的最大長度
  * @returns 提取的摘要文本
  */
-export function extractSummary(text: string, maxLength: number = 200): string {
-  // 防禦性檢查
-  if (!text || text.trim().length === 0) {
-    return "";
+export function extractSummary(text: string, maxLength: number = 100): string {
+  if (!text) return "";
+
+  // 移除 Markdown 格式
+  const plainText = text
+    .replace(/```[\s\S]*?```/g, "") // 移除代碼塊
+    .replace(/#+\s/g, "") // 移除標題標記
+    .replace(/\*\*/g, "") // 移除粗體標記
+    .replace(/\*/g, "") // 移除斜體標記
+    .replace(/\[([^\]]+)\]\([^)]+\)/g, "$1") // 將連結替換為文本
+    .replace(/\n/g, " ") // 將換行符替換為空格
+    .replace(/\s+/g, " ") // 將多個空格替換為單個空格
+    .trim();
+
+  // 如果文本長度在允許範圍內，直接返回
+  if (plainText.length <= maxLength) {
+    return plainText;
   }
 
-  // 將文本分割為句子
-  const sentences = splitIntoSentences(text);
+  // 取前段並添加省略號
+  return plainText.substring(0, maxLength - 3) + "...";
+}
 
-  // 如果只有一個句子且小於最大長度，直接返回
-  if (sentences.length === 1 && sentences[0].length <= maxLength) {
-    return sentences[0];
+/**
+ * 生成任務完成摘要
+ * @param taskName 任務名稱
+ * @param taskDescription 任務描述
+ * @param completionDetails 完成細節（可選）
+ * @returns 生成的任務摘要
+ */
+export function generateTaskSummary(
+  taskName: string,
+  taskDescription: string,
+  completionDetails?: string
+): string {
+  // 如果提供了完成細節，優先使用
+  if (completionDetails) {
+    return extractSummary(completionDetails, 250);
   }
 
-  // 為每個句子評分
-  const scoredSentences = sentences.map((sentence, index) => ({
-    text: sentence,
-    score: scoreSentence(sentence, index, sentences.length),
-    index,
-  }));
-
-  // 按評分排序
-  scoredSentences.sort((a, b) => b.score - a.score);
-
-  // 選擇評分最高的句子，直到達到最大長度
-  let summary = "";
-  let sentencesToInclude: { text: string; index: number }[] = [];
-
-  for (const scored of scoredSentences) {
-    if ((summary + scored.text).length <= maxLength) {
-      sentencesToInclude.push({
-        text: scored.text,
-        index: scored.index,
-      });
-    } else {
-      // 如果還沒有選中任何句子，選擇第一個句子並截斷
-      if (sentencesToInclude.length === 0) {
-        return scored.text.substring(0, maxLength);
-      }
-      break;
-    }
-  }
-
-  // 按原文順序排列選中的句子
-  sentencesToInclude.sort((a, b) => a.index - b.index);
-
-  // 組合成最終摘要
-  summary = sentencesToInclude.map((s) => s.text).join(" ");
-
-  // 如果摘要仍然太長，進行截斷
-  if (summary.length > maxLength) {
-    summary = summary.substring(0, maxLength - 3) + "...";
-  }
-
-  return summary;
+  // 否則從任務名稱和描述生成摘要
+  const baseText = `${taskName}已成功完成。該任務涉及${extractSummary(
+    taskDescription,
+    200
+  )}`;
+  return extractSummary(baseText, 250);
 }
 
 /**

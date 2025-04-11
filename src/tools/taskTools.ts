@@ -6,10 +6,14 @@ import {
   canExecuteTask,
   batchCreateOrUpdateTasks,
   deleteTask as modelDeleteTask,
+  updateTaskSummary,
 } from "../models/taskModel.js";
 import { TaskStatus, ConversationParticipant } from "../types/index.js";
 import { addConversationEntry } from "../models/conversationLogModel.js";
-import { extractSummary } from "../utils/summaryExtractor.js";
+import {
+  extractSummary,
+  generateTaskSummary,
+} from "../utils/summaryExtractor.js";
 
 // 開始規劃工具
 export const planTaskSchema = z.object({
@@ -377,6 +381,11 @@ export async function listTasks() {
           result += `- **完成時間:** ${task.completedAt.toISOString()}\n`;
         }
 
+        // 顯示摘要（如果有）
+        if (task.summary && task.status === TaskStatus.COMPLETED) {
+          result += `- **摘要:** ${task.summary}\n`;
+        }
+
         result += "\n";
       });
     }
@@ -641,10 +650,17 @@ export const completeTaskSchema = z.object({
     .describe(
       "待標記為完成的任務唯一標識符，必須是狀態為「進行中」的有效任務ID"
     ),
+  summary: z
+    .string()
+    .optional()
+    .describe(
+      "任務完成摘要，簡潔描述實施結果和重要決策（選填，如未提供將自動生成）"
+    ),
 });
 
 export async function completeTask({
   taskId,
+  summary,
 }: z.infer<typeof completeTaskSchema>) {
   const task = await getTaskById(taskId);
 
@@ -696,14 +712,26 @@ export async function completeTask({
     };
   }
 
-  // 更新任務狀態為已完成
+  // 處理摘要信息
+  let taskSummary = summary;
+  if (!taskSummary) {
+    // 自動生成摘要
+    taskSummary = generateTaskSummary(task.name, task.description);
+  }
+
+  // 更新任務狀態為已完成，並添加摘要
   await updateTaskStatus(taskId, TaskStatus.COMPLETED);
+  await updateTaskSummary(taskId, taskSummary);
 
   // 記錄任務完成
   try {
     await addConversationEntry(
       ConversationParticipant.MCP,
-      `任務成功完成：${task.name} (ID: ${task.id})`,
+      `任務成功完成：${task.name} (ID: ${
+        task.id
+      })，摘要：${taskSummary.substring(0, 100)}${
+        taskSummary.length > 100 ? "..." : ""
+      }`,
       task.id,
       "任務完成"
     );

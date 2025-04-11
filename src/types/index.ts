@@ -22,6 +22,7 @@ export interface Task {
   createdAt: Date; // 任務創建的時間戳
   updatedAt: Date; // 任務最後更新的時間戳
   completedAt?: Date; // 任務完成的時間戳（僅適用於已完成的任務）
+  summary?: string; // 任務完成摘要，簡潔描述實施結果和重要決策（僅適用於已完成的任務）
 }
 
 // 規劃任務的參數：用於初始化任務規劃階段
@@ -69,6 +70,7 @@ export interface VerifyTaskArgs {
 // 完成任務的參數：用於標記任務為已完成狀態
 export interface CompleteTaskArgs {
   taskId: string; // 待標記為完成的任務唯一標識符，必須是狀態為「進行中」的有效任務ID
+  summary?: string; // 任務完成摘要，簡潔描述實施結果和重要決策（選填，如未提供將自動生成）
 }
 
 // 對話參與者類型：定義對話中的參與方身份
