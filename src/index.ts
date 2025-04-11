@@ -58,13 +58,17 @@ async function main() {
       version: "1.0.0",
     });
 
-    // 註冊工具 - 使用已定義的schema物件
+    // 註冊工具 - 使用已定義的schema物件，並添加內嵌錯誤處理
     server.tool(
       "plan_task",
       "初始化並詳細規劃任務流程，建立明確的目標與成功標準",
       {
         description: z
           .string()
+          .min(10, {
+            message:
+              "任務描述不能少於10個字符，請提供更詳細的描述以確保任務目標明確",
+          })
           .describe("完整詳細的任務問題描述，應包含任務目標、背景及預期成果"),
         requirements: z
           .string()
@@ -82,9 +86,17 @@ async function main() {
       {
         summary: z
           .string()
+          .min(20, {
+            message:
+              "任務摘要太短，請提供更詳細的摘要，包含任務目標、範圍與關鍵技術挑戰",
+          })
           .describe("結構化的任務摘要，包含任務目標、範圍與關鍵技術挑戰"),
         initialConcept: z
           .string()
+          .min(50, {
+            message:
+              "初步解答構想過於簡短，請提供更完整的技術方案和實施策略詳情",
+          })
           .describe("初步解答構想，包含技術方案、架構設計和實施策略"),
         previousAnalysis: z
           .string()
@@ -104,9 +116,17 @@ async function main() {
       {
         summary: z
           .string()
+          .min(20, {
+            message:
+              "任務摘要太短，請確保包含完整的任務目標和範圍以維持分析連續性",
+          })
           .describe("結構化的任務摘要，保持與分析階段一致以確保連續性"),
         analysis: z
           .string()
+          .min(100, {
+            message:
+              "技術分析結果過於簡略，請提供更詳盡的技術細節、依賴組件和實施方案說明",
+          })
           .describe(
             "完整詳盡的技術分析結果，包括所有技術細節、依賴組件和實施方案"
           ),
@@ -130,9 +150,20 @@ async function main() {
             z.object({
               name: z
                 .string()
+                .min(5, {
+                  message:
+                    "任務名稱太短，請提供更清晰明確的名稱以便識別任務目的",
+                })
+                .max(100, {
+                  message: "任務名稱過長，請保持簡潔，不超過100個字符",
+                })
                 .describe("簡潔明確的任務名稱，應能清晰表達任務目的"),
               description: z
                 .string()
+                .min(20, {
+                  message:
+                    "任務描述太短，請詳細說明實施要點、技術細節和驗收標準",
+                })
                 .describe("詳細的任務描述，包含實施要點、技術細節和驗收標準"),
               notes: z
                 .string()
@@ -157,7 +188,7 @@ async function main() {
       "list_tasks",
       "生成結構化任務清單，包含完整狀態追蹤、優先級和依賴關係",
       {},
-      async () => {
+      async (args) => {
         return await listTasks();
       }
     );
@@ -347,7 +378,7 @@ async function main() {
       }
     );
 
-    // 註冊提示
+    // 註冊提示 - 使用同樣的錯誤處理模式
     server.prompt(
       "plan_task_prompt",
       "生成結構化的新任務規劃，包含明確目標、評估標準與執行步驟",
@@ -364,7 +395,7 @@ async function main() {
           .describe("相關代碼片段或文件路徑（選填）"),
       },
       async (args) => {
-        return planTaskPrompt(args);
+        return await planTaskPrompt(args);
       }
     );
 

@@ -11,30 +11,70 @@ import { getTaskById } from "../models/taskModel.js";
 import { ListConversationLogArgs } from "../types/index.js";
 
 // 列出對話日誌工具
-export const listConversationLogSchema = z.object({
-  taskId: z.string().optional().describe("按任務 ID 過濾對話記錄（選填）"),
-  startDate: z
-    .string()
-    .optional()
-    .describe("起始日期過濾，格式為 ISO 日期字串（選填）"),
-  endDate: z
-    .string()
-    .optional()
-    .describe("結束日期過濾，格式為 ISO 日期字串（選填）"),
-  limit: z
-    .number()
-    .int()
-    .positive()
-    .max(100)
-    .default(20)
-    .describe("返回結果數量限制，最大 100（預設：20）"),
-  offset: z
-    .number()
-    .int()
-    .nonnegative()
-    .default(0)
-    .describe("分頁偏移量（預設：0）"),
-});
+export const listConversationLogSchema = z
+  .object({
+    taskId: z
+      .string()
+      .uuid({ message: "任務ID格式無效，請提供有效的UUID格式" })
+      .optional()
+      .describe("按任務 ID 過濾對話記錄（選填）"),
+    startDate: z
+      .string()
+      .refine(
+        (val) => {
+          const date = new Date(val);
+          return !isNaN(date.getTime());
+        },
+        {
+          message:
+            "起始日期格式無效，請使用ISO日期格式，例如：2025-04-11T12:13:49.751Z",
+        }
+      )
+      .optional()
+      .describe("起始日期過濾，格式為 ISO 日期字串（選填）"),
+    endDate: z
+      .string()
+      .refine(
+        (val) => {
+          const date = new Date(val);
+          return !isNaN(date.getTime());
+        },
+        {
+          message:
+            "結束日期格式無效，請使用ISO日期格式，例如：2025-04-11T12:13:49.751Z",
+        }
+      )
+      .optional()
+      .describe("結束日期過濾，格式為 ISO 日期字串（選填）"),
+    limit: z
+      .number()
+      .int({ message: "限制必須是整數" })
+      .positive({ message: "限制必須是正數" })
+      .max(100, { message: "限制不能超過100條記錄" })
+      .default(20)
+      .describe("返回結果數量限制，最大 100（預設：20）"),
+    offset: z
+      .number()
+      .int({ message: "偏移量必須是整數" })
+      .nonnegative({ message: "偏移量不能為負數" })
+      .default(0)
+      .describe("分頁偏移量（預設：0）"),
+  })
+  .refine(
+    (data) => {
+      // 驗證起始日期和結束日期的順序
+      if (data.startDate && data.endDate) {
+        const start = new Date(data.startDate);
+        const end = new Date(data.endDate);
+        return start <= end;
+      }
+      return true;
+    },
+    {
+      message: "起始日期必須早於或等於結束日期",
+      path: ["endDate"],
+    }
+  );
 
 export async function listConversationLog({
   taskId,
@@ -171,7 +211,13 @@ export async function listConversationLog({
 
 // 清除所有對話日誌工具
 export const clearConversationLogSchema = z.object({
-  confirm: z.boolean().describe("確認刪除所有日誌記錄（此操作不可逆）"),
+  confirm: z
+    .boolean()
+    .refine((val) => val === true, {
+      message:
+        "必須明確確認清除操作，請將 confirm 參數設置為 true 以確認此危險操作",
+    })
+    .describe("確認刪除所有日誌記錄（此操作不可逆）"),
 });
 
 export async function clearConversationLog({
@@ -314,18 +360,23 @@ export async function listArchivedLogs({
 export const readArchivedLogSchema = z.object({
   filename: z
     .string()
+    .min(1, { message: "文件名不能為空" })
+    .refine((val) => val.match(/^conversation_log_[\d-]+T[\d-]+\.json$/), {
+      message:
+        "無效的歸檔日誌文件名，正確格式為 'conversation_log_[timestamp].json'",
+    })
     .describe("歸檔日誌文件名，格式為 'conversation_log_[timestamp].json'"),
   limit: z
     .number()
-    .int()
-    .positive()
-    .max(100)
+    .int({ message: "限制必須是整數" })
+    .positive({ message: "限制必須是正數" })
+    .max(100, { message: "限制不能超過100條記錄" })
     .default(50)
     .describe("返回結果數量限制，最大 100（預設：50）"),
   offset: z
     .number()
-    .int()
-    .nonnegative()
+    .int({ message: "偏移量必須是整數" })
+    .nonnegative({ message: "偏移量不能為負數" })
     .default(0)
     .describe("分頁起始位置（預設：0）"),
 });
