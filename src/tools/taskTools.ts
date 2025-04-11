@@ -7,8 +7,13 @@ import {
   batchCreateOrUpdateTasks,
   deleteTask as modelDeleteTask,
   updateTaskSummary,
+  assessTaskComplexity,
 } from "../models/taskModel.js";
-import { TaskStatus, ConversationParticipant } from "../types/index.js";
+import {
+  TaskStatus,
+  ConversationParticipant,
+  TaskComplexityLevel,
+} from "../types/index.js";
 import { addConversationEntry } from "../models/conversationLogModel.js";
 import {
   extractSummary,
@@ -501,6 +506,9 @@ export async function executeTask({
     };
   }
 
+  // ===== 新增：評估任務複雜度 =====
+  const complexityAssessment = await assessTaskComplexity(taskId);
+
   // 更新任務狀態為進行中
   await updateTaskStatus(taskId, TaskStatus.IN_PROGRESS);
 
@@ -508,7 +516,11 @@ export async function executeTask({
   try {
     await addConversationEntry(
       ConversationParticipant.MCP,
-      `開始執行任務：${task.name} (ID: ${task.id})`,
+      `開始執行任務：${task.name} (ID: ${task.id})${
+        complexityAssessment
+          ? `, 複雜度評估：${complexityAssessment.level}`
+          : ""
+      }`,
       task.id,
       "任務啟動"
     );
@@ -516,13 +528,52 @@ export async function executeTask({
     console.error("記錄對話日誌時發生錯誤:", error);
   }
 
-  const prompt = `## 任務執行指示\n\n### 任務詳情\n\n- **名稱:** ${
+  // 構建任務執行提示
+  let prompt = `## 任務執行指示\n\n### 任務詳情\n\n- **名稱:** ${
     task.name
   }\n- **ID:** \`${task.id}\`\n- **描述:** ${task.description}\n${
     task.notes ? `- **注意事項:** ${task.notes}\n` : ""
+  }\n`;
+
+  // 新增：添加複雜度評估部分
+  if (complexityAssessment) {
+    // 添加複雜度評估部分
+    prompt += `\n## 任務複雜度評估\n\n- **複雜度級別:** ${complexityAssessment.level}`;
+
+    // 根據複雜度級別使用不同風格
+    let complexityStyle = "";
+    if (complexityAssessment.level === TaskComplexityLevel.VERY_HIGH) {
+      complexityStyle = "⚠️ **警告：此任務複雜度極高** ⚠️";
+    } else if (complexityAssessment.level === TaskComplexityLevel.HIGH) {
+      complexityStyle = "⚠️ **注意：此任務複雜度較高**";
+    } else if (complexityAssessment.level === TaskComplexityLevel.MEDIUM) {
+      complexityStyle = "**提示：此任務具有一定複雜性**";
+    }
+
+    if (complexityStyle) {
+      prompt += `\n\n${complexityStyle}\n`;
+    }
+
+    // 添加評估指標
+    prompt += `\n### 評估指標\n`;
+    prompt += `- 描述長度: ${complexityAssessment.metrics.descriptionLength} 字符\n`;
+    prompt += `- 依賴任務數: ${complexityAssessment.metrics.dependenciesCount} 個\n`;
+    if (complexityAssessment.metrics.hasNotes) {
+      prompt += `- 注記長度: ${complexityAssessment.metrics.notesLength} 字符\n`;
+    }
+
+    // 添加處理建議
+    if (complexityAssessment.recommendations.length > 0) {
+      prompt += `\n### 處理建議\n`;
+      complexityAssessment.recommendations.forEach((recommendation, index) => {
+        prompt += `${index + 1}. ${recommendation}\n`;
+      });
+    }
+
+    prompt += `\n`;
   }
 
-## 執行指引\n\n1. 請仔細分析任務要求，確保理解所有細節和約束條件
+  prompt += `## 執行指引\n\n1. 請仔細分析任務要求，確保理解所有細節和約束條件
 2. 設計詳細的執行方案，包括具體步驟和技術選擇
 3. 系統性地實施您的方案，遵循最佳實踐和項目慣例
 4. 完整記錄您的實施過程，包括重要決策點和遇到的挑戰

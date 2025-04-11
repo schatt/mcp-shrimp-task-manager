@@ -1,4 +1,11 @@
-import { Task, TaskStatus, TaskDependency } from "../types/index.js";
+import {
+  Task,
+  TaskStatus,
+  TaskDependency,
+  TaskComplexityLevel,
+  TaskComplexityThresholds,
+  TaskComplexityAssessment,
+} from "../types/index.js";
 import fs from "fs/promises";
 import path from "path";
 import { v4 as uuidv4 } from "uuid";
@@ -297,4 +304,137 @@ export async function deleteTask(
   await writeTasks(tasks);
 
   return { success: true, message: "任務刪除成功" };
+}
+
+// 評估任務複雜度
+export async function assessTaskComplexity(
+  taskId: string
+): Promise<TaskComplexityAssessment | null> {
+  const task = await getTaskById(taskId);
+
+  if (!task) {
+    return null;
+  }
+
+  // 評估各項指標
+  const descriptionLength = task.description.length;
+  const dependenciesCount = task.dependencies.length;
+  const notesLength = task.notes ? task.notes.length : 0;
+  const hasNotes = !!task.notes;
+
+  // 基於各項指標評估複雜度級別
+  let level = TaskComplexityLevel.LOW;
+
+  // 描述長度評估
+  if (
+    descriptionLength >= TaskComplexityThresholds.DESCRIPTION_LENGTH.VERY_HIGH
+  ) {
+    level = TaskComplexityLevel.VERY_HIGH;
+  } else if (
+    descriptionLength >= TaskComplexityThresholds.DESCRIPTION_LENGTH.HIGH
+  ) {
+    level = TaskComplexityLevel.HIGH;
+  } else if (
+    descriptionLength >= TaskComplexityThresholds.DESCRIPTION_LENGTH.MEDIUM
+  ) {
+    level = TaskComplexityLevel.MEDIUM;
+  }
+
+  // 依賴數量評估（取最高級別）
+  if (
+    dependenciesCount >= TaskComplexityThresholds.DEPENDENCIES_COUNT.VERY_HIGH
+  ) {
+    level = TaskComplexityLevel.VERY_HIGH;
+  } else if (
+    dependenciesCount >= TaskComplexityThresholds.DEPENDENCIES_COUNT.HIGH &&
+    level !== TaskComplexityLevel.VERY_HIGH
+  ) {
+    level = TaskComplexityLevel.HIGH;
+  } else if (
+    dependenciesCount >= TaskComplexityThresholds.DEPENDENCIES_COUNT.MEDIUM &&
+    level !== TaskComplexityLevel.HIGH &&
+    level !== TaskComplexityLevel.VERY_HIGH
+  ) {
+    level = TaskComplexityLevel.MEDIUM;
+  }
+
+  // 注記長度評估（取最高級別）
+  if (notesLength >= TaskComplexityThresholds.NOTES_LENGTH.VERY_HIGH) {
+    level = TaskComplexityLevel.VERY_HIGH;
+  } else if (
+    notesLength >= TaskComplexityThresholds.NOTES_LENGTH.HIGH &&
+    level !== TaskComplexityLevel.VERY_HIGH
+  ) {
+    level = TaskComplexityLevel.HIGH;
+  } else if (
+    notesLength >= TaskComplexityThresholds.NOTES_LENGTH.MEDIUM &&
+    level !== TaskComplexityLevel.HIGH &&
+    level !== TaskComplexityLevel.VERY_HIGH
+  ) {
+    level = TaskComplexityLevel.MEDIUM;
+  }
+
+  // 根據複雜度級別生成處理建議
+  const recommendations: string[] = [];
+
+  // 低複雜度任務建議
+  if (level === TaskComplexityLevel.LOW) {
+    recommendations.push("此任務複雜度較低，可直接執行");
+    recommendations.push("建議設定清晰的完成標準，確保驗收有明確依據");
+  }
+  // 中等複雜度任務建議
+  else if (level === TaskComplexityLevel.MEDIUM) {
+    recommendations.push("此任務具有一定複雜性，建議詳細規劃執行步驟");
+    recommendations.push("可分階段執行並定期檢查進度，確保理解準確且實施完整");
+    if (dependenciesCount > 0) {
+      recommendations.push("注意檢查所有依賴任務的完成狀態和輸出質量");
+    }
+  }
+  // 高複雜度任務建議
+  else if (level === TaskComplexityLevel.HIGH) {
+    recommendations.push("此任務複雜度較高，建議先進行充分的分析和規劃");
+    recommendations.push("考慮將任務拆分為較小的、可獨立執行的子任務");
+    recommendations.push("建立清晰的里程碑和檢查點，便於追蹤進度和品質");
+    if (
+      dependenciesCount > TaskComplexityThresholds.DEPENDENCIES_COUNT.MEDIUM
+    ) {
+      recommendations.push(
+        "依賴任務較多，建議製作依賴關係圖，確保執行順序正確"
+      );
+    }
+  }
+  // 極高複雜度任務建議
+  else if (level === TaskComplexityLevel.VERY_HIGH) {
+    recommendations.push("⚠️ 此任務複雜度極高，強烈建議拆分為多個獨立任務");
+    recommendations.push(
+      "在執行前進行詳盡的分析和規劃，明確定義各子任務的範圍和介面"
+    );
+    recommendations.push(
+      "對任務進行風險評估，識別可能的阻礙因素並制定應對策略"
+    );
+    recommendations.push("建立具體的測試和驗證標準，確保每個子任務的輸出質量");
+    if (
+      descriptionLength >= TaskComplexityThresholds.DESCRIPTION_LENGTH.VERY_HIGH
+    ) {
+      recommendations.push(
+        "任務描述非常長，建議整理關鍵點並建立結構化的執行清單"
+      );
+    }
+    if (dependenciesCount >= TaskComplexityThresholds.DEPENDENCIES_COUNT.HIGH) {
+      recommendations.push(
+        "依賴任務數量過多，建議重新評估任務邊界，確保任務切分合理"
+      );
+    }
+  }
+
+  return {
+    level,
+    metrics: {
+      descriptionLength,
+      dependenciesCount,
+      notesLength,
+      hasNotes,
+    },
+    recommendations,
+  };
 }

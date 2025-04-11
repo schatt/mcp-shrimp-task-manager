@@ -97,3 +97,43 @@ export interface ListConversationLogArgs {
   limit?: number; // 返回結果數量限制（選填）
   offset?: number; // 分頁偏移量（選填）
 }
+
+// 任務複雜度級別：定義任務的複雜程度分類
+export enum TaskComplexityLevel {
+  LOW = "低複雜度", // 簡單且直接的任務，通常不需要特殊處理
+  MEDIUM = "中等複雜度", // 具有一定複雜性但仍可管理的任務
+  HIGH = "高複雜度", // 複雜且耗時的任務，需要特別關注
+  VERY_HIGH = "極高複雜度", // 極其複雜的任務，建議拆分處理
+}
+
+// 任務複雜度閾值：定義任務複雜度評估的參考標準
+export const TaskComplexityThresholds = {
+  DESCRIPTION_LENGTH: {
+    MEDIUM: 500, // 超過此字數判定為中等複雜度
+    HIGH: 1000, // 超過此字數判定為高複雜度
+    VERY_HIGH: 2000, // 超過此字數判定為極高複雜度
+  },
+  DEPENDENCIES_COUNT: {
+    MEDIUM: 2, // 超過此依賴數量判定為中等複雜度
+    HIGH: 5, // 超過此依賴數量判定為高複雜度
+    VERY_HIGH: 10, // 超過此依賴數量判定為極高複雜度
+  },
+  NOTES_LENGTH: {
+    MEDIUM: 200, // 超過此字數判定為中等複雜度
+    HIGH: 500, // 超過此字數判定為高複雜度
+    VERY_HIGH: 1000, // 超過此字數判定為極高複雜度
+  },
+};
+
+// 任務複雜度評估結果：記錄任務複雜度分析的詳細結果
+export interface TaskComplexityAssessment {
+  level: TaskComplexityLevel; // 整體複雜度級別
+  metrics: {
+    // 各項評估指標的詳細數據
+    descriptionLength: number; // 描述長度
+    dependenciesCount: number; // 依賴數量
+    notesLength: number; // 注記長度
+    hasNotes: boolean; // 是否有注記
+  };
+  recommendations: string[]; // 處理建議列表
+}
