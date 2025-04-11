@@ -8,23 +8,19 @@ import { RelatedFileType } from "../types/index.js";
  *
  * @param relatedFiles 相關文件列表 - RelatedFile 物件數組，包含文件的路徑、類型、描述等資訊
  * @param maxTotalLength 摘要內容的最大總長度 - 控制生成摘要的總字符數，避免過大的返回內容
- * @returns 包含兩個字段的物件：
- *   - content: 詳細的文件資訊，包含每個檔案的基本資訊和提示訊息
- *   - summary: 簡潔的檔案列表概覽，適合快速瀏覽
+ * @returns 格式化的文件摘要資訊
  */
 export async function loadTaskRelatedFiles(
   relatedFiles,
   maxTotalLength = 15000 // 控制生成內容的總長度
 ) {
   if (!relatedFiles || relatedFiles.length === 0) {
-    return {
-      content: "",
-      summary: "無相關文件",
-    };
+    return "## 相關文件\n\n無相關文件";
   }
-  let totalContent = "";
+
   let filesSummary = `## 相關文件內容摘要 (共 ${relatedFiles.length} 個文件)\n\n`;
   let totalLength = 0;
+
   // 按文件類型優先級排序（首先處理待修改的文件）
   const priorityOrder = {
     [RelatedFileType.TO_MODIFY]: 1,
@@ -33,17 +29,21 @@ export async function loadTaskRelatedFiles(
     [RelatedFileType.OUTPUT]: 4,
     [RelatedFileType.OTHER]: 5,
   };
+
   const sortedFiles = [...relatedFiles].sort(
     (a, b) => priorityOrder[a.type] - priorityOrder[b.type]
   );
+
   // 處理每個文件
   for (const file of sortedFiles) {
     if (totalLength >= maxTotalLength) {
       filesSummary += `\n### 已達到上下文長度限制，部分文件未載入\n`;
       break;
     }
+
     // 生成文件基本資訊
     const fileInfo = generateFileInfo(file);
+
     // 添加到總內容
     const fileHeader = `\n### ${file.type}: ${file.path}${
       file.description ? ` - ${file.description}` : ""
@@ -52,17 +52,14 @@ export async function loadTaskRelatedFiles(
         ? ` (行 ${file.lineStart}-${file.lineEnd})`
         : ""
     }\n\n`;
-    totalContent += fileHeader + "```\n" + fileInfo + "\n```\n\n";
-    filesSummary += `- **${file.path}**${
-      file.description ? ` - ${file.description}` : ""
-    } (${fileInfo.length} 字符)\n`;
+
+    filesSummary += fileHeader + "```\n" + fileInfo + "\n```\n\n";
     totalLength += fileInfo.length + fileHeader.length + 8; // 8 for "```\n" and "\n```"
   }
-  return {
-    content: totalContent,
-    summary: filesSummary,
-  };
+
+  return filesSummary;
 }
+
 /**
  * 生成文件基本資訊摘要
  *

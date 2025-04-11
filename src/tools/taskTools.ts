@@ -594,7 +594,6 @@ export async function executeTask({
   }\n`;
 
   // ===== 增強：處理相關文件內容 =====
-  let relatedFilesContent = "";
   let relatedFilesSummary = "";
   let contextInfo = "";
 
@@ -680,9 +679,9 @@ export async function executeTask({
       );
 
       // 生成任務相關文件的摘要資訊
-      const loadResult = await loadTaskRelatedFiles(task.relatedFiles);
-      relatedFilesContent = loadResult.content;
-      relatedFilesSummary = loadResult.summary;
+      // 使用loadTaskRelatedFiles生成文件摘要，現在函數直接返回格式化的文本
+      // 而不是包含content和summary的物件
+      const relatedFilesSummary = await loadTaskRelatedFiles(task.relatedFiles);
 
       // 記錄摘要生成完成
       await addConversationEntry(
@@ -801,45 +800,9 @@ export async function executeTask({
     prompt += `\n`;
   }
 
-  // ===== 增強：添加相關文件部分，更詳細的信息 =====
-  if (task.relatedFiles && task.relatedFiles.length > 0) {
-    prompt += `\n## 任務相關文件\n\n共關聯 ${task.relatedFiles.length} 個文件，類型分布：\n`;
-
-    // 按類型分組統計
-    const fileTypeCount: Record<string, number> = {};
-    task.relatedFiles.forEach((file) => {
-      fileTypeCount[file.type] = (fileTypeCount[file.type] || 0) + 1;
-    });
-
-    Object.entries(fileTypeCount).forEach(([type, count]) => {
-      prompt += `- ${type}: ${count} 個\n`;
-    });
-
-    // 新增：展示文件詳細列表
-    prompt += `\n### 文件詳細列表\n`;
-
-    // 按類型分組
-    const filesByType = task.relatedFiles.reduce((acc, file) => {
-      acc[file.type] = acc[file.type] || [];
-      acc[file.type].push(file);
-      return acc;
-    }, {} as Record<string, RelatedFile[]>);
-
-    // 展示每種類型的文件
-    Object.entries(filesByType).forEach(([type, files]) => {
-      prompt += `\n#### ${type} (${files.length} 個)\n`;
-      files.forEach((file, index) => {
-        prompt += `${index + 1}. \`${file.path}\`${
-          file.description ? ` - ${file.description}` : ""
-        }${
-          file.lineStart && file.lineEnd
-            ? ` (行 ${file.lineStart}-${file.lineEnd})`
-            : ""
-        }\n`;
-      });
-    });
-
-    prompt += `\n使用這些相關文件作為上下文，幫助您理解任務需求和實現細節。系統已為文件生成摘要資訊，無需讀取實際檔案內容。\n`;
+  // 直接添加相關文件摘要到prompt中
+  if (relatedFilesSummary) {
+    prompt += relatedFilesSummary;
   }
 
   // 添加上下文信息
@@ -870,10 +833,6 @@ export async function executeTask({
       {
         type: "text" as const,
         text: prompt,
-      },
-      {
-        type: "text" as const,
-        text: relatedFilesContent,
       },
     ],
   };
