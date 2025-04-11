@@ -235,271 +235,549 @@ if (completedTasks) {
 }
 ```
 
-## 4. 工作日誌功能案例
+## 4. 清除所有任務功能案例
 
-### 案例：追蹤關鍵任務的執行歷程
+### 案例：項目重新規劃
 
-在復盤專案時，需要了解某個關鍵任務的完整執行過程和決策點。
-
-#### 示例代碼：
-
-```javascript
-// 查詢特定任務的日誌
-const taskLogs = await mcp.mcp_shrimp_task_manager.list_conversation_log({
-  taskId: "key-feature-task-uuid",
-  limit: 50, // 獲取更多記錄
-});
-
-// 分析日誌中的關鍵決策點
-const decisionPoints = taskLogs.entries.filter(
-  (entry) =>
-    entry.summary.includes("決定") ||
-    entry.summary.includes("選擇") ||
-    entry.summary.includes("決策")
-);
-
-console.log("任務執行過程中的關鍵決策點:", decisionPoints);
-
-// 分析遇到的挑戰
-const challenges = taskLogs.entries.filter(
-  (entry) =>
-    entry.summary.includes("問題") ||
-    entry.summary.includes("挑戰") ||
-    entry.summary.includes("困難") ||
-    entry.summary.includes("錯誤")
-);
-
-console.log("任務執行過程中遇到的挑戰:", challenges);
-
-// 組織執行時間線
-const timeline = taskLogs.entries
-  .map((entry) => ({
-    time: new Date(entry.timestamp),
-    action:
-      entry.summary.substring(0, 100) +
-      (entry.summary.length > 100 ? "..." : ""),
-    participant: entry.participant,
-  }))
-  .sort((a, b) => a.time - b.time);
-
-console.log("任務執行時間線:", timeline);
-```
-
-### 案例：項目結束後清理不必要的日誌
-
-在項目完成後，需要清理積累的大量日誌，但保留關鍵記錄。
+在完成一個階段性目標後，團隊決定重新規劃剩餘的項目工作，需要清除所有未完成的任務。
 
 #### 示例代碼：
 
 ```javascript
-// 首先，提取重要日誌並保存
-const allLogs = await mcp.mcp_shrimp_task_manager.list_conversation_log({
-  limit: 1000, // 嘗試獲取大量日誌
-  offset: 0,
-});
+// 1. 首先導出現有任務作為備份
+const currentTasks = await mcp.mcp_shrimp_task_manager.list_tasks();
+console.log("備份現有任務列表：", currentTasks);
 
-// 識別關鍵日誌（例如重要決策、錯誤解決方案等）
-const keyLogs = allLogs.entries.filter((entry) => {
-  // 過濾出重要性高的日誌
-  const isDecision =
-    entry.summary.includes("決策") || entry.summary.includes("選擇方案");
-  const isError =
-    entry.summary.includes("修復錯誤") || entry.summary.includes("解決問題");
-  const isMilestone =
-    entry.summary.includes("里程碑") || entry.summary.includes("階段完成");
+// 2. 記錄已完成任務數量（這些任務不會被刪除）
+const completedTasksMatch =
+  currentTasks.content[0].text.match(/已完成: (\d+) 個任務/);
+const completedTasksCount = completedTasksMatch
+  ? parseInt(completedTasksMatch[1])
+  : 0;
+console.log(`已完成任務數量: ${completedTasksCount} (這些任務將被保留)`);
 
-  return isDecision || isError || isMilestone;
-});
-
-// 將關鍵日誌保存到外部文件（示例）
-console.log("保存的關鍵日誌數量:", keyLogs.length);
-console.log("關鍵日誌示例:", keyLogs.slice(0, 3));
-
-// 確認已保存重要日誌後，清除系統中的全部日誌
-const confirmation = window.confirm(
-  "已保存關鍵日誌，是否清除系統中的所有日誌記錄？"
-);
-
-if (confirmation) {
-  await mcp.mcp_shrimp_task_manager.clear_conversation_log({
-    confirm: true,
+// 3. 執行清除操作（必須設置確認參數）
+try {
+  const clearResult = await mcp.mcp_shrimp_task_manager.clear_all_tasks({
+    confirm: true, // 必須明確確認才能執行清除
   });
-  console.log("所有日誌已清除");
+
+  console.log("清除結果:", clearResult);
+
+  // 4. 提取備份文件路徑信息
+  const backupPathMatch =
+    clearResult.content[0].text.match(/備份文件: (.*\.json)/);
+  const backupPath = backupPathMatch ? backupPathMatch[1] : "備份文件路徑未知";
+  console.log(`數據已備份到: ${backupPath}`);
+} catch (error) {
+  console.error("清除操作失敗:", error);
 }
+
+// 5. 確認清除結果
+const remainingTasks = await mcp.mcp_shrimp_task_manager.list_tasks();
+console.log("清除後的任務列表:", remainingTasks);
+
+// 6. 開始新的任務規劃
+await mcp.mcp_shrimp_task_manager.plan_task({
+  description: "項目第二階段：優化用戶體驗並擴展功能",
+  requirements: "改進性能、美化界面、增加新功能模塊",
+});
 ```
 
-## 5. 綜合案例：完整項目流程
+### 案例：測試環境重置
 
-以下是一個完整的項目工作流程示例，從規劃到完成，使用蝦米任務管理器的各項功能。
+在進行系統測試後，需要將環境重置為初始狀態，同時保留已完成任務的歷史記錄。
 
-### 案例：開發一個用戶資料分析儀表板
-
-#### 階段 1：項目規劃與任務拆分
+#### 示例代碼：
 
 ```javascript
-// 開始規劃
-await mcp.mcp_shrimp_task_manager.plan_task({
+// 1. 查詢當前環境狀態
+const beforeReset = await mcp.mcp_shrimp_task_manager.list_tasks();
+console.log("重置前狀態:", beforeReset);
+
+// 2. 記錄重要測試結果
+const testResults = "測試發現3個UI問題，2個性能瓶頸，均已記錄到測試報告";
+console.log(`測試結果摘要: ${testResults}`);
+
+// 3. 執行環境重置
+await mcp.mcp_shrimp_task_manager.clear_all_tasks({
+  confirm: true,
+});
+
+// 4. 確認重置結果
+const afterReset = await mcp.mcp_shrimp_task_manager.list_tasks();
+console.log("重置後狀態:", afterReset);
+
+// 5. 記錄重置操作到系統日誌
+await mcp.mcp_shrimp_task_manager.list_conversation_log({
+  limit: 1, // 只獲取最新的一條日誌
+});
+```
+
+## 5. 更新任務功能案例
+
+### 案例：調整任務範圍
+
+在進行過程中發現任務需求有變化，需要調整任務描述和範圍。
+
+#### 示例代碼：
+
+```javascript
+// 1. 獲取需要更新的任務ID
+const taskList = await mcp.mcp_shrimp_task_manager.list_tasks();
+const taskIdMatch = taskList.content[0].text.match(
+  /ID: `([^`]+)`.*名稱: "實現用戶註冊功能"/
+);
+const taskId = taskIdMatch ? taskIdMatch[1] : null;
+
+if (!taskId) {
+  console.error("找不到目標任務");
+  return;
+}
+
+// 2. 更新任務內容
+const updateResult = await mcp.mcp_shrimp_task_manager.update_task({
+  taskId,
+  name: "實現用戶註冊和驗證功能",
   description:
-    "開發一個用戶資料分析儀表板，用於可視化用戶行為數據，支持多維度分析和報表導出功能。",
-  requirements:
-    "技術棧要求使用React前端和Node.js後端，數據視覺化採用ECharts或D3.js，需支持千萬級用戶數據的實時分析。",
+    "設計並實現用戶註冊流程，包括：\n1. 基本信息註冊\n2. 電子郵件驗證\n3. 手機號碼驗證\n4. 安全問題設置\n5. 初始偏好設定",
+  notes: "更新原因：產品團隊要求增加電子郵件和手機驗證步驟，提高帳戶安全性",
 });
 
-// 分析問題
-await mcp.mcp_shrimp_task_manager.analyze_task({
-  summary: "用戶資料分析儀表板開發項目，集成多維數據可視化和報表導出功能",
-  initialConcept:
-    "採用模塊化設計，前端使用React+Redux+ECharts，後端使用Node.js+Express+MongoDB，實現數據流水線處理和快速響應的數據查詢API。",
+console.log("任務更新結果:", updateResult);
+
+// 3. 通知團隊成員任務範圍變更
+console.log("已通知團隊成員任務範圍已擴大，包含更多驗證步驟");
+
+// 4. 記錄變更歷史
+const changeLog = `
+變更日期: ${new Date().toISOString()}
+變更內容: 擴展任務範圍，增加郵件和手機驗證步驟
+變更原因: 提高帳戶安全性
+請求方: 產品團隊
+`;
+console.log("變更日誌:", changeLog);
+```
+
+### 案例：澄清任務描述
+
+發現任務描述不夠清晰，開發人員需要更多細節以正確實現功能。
+
+#### 示例代碼：
+
+```javascript
+// 1. 找到需要澄清的任務
+const allTasks = await mcp.mcp_shrimp_task_manager.list_tasks();
+const taskIdMatch = allTasks.content[0].text.match(
+  /ID: `([^`]+)`.*名稱: "優化數據庫查詢"/
+);
+const taskId = taskIdMatch ? taskIdMatch[1] : null;
+
+if (!taskId) {
+  console.error("找不到目標任務");
+  return;
+}
+
+// 2. 添加更詳細的技術說明
+await mcp.mcp_shrimp_task_manager.update_task({
+  taskId,
+  description:
+    "優化產品列表和用戶資料頁面的數據庫查詢性能，目標是將頁面載入時間從當前的2.5秒降低到1秒以內。技術要求：\n1. 分析並優化現有SQL查詢\n2. 添加適當的索引\n3. 實現查詢結果緩存\n4. 考慮使用數據庫讀寫分離\n5. 測量並報告性能改進",
+  notes:
+    "性能瓶頸主要出現在產品過濾和排序操作上，特別是當產品數量超過1000個時。可考慮使用Redis緩存熱門查詢結果。",
 });
 
-// 反思構想
-await mcp.mcp_shrimp_task_manager.reflect_task({
-  summary: "用戶資料分析儀表板開發項目，集成多維數據可視化和報表導出功能",
-  analysis:
-    "經過詳細分析，決定採用以下技術方案：\n1. 前端框架：React 18 + TypeScript\n2. 狀態管理：Redux Toolkit + RTK Query\n3. 視覺化庫：ECharts 5 (適合複雜數據視覺化)\n4. 後端API：Node.js + Express + MongoDB聚合查詢\n5. 數據處理：採用分層緩存策略，通過Redis緩存熱門查詢\n6. 報表導出：使用server-side生成PDF和CSV\n...",
+// 3. 複查更新後的任務描述
+const updatedTask = await mcp.mcp_shrimp_task_manager.execute_task({
+  taskId,
 });
 
-// 拆分任務
+console.log("已更新的任務詳情:", updatedTask);
+```
+
+## 6. 任務相關文件位置記錄功能案例
+
+### 案例：記錄複雜重構任務的相關文件
+
+在進行大型代碼重構時，需要記錄涉及的所有相關文件，以便更好地跟蹤和管理變更。
+
+#### 示例代碼：
+
+```javascript
+// 1. 建立重構任務
 await mcp.mcp_shrimp_task_manager.split_tasks({
   isOverwrite: false,
   tasks: [
     {
-      name: "設計系統架構",
+      name: "重構認證系統",
       description:
-        "定義系統整體架構，包括前後端技術選型、數據流、API設計和部署架構",
-      notes: "需考慮系統擴展性和性能要求",
-    },
-    {
-      name: "開發資料處理後端",
-      description: "實現資料處理引擎，支持大數據量查詢和聚合分析",
-      dependencies: ["設計系統架構"],
-    },
-    {
-      name: "實現資料視覺化元件",
-      description: "開發可重用的視覺化圖表元件，支持多種數據展示形式",
-      dependencies: ["設計系統架構"],
-    },
-    {
-      name: "搭建儀表板界面",
-      description: "根據UI設計實現儀表板界面，包括布局、過濾器和用戶交互",
-      dependencies: ["設計系統架構"],
-    },
-    {
-      name: "整合資料和視覺化",
-      description: "連接後端API和前端視覺化元件，實現數據實時更新和交互",
-      dependencies: [
-        "開發資料處理後端",
-        "實現資料視覺化元件",
-        "搭建儀表板界面",
-      ],
-    },
-    {
-      name: "開發報表導出功能",
-      description: "實現多格式報表導出功能，支持PDF、CSV等格式",
-      dependencies: ["整合資料和視覺化"],
-    },
-    {
-      name: "系統測試與優化",
-      description:
-        "進行系統整體測試，包括功能測試、性能測試和壓力測試，針對性優化",
-      dependencies: ["整合資料和視覺化", "開發報表導出功能"],
+        "將現有的基於Session的認證系統重構為JWT令牌認證，提高系統擴展性和安全性",
+      notes: "重構過程中需確保向後兼容，不影響現有用戶",
     },
   ],
 });
-```
 
-#### 階段 2：任務執行與複雜度處理
-
-```javascript
-// 列出所有任務
-const tasks = await mcp.mcp_shrimp_task_manager.list_tasks();
-console.log(tasks);
-
-// 找出第一個待執行的任務
-const pendingTasks = tasks.content[0].text.match(/待處理.*?ID: `([^`]+)`/gs);
-const firstTaskId = pendingTasks[0].match(/ID: `([^`]+)`/)[1];
-
-// 執行架構設計任務
-const executeResult = await mcp.mcp_shrimp_task_manager.execute_task({
-  taskId: firstTaskId,
-});
-
-// 檢查複雜度評估
-if (executeResult.content[0].text.includes("高複雜度")) {
-  console.log("架構設計是高複雜度任務，需要特別關注");
-
-  // 可以進一步拆分架構設計任務
-  await mcp.mcp_shrimp_task_manager.split_tasks({
-    isOverwrite: false,
-    tasks: [
-      {
-        name: "前端架構設計",
-        description: "設計前端架構，包括組件結構、狀態管理和路由設計",
-        dependencies: [],
-      },
-      {
-        name: "後端架構設計",
-        description: "設計後端架構，包括API結構、數據模型和緩存策略",
-        dependencies: [],
-      },
-      {
-        name: "整合前後端架構",
-        description: "確保前後端架構協同工作，定義數據交換格式和API契約",
-        dependencies: ["前端架構設計", "後端架構設計"],
-      },
-    ],
-  });
-}
-```
-
-#### 階段 3：完成任務與提供摘要
-
-```javascript
-// 驗證任務
-await mcp.mcp_shrimp_task_manager.verify_task({
-  taskId: "architecture-task-uuid",
-});
-
-// 完成任務並提供詳細摘要
-await mcp.mcp_shrimp_task_manager.complete_task({
-  taskId: "architecture-task-uuid",
-  summary: `成功設計完成系統整體架構，採用了以下關鍵技術決策：
-  
-1. 採用微服務架構，將資料處理和視覺化渲染分離，提高系統靈活性
-2. 前端技術棧：React 18 + TypeScript + ECharts 5，組件採用原子設計模式
-3. 後端技術棧：Node.js + Express + MongoDB，採用資料聚合管道處理複雜查詢
-4. 快取策略：三層緩存（應用內存、Redis、持久化存儲），針對不同數據生命週期優化
-5. 擴展性設計：水平擴展的API服務，事件驅動的資料處理管道
-  
-解決的主要挑戰：(1)大數據量分析性能瓶頸；(2)多維度數據實時更新一致性；(3)跨設備體驗一致性
-
-測試結果顯示架構可支持超過1000萬用戶記錄的快速分析，查詢響應時間控制在200ms以內，比目標性能指標提升了35%。`,
-});
-```
-
-#### 階段 4：查詢任務日誌和維護
-
-```javascript
-// 查詢任務執行日誌
-const taskLogs = await mcp.mcp_shrimp_task_manager.list_conversation_log({
-  taskId: "architecture-task-uuid",
-});
-
-// 分析日誌，找出關鍵決策點
-const decisions = taskLogs.entries.filter(
-  (entry) => entry.summary.includes("決定") || entry.summary.includes("選擇")
+// 2. 獲取新創建的任務ID
+const taskList = await mcp.mcp_shrimp_task_manager.list_tasks();
+const taskIdMatch = taskList.content[0].text.match(
+  /ID: `([^`]+)`.*名稱: "重構認證系統"/
 );
+const taskId = taskIdMatch ? taskIdMatch[1] : null;
 
-console.log("架構設計過程中的關鍵決策:", decisions);
+if (!taskId) {
+  console.error("找不到重構任務");
+  return;
+}
 
-// 清理不必要的任務（假設有些子任務變得不必要）
-await mcp.mcp_shrimp_task_manager.delete_task({
-  taskId: "unnecessary-subtask-uuid",
+// 3. 記錄所有相關文件
+await mcp.mcp_shrimp_task_manager.update_task_files({
+  taskId,
+  relatedFiles: [
+    // 需要修改的核心文件
+    {
+      path: "src/services/authService.js",
+      type: "待修改",
+      description: "認證服務核心邏輯，需將session邏輯替換為JWT",
+      lineStart: 24,
+      lineEnd: 156,
+    },
+    {
+      path: "src/middleware/auth.js",
+      type: "待修改",
+      description: "認證中間件，需更新驗證邏輯",
+      lineStart: 5,
+      lineEnd: 42,
+    },
+    {
+      path: "src/controllers/userController.js",
+      type: "待修改",
+      description: "用戶控制器，需更新登入和註銷邏輯",
+      lineStart: 78,
+      lineEnd: 142,
+    },
+
+    // 參考資料
+    {
+      path: "docs/auth-system-design.md",
+      type: "參考資料",
+      description: "認證系統設計文檔，包含JWT切換的要求和規範",
+    },
+    {
+      path: "package.json",
+      type: "參考資料",
+      description: "檢查已安裝的依賴，可能需要添加jsonwebtoken套件",
+      lineStart: 10,
+      lineEnd: 25,
+    },
+
+    // 依賴的組件
+    {
+      path: "src/utils/crypto.js",
+      type: "依賴文件",
+      description: "加密工具，JWT簽名將使用此模塊",
+      lineStart: 15,
+      lineEnd: 35,
+    },
+
+    // 需要創建的新文件
+    {
+      path: "src/config/jwt.js",
+      type: "輸出結果",
+      description: "新的JWT配置文件，需要創建",
+    },
+    {
+      path: "src/utils/tokenManager.js",
+      type: "輸出結果",
+      description: "新的令牌管理工具，處理JWT的創建、驗證和刷新",
+    },
+  ],
 });
 
-// 最終檢查任務狀態
-const finalTaskList = await mcp.mcp_shrimp_task_manager.list_tasks();
-console.log("當前任務狀態:", finalTaskList);
+// 4. 查看更新後的任務詳情
+const taskWithFiles = await mcp.mcp_shrimp_task_manager.execute_task({
+  taskId,
+});
+
+console.log("帶有相關文件信息的任務:", taskWithFiles);
+```
+
+### 案例：記錄 Bug 修復相關的代碼文件
+
+在處理複雜 Bug 時，記錄相關文件位置以便快速定位問題。
+
+#### 示例代碼：
+
+```javascript
+// 1. 創建bug修復任務
+await mcp.mcp_shrimp_task_manager.split_tasks({
+  isOverwrite: false,
+  tasks: [
+    {
+      name: "修復購物車計算錯誤",
+      description: "修復在添加多個相同產品到購物車時總價計算錯誤的問題",
+      notes:
+        "此問題只在特定情況下出現：當用戶添加同一產品超過10個且應用了折扣優惠",
+    },
+  ],
+});
+
+// 2. 獲取新創建的任務ID
+const taskList = await mcp.mcp_shrimp_task_manager.list_tasks();
+const taskIdMatch = taskList.content[0].text.match(
+  /ID: `([^`]+)`.*名稱: "修復購物車計算錯誤"/
+);
+const taskId = taskIdMatch ? taskIdMatch[1] : null;
+
+if (!taskId) {
+  console.error("找不到bug修復任務");
+  return;
+}
+
+// 3. 添加問題相關文件
+await mcp.mcp_shrimp_task_manager.update_task_files({
+  taskId,
+  relatedFiles: [
+    // 包含錯誤代碼的文件
+    {
+      path: "src/services/cartService.js",
+      type: "待修改",
+      description: "購物車服務，計算總價的邏輯有誤",
+      lineStart: 87,
+      lineEnd: 104,
+    },
+    {
+      path: "src/utils/priceCalculator.js",
+      type: "待修改",
+      description: "價格計算工具，折扣邏輯實現有誤",
+      lineStart: 45,
+      lineEnd: 65,
+    },
+
+    // 測試用例
+    {
+      path: "tests/cart.test.js",
+      type: "參考資料",
+      description: "現有測試用例，需要擴展以覆蓋發現的錯誤場景",
+      lineStart: 120,
+      lineEnd: 150,
+    },
+
+    // 錯誤報告
+    {
+      path: "docs/bug-reports/cart-calculation-issue.md",
+      type: "參考資料",
+      description: "詳細的錯誤報告，包含用戶報告的具體場景和截圖",
+    },
+  ],
+});
+
+// 4. 執行任務，自動加載相關文件
+await mcp.mcp_shrimp_task_manager.execute_task({
+  taskId,
+});
+```
+
+## 7. 優化任務執行時的上下文記憶功能案例
+
+### 案例：處理跨多個文件的複雜任務
+
+實現一個需要理解和修改多個相關文件的功能，利用增強的上下文記憶功能。
+
+#### 示例代碼：
+
+```javascript
+// 1. 創建複雜任務
+await mcp.mcp_shrimp_task_manager.split_tasks({
+  isOverwrite: false,
+  tasks: [
+    {
+      name: "實現多租戶數據隔離",
+      description:
+        "在現有系統中實現多租戶數據隔離功能，確保不同租戶的數據完全隔離，同時共享應用代碼和基礎設施",
+      notes: "這是一項複雜的架構變更，需要修改多個核心組件",
+    },
+  ],
+});
+
+// 2. 獲取新創建的任務ID
+const taskList = await mcp.mcp_shrimp_task_manager.list_tasks();
+const taskIdMatch = taskList.content[0].text.match(
+  /ID: `([^`]+)`.*名稱: "實現多租戶數據隔離"/
+);
+const taskId = taskIdMatch ? taskIdMatch[1] : null;
+
+if (!taskId) {
+  console.error("找不到多租戶任務");
+  return;
+}
+
+// 3. 關聯核心相關文件
+await mcp.mcp_shrimp_task_manager.update_task_files({
+  taskId,
+  relatedFiles: [
+    // 數據庫連接和模型
+    {
+      path: "src/config/database.js",
+      type: "待修改",
+      description: "數據庫配置，需改為支持多租戶連接池",
+      lineStart: 10,
+      lineEnd: 45,
+    },
+    {
+      path: "src/models/baseModel.js",
+      type: "待修改",
+      description: "所有模型的基類，需添加租戶ID過濾",
+      lineStart: 5,
+      lineEnd: 50,
+    },
+
+    // 中間件和上下文
+    {
+      path: "src/middleware/tenantContext.js",
+      type: "輸出結果",
+      description: "需要創建的新租戶上下文中間件",
+    },
+    {
+      path: "src/utils/requestContext.js",
+      type: "待修改",
+      description: "請求上下文工具，需增加租戶信息傳遞",
+      lineStart: 15,
+      lineEnd: 40,
+    },
+
+    // 身份驗證相關
+    {
+      path: "src/services/authService.js",
+      type: "待修改",
+      description: "認證服務，需在令牌中包含租戶信息",
+      lineStart: 50,
+      lineEnd: 120,
+    },
+  ],
+});
+
+// 4. 執行任務，系統會自動加載相關文件和上下文
+const executionResult = await mcp.mcp_shrimp_task_manager.execute_task({
+  taskId,
+});
+
+// 5. 在任務執行過程中，發現需要更多相關文件，動態添加
+await mcp.mcp_shrimp_task_manager.update_task_files({
+  taskId,
+  relatedFiles: [
+    // 新發現的相關文件
+    {
+      path: "src/services/userService.js",
+      type: "待修改",
+      description: "用戶服務也需更新以支持多租戶",
+      lineStart: 25,
+      lineEnd: 75,
+    },
+    {
+      path: "docs/architecture/multi-tenant-design.md",
+      type: "參考資料",
+      description: "多租戶架構設計文檔，提供實現指導",
+    },
+  ],
+});
+
+// 6. 繼續執行任務，系統會結合新添加的文件和之前的上下文
+await mcp.mcp_shrimp_task_manager.execute_task({
+  taskId,
+});
+
+// 7. 任務完成後，記錄完整的實現摘要
+await mcp.mcp_shrimp_task_manager.complete_task({
+  taskId,
+  summary:
+    "成功實現多租戶數據隔離功能，採用了基於中間件的動態租戶識別和數據過濾方案。主要更改包括：(1)實現了租戶上下文中間件，自動從請求中提取租戶標識；(2)增強了數據庫連接池，支持租戶專用連接；(3)修改了基礎模型類，所有查詢自動應用租戶過濾；(4)更新了認證服務，在JWT令牌中包含租戶信息；(5)實現了請求間租戶上下文的傳遞機制。所有修改均經過單元測試和集成測試驗證，確保數據完全隔離且性能影響最小化。",
+});
+```
+
+### 案例：長時間進行的開發任務
+
+在需要多次中斷和恢復的長期開發任務中，利用上下文記憶功能保持連續性。
+
+#### 示例代碼：
+
+```javascript
+// 假設我們有一個已經進行了一段時間的長期任務
+const taskId = "existing-long-term-task-id";
+
+// 1. 恢復到之前的工作狀態，系統會自動加載任務相關文件和執行歷史
+const taskContext = await mcp.mcp_shrimp_task_manager.execute_task({
+  taskId,
+});
+
+console.log("恢復任務上下文:", taskContext);
+
+// 2. 記錄新的發現和決策
+const developmentLog = `
+開發日誌 - ${new Date().toISOString()}
+
+今天解決了用戶認證頁面的以下問題：
+1. 修復了表單驗證錯誤信息不顯示的問題
+2. 優化了密碼強度檢查算法
+3. 決定使用漸進式登入延遲策略防止暴力破解
+
+待解決問題：
+- OAuth提供商回調處理邏輯複雜，需要重構
+- 移動端視圖適配問題
+`;
+
+console.log(developmentLog);
+
+// 3. 更新任務相關文件，記錄今天處理的內容
+await mcp.mcp_shrimp_task_manager.update_task_files({
+  taskId,
+  relatedFiles: [
+    // 今天修改的文件
+    {
+      path: "src/components/LoginForm.jsx",
+      type: "待修改",
+      description: "登入表單組件，已修復驗證錯誤顯示問題",
+      lineStart: 45,
+      lineEnd: 95,
+    },
+    {
+      path: "src/utils/passwordStrength.js",
+      type: "待修改",
+      description: "密碼強度檢查工具，已優化算法",
+      lineStart: 10,
+      lineEnd: 50,
+    },
+    {
+      path: "src/middleware/rateLimit.js",
+      type: "待修改",
+      description: "添加了漸進式登入延遲功能",
+      lineStart: 25,
+      lineEnd: 65,
+    },
+
+    // 明天需要處理的文件
+    {
+      path: "src/services/oauthService.js",
+      type: "待修改",
+      description: "OAuth服務需要重構，明天處理",
+      lineStart: 80,
+      lineEnd: 180,
+    },
+    {
+      path: "src/styles/mobile.css",
+      type: "待修改",
+      description: "需要改進移動端樣式適配",
+      lineStart: 120,
+      lineEnd: 200,
+    },
+  ],
+});
+
+// 4. 更新任務注記，記錄進度和計劃
+await mcp.mcp_shrimp_task_manager.update_task({
+  taskId,
+  notes:
+    "已完成認證頁面的基本功能和安全增強。下一步將重構OAuth服務並改進移動端適配。預計還需3天完成所有計劃工作。",
+});
 ```
 
 ## 結論

@@ -11,6 +11,24 @@ export interface TaskDependency {
   taskId: string; // 前置任務的唯一標識符，當前任務執行前必須完成此依賴任務
 }
 
+// 相關文件類型：定義文件與任務的關係類型
+export enum RelatedFileType {
+  TO_MODIFY = "待修改", // 需要在任務中修改的文件
+  REFERENCE = "參考資料", // 任務的參考資料或相關文檔
+  OUTPUT = "輸出結果", // 任務產生的輸出文件
+  DEPENDENCY = "依賴文件", // 任務依賴的組件或庫文件
+  OTHER = "其他", // 其他類型的相關文件
+}
+
+// 相關文件：定義任務相關的文件信息
+export interface RelatedFile {
+  path: string; // 文件路徑，可以是相對於項目根目錄的路徑或絕對路徑
+  type: RelatedFileType; // 文件與任務的關係類型
+  description?: string; // 文件的補充描述，說明其與任務的具體關係或用途
+  lineStart?: number; // 相關代碼區塊的起始行（選填）
+  lineEnd?: number; // 相關代碼區塊的結束行（選填）
+}
+
 // 任務介面：定義任務的完整數據結構
 export interface Task {
   id: string; // 任務的唯一標識符
@@ -23,6 +41,7 @@ export interface Task {
   updatedAt: Date; // 任務最後更新的時間戳
   completedAt?: Date; // 任務完成的時間戳（僅適用於已完成的任務）
   summary?: string; // 任務完成摘要，簡潔描述實施結果和重要決策（僅適用於已完成的任務）
+  relatedFiles?: RelatedFile[]; // 與任務相關的文件列表（選填）
 }
 
 // 規劃任務的參數：用於初始化任務規劃階段

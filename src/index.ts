@@ -1,6 +1,7 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { z } from "zod";
+import { RelatedFileType } from "./types/index.js";
 
 // 導入工具函數
 import {
@@ -21,6 +22,12 @@ import {
   completeTaskSchema,
   deleteTask,
   deleteTaskSchema,
+  clearAllTasks,
+  clearAllTasksSchema,
+  updateTaskContent,
+  updateTaskContentSchema,
+  updateTaskRelatedFiles,
+  updateTaskRelatedFilesSchema,
 } from "./tools/taskTools.js";
 
 // 導入日誌工具函數
@@ -210,6 +217,85 @@ async function main() {
       },
       async (args) => {
         return await deleteTask(args);
+      }
+    );
+
+    // 註冊清除所有任務工具
+    server.tool(
+      "clear_all_tasks",
+      "刪除系統中所有未完成的任務，該指令必須由用戶明確確認才能執行",
+      {
+        confirm: z
+          .boolean()
+          .describe("確認刪除所有未完成的任務（此操作不可逆）"),
+      },
+      async (args) => {
+        return await clearAllTasks(args);
+      }
+    );
+
+    // 註冊更新任務工具
+    server.tool(
+      "update_task",
+      "更新任務內容，包括名稱、描述和注記，但不允許修改已完成的任務",
+      {
+        taskId: z
+          .string()
+          .describe("待更新任務的唯一標識符，必須是系統中存在且未完成的任務ID"),
+        name: z.string().optional().describe("任務的新名稱（選填）"),
+        description: z.string().optional().describe("任務的新描述內容（選填）"),
+        notes: z.string().optional().describe("任務的新補充說明（選填）"),
+      },
+      async (args) => {
+        return await updateTaskContent(args);
+      }
+    );
+
+    // 註冊更新任務相關文件工具
+    server.tool(
+      "update_task_files",
+      "更新任務相關文件列表，用於記錄與任務相關的代碼文件、參考資料等",
+      {
+        taskId: z
+          .string()
+          .describe("待更新任務的唯一標識符，必須是系統中存在且未完成的任務ID"),
+        relatedFiles: z
+          .array(
+            z.object({
+              path: z
+                .string()
+                .describe("文件路徑，可以是相對於項目根目錄的路徑或絕對路徑"),
+              type: z
+                .enum([
+                  RelatedFileType.TO_MODIFY,
+                  RelatedFileType.REFERENCE,
+                  RelatedFileType.OUTPUT,
+                  RelatedFileType.DEPENDENCY,
+                  RelatedFileType.OTHER,
+                ])
+                .describe("文件與任務的關係類型"),
+              description: z
+                .string()
+                .optional()
+                .describe("文件的補充描述（選填）"),
+              lineStart: z
+                .number()
+                .int()
+                .positive()
+                .optional()
+                .describe("相關代碼區塊的起始行（選填）"),
+              lineEnd: z
+                .number()
+                .int()
+                .positive()
+                .optional()
+                .describe("相關代碼區塊的結束行（選填）"),
+            })
+          )
+          .describe("與任務相關的文件列表"),
+      },
+      async (args) => {
+        return await updateTaskRelatedFiles(args);
       }
     );
 

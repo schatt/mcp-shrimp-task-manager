@@ -8,17 +8,28 @@ import {
   deleteTask as modelDeleteTask,
   updateTaskSummary,
   assessTaskComplexity,
+  clearAllTasks as modelClearAllTasks,
+  updateTaskContent as modelUpdateTaskContent,
+  updateTaskRelatedFiles as modelUpdateTaskRelatedFiles,
 } from "../models/taskModel.js";
 import {
   TaskStatus,
   ConversationParticipant,
   TaskComplexityLevel,
+  RelatedFileType,
+  RelatedFile,
+  Task,
+  TaskDependency,
 } from "../types/index.js";
-import { addConversationEntry } from "../models/conversationLogModel.js";
+import {
+  addConversationEntry,
+  getConversationEntriesByTaskId,
+} from "../models/conversationLogModel.js";
 import {
   extractSummary,
   generateTaskSummary,
 } from "../utils/summaryExtractor.js";
+import { loadTaskRelatedFiles } from "../utils/fileLoader.js";
 
 // 開始規劃工具
 export const planTaskSchema = z.object({
@@ -368,30 +379,7 @@ export async function listTasks() {
       result += `## ${status} (${tasksWithStatus.length})\n\n`;
 
       tasksWithStatus.forEach((task, index) => {
-        result += `### ${index + 1}. ${task.name}\n`;
-        result += `- **ID:** \`${task.id}\`\n`;
-        result += `- **描述:** ${task.description}\n`;
-        if (task.notes) {
-          result += `- **注意事項:** ${task.notes}\n`;
-        }
-        if (task.dependencies.length > 0) {
-          result += `- **依賴任務:** ${task.dependencies
-            .map((d) => `\`${d.taskId}\``)
-            .join(", ")}\n`;
-        }
-
-        // 添加時間相關訊息
-        result += `- **創建時間:** ${task.createdAt.toISOString()}\n`;
-        if (task.status === TaskStatus.COMPLETED && task.completedAt) {
-          result += `- **完成時間:** ${task.completedAt.toISOString()}\n`;
-        }
-
-        // 顯示摘要（如果有）
-        if (task.summary && task.status === TaskStatus.COMPLETED) {
-          result += `- **摘要:** ${task.summary}\n`;
-        }
-
-        result += "\n";
+        result += formatTaskDetails(task);
       });
     }
   }
@@ -535,6 +523,176 @@ export async function executeTask({
     task.notes ? `- **注意事項:** ${task.notes}\n` : ""
   }\n`;
 
+  // ===== 增強：處理相關文件內容 =====
+  let relatedFilesContent = "";
+  let relatedFilesSummary = "";
+  let contextInfo = "";
+
+  // 查找之前執行過的相關日誌條目，增強上下文記憶
+  try {
+    const taskLogs = await getConversationEntriesByTaskId(task.id);
+    if (taskLogs.length > 0) {
+      // 按時間排序，獲取最近的日誌（最多3條）
+      const recentLogs = [...taskLogs]
+        .sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime())
+        .slice(0, 3);
+
+      if (recentLogs.length > 0) {
+        contextInfo += `\n## 任務執行歷史摘要\n\n最近 ${recentLogs.length} 條操作記錄：\n\n`;
+        recentLogs.forEach((log, index) => {
+          const timestamp = new Date(log.timestamp)
+            .toISOString()
+            .replace(/T/, " ")
+            .replace(/\..+/, "");
+          contextInfo += `${index + 1}. [${timestamp}] ${log.summary}\n`;
+        });
+
+        // 記錄日誌加載
+        await addConversationEntry(
+          ConversationParticipant.MCP,
+          `已加載任務歷史記錄，共 ${recentLogs.length} 條`,
+          task.id,
+          "加載歷史記錄"
+        );
+      }
+    }
+  } catch (error) {
+    console.error("加載任務歷史記錄時發生錯誤:", error);
+  }
+
+  // 查找依賴任務的相關信息
+  if (task.dependencies && task.dependencies.length > 0) {
+    try {
+      const allTasks = await getAllTasks();
+      const depTasks = task.dependencies
+        .map((dep) => allTasks.find((t) => t.id === dep.taskId))
+        .filter((t) => t !== undefined) as Task[];
+
+      if (depTasks.length > 0) {
+        const completedDepTasks = depTasks.filter(
+          (t) => t.status === TaskStatus.COMPLETED
+        );
+
+        if (completedDepTasks.length > 0) {
+          contextInfo += `\n## 依賴任務完成摘要\n\n`;
+
+          for (const depTask of completedDepTasks) {
+            contextInfo += `### ${depTask.name}\n`;
+            if (depTask.summary) {
+              contextInfo += `${depTask.summary}\n\n`;
+            } else {
+              contextInfo += `*無完成摘要*\n\n`;
+            }
+          }
+
+          // 記錄依賴任務加載
+          await addConversationEntry(
+            ConversationParticipant.MCP,
+            `已加載依賴任務完成摘要，共 ${completedDepTasks.length} 個已完成依賴任務`,
+            task.id,
+            "加載依賴任務摘要"
+          );
+        }
+      }
+    } catch (error) {
+      console.error("加載依賴任務信息時發生錯誤:", error);
+    }
+  }
+
+  if (task.relatedFiles && task.relatedFiles.length > 0) {
+    try {
+      // 記錄加載文件操作
+      await addConversationEntry(
+        ConversationParticipant.MCP,
+        `正在加載任務相關文件，共 ${task.relatedFiles.length} 個文件`,
+        task.id,
+        "加載相關文件"
+      );
+
+      // 加載相關文件內容，使用增強的智能提取功能
+      const loadResult = await loadTaskRelatedFiles(task.relatedFiles);
+      relatedFilesContent = loadResult.content;
+      relatedFilesSummary = loadResult.summary;
+
+      // 記錄加載完成
+      await addConversationEntry(
+        ConversationParticipant.MCP,
+        `任務相關文件加載完成，成功加載 ${task.relatedFiles.length} 個文件，提取了最相關的代碼片段`,
+        task.id,
+        "相關文件加載完成"
+      );
+    } catch (error) {
+      console.error("加載任務相關文件時發生錯誤:", error);
+
+      // 記錄錯誤
+      await addConversationEntry(
+        ConversationParticipant.MCP,
+        `加載任務相關文件時發生錯誤: ${
+          error instanceof Error ? error.message : String(error)
+        }`,
+        task.id,
+        "相關文件加載錯誤"
+      );
+
+      relatedFilesSummary =
+        "## 相關文件內容加載失敗\n\n加載文件時發生錯誤，請手動查看相關文件。";
+    }
+  } else {
+    // 沒有相關文件的情況
+    relatedFilesSummary =
+      "## 相關文件\n\n當前任務沒有關聯的文件。可以使用 `update_task_files` 工具添加相關文件，以便在執行任務時提供上下文。";
+
+    // 嘗試自動發現相關文件
+    try {
+      // 基於任務名稱和描述關鍵詞，嘗試推測可能相關的文件
+      const taskWords = [
+        ...task.name.split(/[\s,.;:]+/),
+        ...task.description.split(/[\s,.;:]+/),
+      ]
+        .filter((word) => word.length > 3)
+        .map((word) => word.toLowerCase());
+
+      // 從關鍵詞中提取可能的文件名或路徑片段
+      const potentialFileKeywords = taskWords.filter(
+        (word) =>
+          /^[a-z0-9]+$/i.test(word) &&
+          ![
+            "task",
+            "function",
+            "model",
+            "index",
+            "with",
+            "from",
+            "this",
+          ].includes(word.toLowerCase())
+      );
+
+      if (potentialFileKeywords.length > 0) {
+        // 推薦自動關聯文件的提示
+        relatedFilesSummary += `\n\n### 推薦操作\n基於任務描述，您可能需要查看以下相關文件：\n`;
+
+        // 列出可能相關的文件類型或名稱
+        potentialFileKeywords.slice(0, 5).forEach((keyword) => {
+          relatedFilesSummary += `- 含有 "${keyword}" 的文件\n`;
+        });
+
+        relatedFilesSummary += `\n使用 update_task_files 工具關聯相關文件，以獲得更好的上下文記憶支持。`;
+
+        // 記錄文件推薦
+        await addConversationEntry(
+          ConversationParticipant.MCP,
+          `為任務推薦了潛在相關文件關鍵詞: ${potentialFileKeywords
+            .slice(0, 5)
+            .join(", ")}`,
+          task.id,
+          "文件推薦"
+        );
+      }
+    } catch (error) {
+      console.error("推薦相關文件時發生錯誤:", error);
+    }
+  }
+
   // 新增：添加複雜度評估部分
   if (complexityAssessment) {
     // 添加複雜度評估部分
@@ -573,14 +731,65 @@ export async function executeTask({
     prompt += `\n`;
   }
 
-  prompt += `## 執行指引\n\n1. 請仔細分析任務要求，確保理解所有細節和約束條件
+  // ===== 增強：添加相關文件部分，更詳細的信息 =====
+  if (task.relatedFiles && task.relatedFiles.length > 0) {
+    prompt += `\n## 任務相關文件\n\n共關聯 ${task.relatedFiles.length} 個文件，類型分布：\n`;
+
+    // 按類型分組統計
+    const fileTypeCount: Record<string, number> = {};
+    task.relatedFiles.forEach((file) => {
+      fileTypeCount[file.type] = (fileTypeCount[file.type] || 0) + 1;
+    });
+
+    Object.entries(fileTypeCount).forEach(([type, count]) => {
+      prompt += `- ${type}: ${count} 個\n`;
+    });
+
+    // 新增：展示文件詳細列表
+    prompt += `\n### 文件詳細列表\n`;
+
+    // 按類型分組
+    const filesByType = task.relatedFiles.reduce((acc, file) => {
+      acc[file.type] = acc[file.type] || [];
+      acc[file.type].push(file);
+      return acc;
+    }, {} as Record<string, RelatedFile[]>);
+
+    // 展示每種類型的文件
+    Object.entries(filesByType).forEach(([type, files]) => {
+      prompt += `\n#### ${type} (${files.length} 個)\n`;
+      files.forEach((file, index) => {
+        prompt += `${index + 1}. \`${file.path}\`${
+          file.description ? ` - ${file.description}` : ""
+        }${
+          file.lineStart && file.lineEnd
+            ? ` (行 ${file.lineStart}-${file.lineEnd})`
+            : ""
+        }\n`;
+      });
+    });
+
+    prompt += `\n使用這些相關文件作為上下文，幫助您理解任務需求和實現細節。文件內容已經過智能提取，保留最相關的部分。\n`;
+  }
+
+  // 添加上下文信息
+  if (contextInfo) {
+    prompt += contextInfo;
+  }
+
+  prompt += `\n## 執行指引\n\n1. 請仔細分析任務要求，確保理解所有細節和約束條件
 2. 設計詳細的執行方案，包括具體步驟和技術選擇
 3. 系統性地實施您的方案，遵循最佳實踐和項目慣例
 4. 完整記錄您的實施過程，包括重要決策點和遇到的挑戰
+5. 實時更新任務相關文件，確保上下文記憶持續有效
 
 ## 質量保證\n\n- 確保代碼符合專案編碼標準和架構設計
 - 實施適當的錯誤處理和邊緣情況檢查
 - 優化性能和資源使用
+
+## 上下文記憶管理\n\n- 在執行過程中，使用 update_task_files 工具更新重要的相關文件
+- 關注關鍵代碼片段，記錄代碼行號以便精確定位
+- 將重要的發現、決策和實現細節記錄為文件關聯和描述
 
 ## 下一步行動\n\n完成實施後，必須使用「verify_task」工具進行全面驗證，確保所有功能和要求均已正確實現。`;
 
@@ -589,6 +798,10 @@ export async function executeTask({
       {
         type: "text" as const,
         text: prompt,
+      },
+      {
+        type: "text" as const,
+        text: relatedFilesContent,
       },
     ],
   };
@@ -906,3 +1119,470 @@ export async function deleteTask({ taskId }: z.infer<typeof deleteTaskSchema>) {
     isError: !result.success,
   };
 }
+
+// 清除所有任務工具
+export const clearAllTasksSchema = z.object({
+  confirm: z.boolean().describe("確認刪除所有未完成的任務（此操作不可逆）"),
+});
+
+export async function clearAllTasks({
+  confirm,
+}: z.infer<typeof clearAllTasksSchema>) {
+  // 安全檢查：如果沒有確認，則拒絕操作
+  if (!confirm) {
+    return {
+      content: [
+        {
+          type: "text" as const,
+          text: `## 操作取消\n\n未確認清除操作。如要清除所有任務，請將 confirm 參數設為 true。\n\n⚠️ 警告：此操作將刪除所有未完成的任務，且無法恢復。請謹慎操作。`,
+        },
+      ],
+    };
+  }
+
+  // 檢查是否真的有任務需要清除
+  const allTasks = await getAllTasks();
+  if (allTasks.length === 0) {
+    // 記錄操作
+    try {
+      await addConversationEntry(
+        ConversationParticipant.MCP,
+        `清除所有任務操作：無任務需要清除`,
+        undefined,
+        "任務清除"
+      );
+    } catch (error) {
+      console.error("記錄對話日誌時發生錯誤:", error);
+    }
+
+    return {
+      content: [
+        {
+          type: "text" as const,
+          text: `## 操作提示\n\n系統中沒有任何任務需要清除。`,
+        },
+      ],
+    };
+  }
+
+  // 記錄操作開始
+  try {
+    await addConversationEntry(
+      ConversationParticipant.MCP,
+      `開始清除所有任務操作：共 ${allTasks.length} 個任務`,
+      undefined,
+      "任務清除"
+    );
+  } catch (error) {
+    console.error("記錄對話日誌時發生錯誤:", error);
+  }
+
+  // 執行清除操作
+  const result = await modelClearAllTasks();
+
+  // 記錄操作結果
+  try {
+    await addConversationEntry(
+      ConversationParticipant.MCP,
+      `任務清除${result.success ? "成功" : "失敗"}：${result.message}${
+        result.backupFile ? `，備份文件: ${result.backupFile}` : ""
+      }`,
+      undefined,
+      result.success ? "任務清除成功" : "任務清除失敗"
+    );
+  } catch (error) {
+    console.error("記錄對話日誌時發生錯誤:", error);
+  }
+
+  return {
+    content: [
+      {
+        type: "text" as const,
+        text: `## ${result.success ? "操作成功" : "操作失敗"}\n\n${
+          result.message
+        }${
+          result.backupFile
+            ? `\n\n系統已自動創建備份文件: \`${result.backupFile}\``
+            : ""
+        }`,
+      },
+    ],
+    isError: !result.success,
+  };
+}
+
+// 更新任務內容工具
+export const updateTaskContentSchema = z.object({
+  taskId: z
+    .string()
+    .describe("待更新任務的唯一標識符，必須是系統中存在且未完成的任務ID"),
+  name: z.string().optional().describe("任務的新名稱（選填）"),
+  description: z.string().optional().describe("任務的新描述內容（選填）"),
+  notes: z.string().optional().describe("任務的新補充說明（選填）"),
+  relatedFiles: z
+    .array(
+      z.object({
+        path: z
+          .string()
+          .describe("文件路徑，可以是相對於項目根目錄的路徑或絕對路徑"),
+        type: z
+          .enum([
+            RelatedFileType.TO_MODIFY,
+            RelatedFileType.REFERENCE,
+            RelatedFileType.OUTPUT,
+            RelatedFileType.DEPENDENCY,
+            RelatedFileType.OTHER,
+          ])
+          .describe("文件與任務的關係類型"),
+        description: z.string().optional().describe("文件的補充描述（選填）"),
+        lineStart: z
+          .number()
+          .int()
+          .positive()
+          .optional()
+          .describe("相關代碼區塊的起始行（選填）"),
+        lineEnd: z
+          .number()
+          .int()
+          .positive()
+          .optional()
+          .describe("相關代碼區塊的結束行（選填）"),
+      })
+    )
+    .optional()
+    .describe("與任務相關的文件列表（選填）"),
+});
+
+export async function updateTaskContent({
+  taskId,
+  name,
+  description,
+  notes,
+  relatedFiles,
+}: z.infer<typeof updateTaskContentSchema>) {
+  // 獲取任務以檢查它是否存在
+  const task = await getTaskById(taskId);
+
+  if (!task) {
+    // 記錄錯誤日誌
+    try {
+      await addConversationEntry(
+        ConversationParticipant.MCP,
+        `更新任務失敗：找不到ID為 ${taskId} 的任務`,
+        undefined,
+        "錯誤"
+      );
+    } catch (error) {
+      console.error("記錄對話日誌時發生錯誤:", error);
+    }
+
+    return {
+      content: [
+        {
+          type: "text" as const,
+          text: `## 系統錯誤\n\n找不到ID為 \`${taskId}\` 的任務。請使用「list_tasks」工具確認有效的任務ID後再試。`,
+        },
+      ],
+      isError: true,
+    };
+  }
+
+  // 記錄要更新的任務和內容
+  let updateSummary = `準備更新任務：${task.name} (ID: ${task.id})`;
+  if (name) updateSummary += `，新名稱：${name}`;
+  if (description) updateSummary += `，更新描述`;
+  if (notes) updateSummary += `，更新注記`;
+  if (relatedFiles)
+    updateSummary += `，更新相關文件 (${relatedFiles.length} 個)`;
+
+  try {
+    await addConversationEntry(
+      ConversationParticipant.MCP,
+      updateSummary,
+      task.id,
+      "任務更新"
+    );
+  } catch (error) {
+    console.error("記錄對話日誌時發生錯誤:", error);
+  }
+
+  // 執行更新操作
+  const result = await modelUpdateTaskContent(taskId, {
+    name,
+    description,
+    notes,
+    relatedFiles,
+  });
+
+  // 記錄更新結果
+  try {
+    await addConversationEntry(
+      ConversationParticipant.MCP,
+      `任務更新${result.success ? "成功" : "失敗"}：${task.name} (ID: ${
+        task.id
+      })，原因：${result.message}`,
+      task.id,
+      result.success ? "任務更新成功" : "任務更新失敗"
+    );
+  } catch (error) {
+    console.error("記錄對話日誌時發生錯誤:", error);
+  }
+
+  // 構建響應消息
+  const responseTitle = result.success ? "操作成功" : "操作失敗";
+  let responseMessage = result.message;
+
+  if (result.success && result.task) {
+    // 顯示更新後的任務詳情
+    responseMessage += "\n\n### 更新後的任務詳情\n";
+    responseMessage += `- **名稱:** ${result.task.name}\n`;
+    responseMessage += `- **描述:** ${result.task.description.substring(
+      0,
+      100
+    )}${result.task.description.length > 100 ? "..." : ""}\n`;
+
+    if (result.task.notes) {
+      responseMessage += `- **注記:** ${result.task.notes.substring(0, 100)}${
+        result.task.notes.length > 100 ? "..." : ""
+      }\n`;
+    }
+
+    responseMessage += `- **狀態:** ${result.task.status}\n`;
+    responseMessage += `- **更新時間:** ${new Date(
+      result.task.updatedAt
+    ).toISOString()}\n`;
+
+    // 顯示相關文件信息
+    if (result.task.relatedFiles && result.task.relatedFiles.length > 0) {
+      responseMessage += `- **相關文件:** ${result.task.relatedFiles.length} 個\n`;
+
+      // 按文件類型分組
+      const filesByType = result.task.relatedFiles.reduce((acc, file) => {
+        if (!acc[file.type]) {
+          acc[file.type] = [];
+        }
+        acc[file.type].push(file);
+        return acc;
+      }, {} as Record<string, RelatedFile[]>);
+
+      for (const [type, files] of Object.entries(filesByType)) {
+        responseMessage += `  - ${type} (${files.length} 個): `;
+        responseMessage += files.map((file) => `\`${file.path}\``).join(", ");
+        responseMessage += "\n";
+      }
+    }
+  }
+
+  return {
+    content: [
+      {
+        type: "text" as const,
+        text: `## ${responseTitle}\n\n${responseMessage}`,
+      },
+    ],
+    isError: !result.success,
+  };
+}
+
+// 更新任務相關文件工具
+export const updateTaskRelatedFilesSchema = z.object({
+  taskId: z
+    .string()
+    .describe("待更新任務的唯一標識符，必須是系統中存在且未完成的任務ID"),
+  relatedFiles: z
+    .array(
+      z.object({
+        path: z
+          .string()
+          .describe("文件路徑，可以是相對於項目根目錄的路徑或絕對路徑"),
+        type: z
+          .enum([
+            RelatedFileType.TO_MODIFY,
+            RelatedFileType.REFERENCE,
+            RelatedFileType.OUTPUT,
+            RelatedFileType.DEPENDENCY,
+            RelatedFileType.OTHER,
+          ])
+          .describe("文件與任務的關係類型"),
+        description: z.string().optional().describe("文件的補充描述（選填）"),
+        lineStart: z
+          .number()
+          .int()
+          .positive()
+          .optional()
+          .describe("相關代碼區塊的起始行（選填）"),
+        lineEnd: z
+          .number()
+          .int()
+          .positive()
+          .optional()
+          .describe("相關代碼區塊的結束行（選填）"),
+      })
+    )
+    .describe("與任務相關的文件列表"),
+});
+
+export async function updateTaskRelatedFiles({
+  taskId,
+  relatedFiles,
+}: z.infer<typeof updateTaskRelatedFilesSchema>) {
+  // 獲取任務以檢查它是否存在
+  const task = await getTaskById(taskId);
+
+  if (!task) {
+    // 記錄錯誤日誌
+    try {
+      await addConversationEntry(
+        ConversationParticipant.MCP,
+        `更新任務相關文件失敗：找不到ID為 ${taskId} 的任務`,
+        undefined,
+        "錯誤"
+      );
+    } catch (error) {
+      console.error("記錄對話日誌時發生錯誤:", error);
+    }
+
+    return {
+      content: [
+        {
+          type: "text" as const,
+          text: `## 系統錯誤\n\n找不到ID為 \`${taskId}\` 的任務。請使用「list_tasks」工具確認有效的任務ID後再試。`,
+        },
+      ],
+      isError: true,
+    };
+  }
+
+  // 記錄要更新的任務和相關文件
+  const fileTypeCount = relatedFiles.reduce((acc, file) => {
+    acc[file.type] = (acc[file.type] || 0) + 1;
+    return acc;
+  }, {} as Record<string, number>);
+
+  const fileTypeSummary = Object.entries(fileTypeCount)
+    .map(([type, count]) => `${type} ${count} 個`)
+    .join("，");
+
+  try {
+    await addConversationEntry(
+      ConversationParticipant.MCP,
+      `準備更新任務相關文件：${task.name} (ID: ${task.id})，共 ${relatedFiles.length} 個文件（${fileTypeSummary}）`,
+      task.id,
+      "更新相關文件"
+    );
+  } catch (error) {
+    console.error("記錄對話日誌時發生錯誤:", error);
+  }
+
+  // 執行更新操作
+  const result = await modelUpdateTaskRelatedFiles(taskId, relatedFiles);
+
+  // 記錄更新結果
+  try {
+    await addConversationEntry(
+      ConversationParticipant.MCP,
+      `任務相關文件更新${result.success ? "成功" : "失敗"}：${task.name} (ID: ${
+        task.id
+      })，${result.message}`,
+      task.id,
+      result.success ? "相關文件更新成功" : "相關文件更新失敗"
+    );
+  } catch (error) {
+    console.error("記錄對話日誌時發生錯誤:", error);
+  }
+
+  // 構建響應消息
+  const responseTitle = result.success ? "操作成功" : "操作失敗";
+  let responseMessage = result.message;
+
+  if (result.success && result.task && result.task.relatedFiles) {
+    // 顯示更新後的相關文件列表
+    responseMessage += "\n\n### 任務相關文件列表\n";
+
+    // 按文件類型分組顯示
+    const filesByType = result.task.relatedFiles.reduce((acc, file) => {
+      acc[file.type] = acc[file.type] || [];
+      acc[file.type].push(file);
+      return acc;
+    }, {} as Record<string, RelatedFile[]>);
+
+    for (const [type, files] of Object.entries(filesByType)) {
+      responseMessage += `\n#### ${type} (${files.length} 個)\n`;
+      files.forEach((file, index) => {
+        responseMessage += `${index + 1}. \`${file.path}\`${
+          file.description ? ` - ${file.description}` : ""
+        }${
+          file.lineStart && file.lineEnd
+            ? ` (行 ${file.lineStart}-${file.lineEnd})`
+            : ""
+        }\n`;
+      });
+    }
+  }
+
+  return {
+    content: [
+      {
+        type: "text" as const,
+        text: `## ${responseTitle}\n\n${responseMessage}`,
+      },
+    ],
+    isError: !result.success,
+  };
+}
+
+// 格式化單個任務的詳細資訊
+const formatTaskDetails = (task: Task) => {
+  let details = `### ${task.name}\n**ID:** \`${task.id}\`\n**描述:** ${task.description}\n`;
+
+  if (task.notes) {
+    details += `**注記:** ${task.notes}\n`;
+  }
+
+  details += `**狀態:** ${task.status}\n`;
+
+  if (task.dependencies.length > 0) {
+    const depIds = task.dependencies
+      .map((dep: TaskDependency) => `\`${dep.taskId}\``)
+      .join(", ");
+    details += `**依賴任務:** ${depIds}\n`;
+  }
+
+  // 添加相關文件信息
+  if (task.relatedFiles && task.relatedFiles.length > 0) {
+    details += `**相關文件:** ${task.relatedFiles.length} 個\n`;
+
+    // 按文件類型分組
+    const filesByType = task.relatedFiles.reduce(
+      (acc: Record<string, RelatedFile[]>, file: RelatedFile) => {
+        if (!acc[file.type]) {
+          acc[file.type] = [];
+        }
+        acc[file.type].push(file);
+        return acc;
+      },
+      {} as Record<string, RelatedFile[]>
+    );
+
+    for (const [type, files] of Object.entries(filesByType)) {
+      details += `  - ${type} (${files.length} 個): `;
+      details += files
+        .map((file: RelatedFile) => `\`${file.path}\``)
+        .join(", ");
+      details += "\n";
+    }
+  }
+
+  details += `**創建時間:** ${new Date(task.createdAt).toISOString()}\n`;
+  details += `**更新時間:** ${new Date(task.updatedAt).toISOString()}\n`;
+
+  if (task.completedAt) {
+    details += `**完成時間:** ${new Date(task.completedAt).toISOString()}\n`;
+  }
+
+  if (task.summary) {
+    details += `**完成摘要:** ${task.summary}\n`;
+  }
+
+  return details;
+};

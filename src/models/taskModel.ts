@@ -5,6 +5,7 @@ import {
   TaskComplexityLevel,
   TaskComplexityThresholds,
   TaskComplexityAssessment,
+  RelatedFile,
 } from "../types/index.js";
 import fs from "fs/promises";
 import path from "path";
@@ -72,7 +73,8 @@ export async function createTask(
   name: string,
   description: string,
   notes?: string,
-  dependencies: string[] = []
+  dependencies: string[] = [],
+  relatedFiles?: RelatedFile[]
 ): Promise<Task> {
   const tasks = await readTasks();
 
@@ -89,6 +91,7 @@ export async function createTask(
     dependencies: dependencyObjects,
     createdAt: new Date(),
     updatedAt: new Date(),
+    relatedFiles,
   };
 
   tasks.push(newTask);
@@ -107,6 +110,24 @@ export async function updateTask(
 
   if (taskIndex === -1) {
     return null;
+  }
+
+  // 檢查任務是否已完成，已完成的任務不允許更新（除非是明確允許的欄位）
+  if (tasks[taskIndex].status === TaskStatus.COMPLETED) {
+    // 僅允許更新 summary 欄位（任務摘要）
+    const allowedFields = ["summary"];
+    const attemptedFields = Object.keys(updates);
+
+    const disallowedFields = attemptedFields.filter(
+      (field) => !allowedFields.includes(field)
+    );
+
+    if (disallowedFields.length > 0) {
+      console.warn(
+        `警告：嘗試更新已完成任務的非法欄位: ${disallowedFields.join(", ")}`
+      );
+      return null;
+    }
   }
 
   tasks[taskIndex] = {
@@ -140,6 +161,97 @@ export async function updateTaskSummary(
   summary: string
 ): Promise<Task | null> {
   return await updateTask(taskId, { summary });
+}
+
+// 更新任務內容
+export async function updateTaskContent(
+  taskId: string,
+  updates: {
+    name?: string;
+    description?: string;
+    notes?: string;
+    relatedFiles?: RelatedFile[];
+  }
+): Promise<{ success: boolean; message: string; task?: Task }> {
+  // 獲取任務並檢查是否存在
+  const task = await getTaskById(taskId);
+
+  if (!task) {
+    return { success: false, message: "找不到指定任務" };
+  }
+
+  // 檢查任務是否已完成
+  if (task.status === TaskStatus.COMPLETED) {
+    return { success: false, message: "無法更新已完成的任務" };
+  }
+
+  // 構建更新物件，只包含實際需要更新的欄位
+  const updateObj: Partial<Task> = {};
+
+  if (updates.name !== undefined) {
+    updateObj.name = updates.name;
+  }
+
+  if (updates.description !== undefined) {
+    updateObj.description = updates.description;
+  }
+
+  if (updates.notes !== undefined) {
+    updateObj.notes = updates.notes;
+  }
+
+  if (updates.relatedFiles !== undefined) {
+    updateObj.relatedFiles = updates.relatedFiles;
+  }
+
+  // 如果沒有要更新的內容，提前返回
+  if (Object.keys(updateObj).length === 0) {
+    return { success: true, message: "沒有提供需要更新的內容", task };
+  }
+
+  // 執行更新
+  const updatedTask = await updateTask(taskId, updateObj);
+
+  if (!updatedTask) {
+    return { success: false, message: "更新任務時發生錯誤" };
+  }
+
+  return {
+    success: true,
+    message: "任務內容已成功更新",
+    task: updatedTask,
+  };
+}
+
+// 更新任務相關文件
+export async function updateTaskRelatedFiles(
+  taskId: string,
+  relatedFiles: RelatedFile[]
+): Promise<{ success: boolean; message: string; task?: Task }> {
+  // 獲取任務並檢查是否存在
+  const task = await getTaskById(taskId);
+
+  if (!task) {
+    return { success: false, message: "找不到指定任務" };
+  }
+
+  // 檢查任務是否已完成
+  if (task.status === TaskStatus.COMPLETED) {
+    return { success: false, message: "無法更新已完成的任務" };
+  }
+
+  // 執行更新
+  const updatedTask = await updateTask(taskId, { relatedFiles });
+
+  if (!updatedTask) {
+    return { success: false, message: "更新任務相關文件時發生錯誤" };
+  }
+
+  return {
+    success: true,
+    message: `已成功更新任務相關文件，共 ${relatedFiles.length} 個文件`,
+    task: updatedTask,
+  };
 }
 
 // 批量創建或更新任務
@@ -437,4 +549,52 @@ export async function assessTaskComplexity(
     },
     recommendations,
   };
+}
+
+// 清除所有任務
+export async function clearAllTasks(): Promise<{
+  success: boolean;
+  message: string;
+  backupFile?: string;
+}> {
+  try {
+    // 確保數據目錄存在
+    await ensureDataDir();
+
+    // 讀取現有任務，用於創建備份
+    const tasks = await readTasks();
+
+    // 如果沒有任務，直接返回
+    if (tasks.length === 0) {
+      return { success: true, message: "沒有任務需要清除" };
+    }
+
+    // 創建備份文件名
+    const timestamp = new Date()
+      .toISOString()
+      .replace(/:/g, "-")
+      .replace(/\..+/, "");
+    const backupFileName = `tasks_backup_${timestamp}.json`;
+    const backupFilePath = path.join(DATA_DIR, backupFileName);
+
+    // 創建備份
+    await fs.writeFile(backupFilePath, JSON.stringify({ tasks }, null, 2));
+
+    // 清空任務文件
+    await writeTasks([]);
+
+    return {
+      success: true,
+      message: `已成功清除所有任務，共 ${tasks.length} 個任務被刪除`,
+      backupFile: backupFileName,
+    };
+  } catch (error) {
+    console.error("清除所有任務時發生錯誤:", error);
+    return {
+      success: false,
+      message: `清除任務時發生錯誤: ${
+        error instanceof Error ? error.message : String(error)
+      }`,
+    };
+  }
 }

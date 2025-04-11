@@ -100,6 +100,125 @@ const completeResult = await mcp.mcp_shrimp_task_manager.complete_task({
 
 當未提供 `summary` 參數時，系統會根據任務名稱和描述自動生成摘要。
 
+### 4. 清除所有任務功能
+
+#### `clear_all_tasks`
+
+清除系統中所有未完成的任務，提供簡化的系統重置功能。
+
+**參數：**
+
+| 參數名  | 類型    | 必填 | 描述                      |
+| ------- | ------- | ---- | ------------------------- |
+| confirm | boolean | 是   | 確認刪除操作，必須為 true |
+
+**返回：**
+
+- 成功：返回清除操作的結果，包含被刪除的任務數量
+- 失敗：返回錯誤訊息，說明失敗原因
+
+**使用範例：**
+
+```javascript
+const clearResult = await mcp.mcp_shrimp_task_manager.clear_all_tasks({
+  confirm: true, // 必須明確確認
+});
+```
+
+**安全機制：**
+
+- 必須明確設置 `confirm` 參數為 `true` 才能執行操作
+- 系統會自動在清除前創建數據備份，存放在 `data/backups` 目錄
+- 所有清除操作都會記錄到系統日誌中
+- 已完成的任務不會被刪除，確保歷史記錄完整性
+
+### 5. 更新任務功能
+
+#### `update_task`
+
+更新未完成任務的內容，包括名稱、描述和注記。
+
+**參數：**
+
+| 參數名      | 類型   | 必填 | 描述                                              |
+| ----------- | ------ | ---- | ------------------------------------------------- |
+| taskId      | string | 是   | 待更新任務的唯一標識符，必須是未完成的有效任務 ID |
+| name        | string | 否   | 任務的新名稱（選填）                              |
+| description | string | 否   | 任務的新描述（選填）                              |
+| notes       | string | 否   | 任務的新補充說明（選填）                          |
+
+**返回：**
+
+- 成功：返回更新後的任務數據
+- 失敗：返回錯誤訊息，說明失敗原因（如任務不存在、已完成等）
+
+**使用範例：**
+
+```javascript
+const updateResult = await mcp.mcp_shrimp_task_manager.update_task({
+  taskId: "task-uuid-here",
+  name: "優化後的任務名稱",
+  description: "更詳細的任務描述...",
+  notes: "補充重要資訊",
+});
+```
+
+**約束條件：**
+
+- 不允許更新已完成的任務
+- 至少需要提供 name、description 或 notes 中的一個參數
+- 任務 ID 和完成狀態不可通過此功能更改
+
+### 6. 任務相關文件位置記錄功能
+
+#### `update_task_files`
+
+為任務添加或更新相關文件記錄，提升任務執行時的上下文記憶能力。
+
+**參數：**
+
+| 參數名       | 類型   | 必填 | 描述                                 |
+| ------------ | ------ | ---- | ------------------------------------ |
+| taskId       | string | 是   | 任務的唯一標識符                     |
+| relatedFiles | array  | 是   | 相關文件列表，包含以下屬性的對象數組 |
+
+**relatedFiles 對象屬性：**
+
+| 屬性名      | 類型   | 必填 | 描述                                                                                 |
+| ----------- | ------ | ---- | ------------------------------------------------------------------------------------ |
+| path        | string | 是   | 文件路徑（相對於項目根目錄或絕對路徑）                                               |
+| type        | string | 是   | 文件關聯類型，可選值：「待修改」、「參考資料」、「輸出結果」、「依賴文件」、「其他」 |
+| description | string | 否   | 文件的補充描述（選填）                                                               |
+| lineStart   | number | 否   | 相關代碼區塊的起始行（選填）                                                         |
+| lineEnd     | number | 否   | 相關代碼區塊的結束行（選填）                                                         |
+
+**返回：**
+
+- 成功：返回更新後的任務數據，包含完整的相關文件列表
+- 失敗：返回錯誤訊息
+
+**使用範例：**
+
+```javascript
+const updateFilesResult = await mcp.mcp_shrimp_task_manager.update_task_files({
+  taskId: "task-uuid-here",
+  relatedFiles: [
+    {
+      path: "src/components/Button.tsx",
+      type: "待修改",
+      description: "需要修改按鈕組件以支持新狀態",
+      lineStart: 24,
+      lineEnd: 45,
+    },
+    {
+      path: "docs/design-spec.md",
+      type: "參考資料",
+      description: "包含按鈕設計規範",
+    },
+  ],
+});
+```
+
 ## 工作日誌功能
 
 ### 1. 查詢日誌
