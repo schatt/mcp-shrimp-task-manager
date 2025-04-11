@@ -1,5 +1,4 @@
-import { RelatedFile, RelatedFileType } from "../types/index.js";
-
+import { RelatedFileType } from "../types/index.js";
 /**
  * 生成任務相關文件的內容摘要
  *
@@ -14,43 +13,37 @@ import { RelatedFile, RelatedFileType } from "../types/index.js";
  *   - summary: 簡潔的檔案列表概覽，適合快速瀏覽
  */
 export async function loadTaskRelatedFiles(
-  relatedFiles: RelatedFile[],
-  maxTotalLength: number = 15000 // 控制生成內容的總長度
-): Promise<{ content: string; summary: string }> {
+  relatedFiles,
+  maxTotalLength = 15000 // 控制生成內容的總長度
+) {
   if (!relatedFiles || relatedFiles.length === 0) {
     return {
       content: "",
       summary: "無相關文件",
     };
   }
-
   let totalContent = "";
   let filesSummary = `## 相關文件內容摘要 (共 ${relatedFiles.length} 個文件)\n\n`;
   let totalLength = 0;
-
   // 按文件類型優先級排序（首先處理待修改的文件）
-  const priorityOrder: Record<RelatedFileType, number> = {
+  const priorityOrder = {
     [RelatedFileType.TO_MODIFY]: 1,
     [RelatedFileType.REFERENCE]: 2,
     [RelatedFileType.DEPENDENCY]: 3,
     [RelatedFileType.OUTPUT]: 4,
     [RelatedFileType.OTHER]: 5,
   };
-
   const sortedFiles = [...relatedFiles].sort(
     (a, b) => priorityOrder[a.type] - priorityOrder[b.type]
   );
-
   // 處理每個文件
   for (const file of sortedFiles) {
     if (totalLength >= maxTotalLength) {
       filesSummary += `\n### 已達到上下文長度限制，部分文件未載入\n`;
       break;
     }
-
     // 生成文件基本資訊
     const fileInfo = generateFileInfo(file);
-
     // 添加到總內容
     const fileHeader = `\n### ${file.type}: ${file.path}${
       file.description ? ` - ${file.description}` : ""
@@ -59,21 +52,17 @@ export async function loadTaskRelatedFiles(
         ? ` (行 ${file.lineStart}-${file.lineEnd})`
         : ""
     }\n\n`;
-
     totalContent += fileHeader + "```\n" + fileInfo + "\n```\n\n";
     filesSummary += `- **${file.path}**${
       file.description ? ` - ${file.description}` : ""
     } (${fileInfo.length} 字符)\n`;
-
     totalLength += fileInfo.length + fileHeader.length + 8; // 8 for "```\n" and "\n```"
   }
-
   return {
     content: totalContent,
     summary: filesSummary,
   };
 }
-
 /**
  * 生成文件基本資訊摘要
  *
@@ -83,18 +72,15 @@ export async function loadTaskRelatedFiles(
  * @param file 相關文件物件 - 包含檔案路徑、類型、描述等基本資訊
  * @returns 格式化的檔案資訊摘要文字
  */
-function generateFileInfo(file: RelatedFile): string {
+function generateFileInfo(file) {
   let fileInfo = `檔案: ${file.path}\n`;
   fileInfo += `類型: ${file.type}\n`;
-
   if (file.description) {
     fileInfo += `描述: ${file.description}\n`;
   }
-
   if (file.lineStart && file.lineEnd) {
     fileInfo += `行範圍: ${file.lineStart}-${file.lineEnd}\n`;
   }
-
   fileInfo += `若需查看實際內容，請直接查看檔案: ${file.path}\n`;
 
   return fileInfo;
