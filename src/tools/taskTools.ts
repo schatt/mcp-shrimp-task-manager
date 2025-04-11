@@ -597,38 +597,6 @@ export async function executeTask({
   let relatedFilesSummary = "";
   let contextInfo = "";
 
-  // 查找之前執行過的相關日誌條目，增強上下文記憶
-  try {
-    const taskLogs = await getConversationEntriesByTaskId(task.id);
-    if (taskLogs.length > 0) {
-      // 按時間排序，獲取最近的日誌（最多3條）
-      const recentLogs = [...taskLogs]
-        .sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime())
-        .slice(0, 3);
-
-      if (recentLogs.length > 0) {
-        contextInfo += `\n## 任務執行歷史摘要\n\n最近 ${recentLogs.length} 條操作記錄：\n\n`;
-        recentLogs.forEach((log, index) => {
-          const timestamp = new Date(log.timestamp)
-            .toISOString()
-            .replace(/T/, " ")
-            .replace(/\..+/, "");
-          contextInfo += `${index + 1}. [${timestamp}] ${log.summary}\n`;
-        });
-
-        // 記錄日誌加載
-        await addConversationEntry(
-          ConversationParticipant.MCP,
-          `已加載任務歷史記錄，共 ${recentLogs.length} 條`,
-          task.id,
-          "加載歷史記錄"
-        );
-      }
-    }
-  } catch (error) {
-    console.error("加載任務歷史記錄時發生錯誤:", error);
-  }
-
   // 查找依賴任務的相關信息
   if (task.dependencies && task.dependencies.length > 0) {
     try {
