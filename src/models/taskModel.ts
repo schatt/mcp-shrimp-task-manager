@@ -32,7 +32,15 @@ async function ensureDataDir() {
 async function readTasks(): Promise<Task[]> {
   await ensureDataDir();
   const data = await fs.readFile(TASKS_FILE, "utf-8");
-  return JSON.parse(data).tasks;
+  const tasks = JSON.parse(data).tasks;
+
+  // 將日期字串轉換回 Date 物件
+  return tasks.map((task: any) => ({
+    ...task,
+    createdAt: task.createdAt ? new Date(task.createdAt) : new Date(),
+    updatedAt: task.updatedAt ? new Date(task.updatedAt) : new Date(),
+    completedAt: task.completedAt ? new Date(task.completedAt) : undefined,
+  }));
 }
 
 // 寫入所有任務
