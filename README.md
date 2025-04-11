@@ -10,6 +10,9 @@
 4. **執行追蹤**：監控任務執行進度和狀態
 5. **任務驗證**：確保任務符合預期要求
 6. **工作日誌**：記錄和查詢對話歷史，提供任務執行過程的完整紀錄
+7. **刪除任務**：刪除未完成狀態的任務，維護任務列表整潔
+8. **任務複雜度評估**：自動評估任務複雜度並提供處理建議
+9. **任務摘要自動更新**：完成任務時自動更新摘要，優化記憶效能
 
 ## 任務管理工作流程
 
@@ -20,9 +23,56 @@
 3. **反思構想 (reflect_task)**：批判性審查分析結果，確保方案完善
 4. **拆分任務 (split_tasks)**：將大任務拆分為小任務，建立依賴關係
 5. **列出任務 (list_tasks)**：查看所有任務及其狀態
-6. **執行任務 (execute_task)**：執行特定任務
+6. **執行任務 (execute_task)**：執行特定任務，同時評估任務複雜度
 7. **檢驗任務 (verify_task)**：檢查任務完成情況
-8. **完成任務 (complete_task)**：標記任務完成並提供報告
+8. **完成任務 (complete_task)**：標記任務完成並提供報告，更新摘要
+9. **刪除任務 (delete_task)**：刪除未完成的任務（不能刪除已完成任務）
+
+## 新增功能詳情
+
+### 刪除任務功能
+
+允許刪除未完成狀態的任務，但禁止刪除已完成的任務。系統會檢查任務狀態和依賴關係，確保安全刪除。
+
+```javascript
+// 刪除特定任務
+await mcp.mcp_shrimp_task_manager.delete_task({
+  taskId: "task-uuid-here",
+});
+```
+
+更多詳情請參閱 [API 參考文檔](docs/api-reference.md#1-刪除任務功能) 和 [使用指南](docs/usage-guide.md#1-刪除任務功能)。
+
+### 任務複雜度自適應處理
+
+系統會在執行任務時自動評估任務複雜度，並根據複雜度提供適當的處理建議。支持四個複雜度級別：低複雜度、中等複雜度、高複雜度和極高複雜度。
+
+複雜度評估基於多種指標：
+
+- 任務描述長度
+- 依賴任務數量
+- 注記長度
+
+更多詳情請參閱 [API 參考文檔](docs/api-reference.md#2-任務複雜度自適應處理) 和 [使用指南](docs/usage-guide.md#2-任務複雜度自適應處理)。
+
+### 任務摘要自動更新機制
+
+當任務完成時，系統會自動生成或使用提供的摘要信息，優化 LLM 的記憶效能。
+
+```javascript
+// 提供自定義摘要
+await mcp.mcp_shrimp_task_manager.complete_task({
+  taskId: "task-uuid-here",
+  summary: "詳細的任務完成摘要...",
+});
+
+// 或使用自動生成的摘要
+await mcp.mcp_shrimp_task_manager.complete_task({
+  taskId: "task-uuid-here",
+});
+```
+
+更多詳情請參閱 [API 參考文檔](docs/api-reference.md#3-任務摘要自動更新機制) 和 [使用指南](docs/usage-guide.md#3-任務摘要自動更新機制)。
 
 ## 工作日誌功能
 
@@ -164,6 +214,13 @@ enum ConversationParticipant {
 
 這種靈活的依賴指定方式讓您可以在同一批次創建的任務間建立依賴關係，無需預先知道任務 ID。
 
+## 文檔資源
+
+- [API 參考文檔](docs/api-reference.md)：詳細的 API 接口說明和參數列表
+- [使用指南](docs/usage-guide.md)：功能使用場景和最佳實踐
+- [示例代碼與案例](docs/examples.md)：具體使用案例和代碼示例
+- [系統架構](docs/architecture.md)：系統架構設計和數據流
+
 ## 安裝與使用
 
 ```bash
@@ -171,7 +228,7 @@ enum ConversationParticipant {
 npm install
 
 # 啟動服務
-npm start
+npm run build
 ```
 
 ## 在支援 MCP 的客戶端中使用
@@ -185,18 +242,15 @@ npm start
 
 ```json
 {
-  "mcpServers": [
-    {
-      "name": "蝦米任務管理器",
-      "id": "mcp-shrimp-task-manager",
+  "mcpServers": {
+    "shrimp-task-manager": {
       "command": "node",
-      "args": ["path/to/mcp-shrimp-task-manager/dist/index.js"],
-      "description": "任務規劃、拆分、執行和管理工具",
+      "args": ["/mcp-shrimp-task-manager/dist/index.js"],
       "env": {
-        "NODE_ENV": "production"
+        "DATA_DIR": "/mcp-shrimp-task-manager/data"
       }
     }
-  ]
+  }
 }
 ```
 
@@ -214,6 +268,9 @@ npm start
 - **執行任務**：`execute_task`
 - **檢驗任務**：`verify_task`
 - **完成任務**：`complete_task`
+- **刪除任務**：`delete_task`
+- **查詢日誌**：`list_conversation_log`
+- **清除日誌**：`clear_conversation_log`
 
 ### 使用範例
 
