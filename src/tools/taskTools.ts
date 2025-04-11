@@ -7,7 +7,9 @@ import {
   batchCreateOrUpdateTasks,
   deleteTask as modelDeleteTask,
 } from "../models/taskModel.js";
-import { TaskStatus } from "../types/index.js";
+import { TaskStatus, ConversationParticipant } from "../types/index.js";
+import { addConversationEntry } from "../models/conversationLogModel.js";
+import { extractSummary } from "../utils/summaryExtractor.js";
 
 // 開始規劃工具
 export const planTaskSchema = z.object({
@@ -24,6 +26,20 @@ export async function planTask({
   description,
   requirements,
 }: z.infer<typeof planTaskSchema>) {
+  // 記錄任務規劃開始
+  try {
+    // 使用摘要提取工具處理較長的描述
+    const descriptionSummary = extractSummary(description, 100);
+    await addConversationEntry(
+      ConversationParticipant.MCP,
+      `開始新任務規劃，描述：${descriptionSummary}`,
+      undefined,
+      "任務規劃"
+    );
+  } catch (error) {
+    console.error("記錄對話日誌時發生錯誤:", error);
+  }
+
   let prompt = `## 任務分析請求\n\n請仔細分析以下任務問題，理解其核心要求、範圍和約束條件：\n\n\`\`\`\n${description}\n\`\`\`\n\n`;
 
   if (requirements) {
@@ -68,6 +84,23 @@ export async function analyzeTask({
   initialConcept,
   previousAnalysis,
 }: z.infer<typeof analyzeTaskSchema>) {
+  // 記錄任務分析
+  try {
+    // 使用摘要提取工具處理較長的概念描述
+    const conceptSummary = extractSummary(initialConcept, 100);
+    await addConversationEntry(
+      ConversationParticipant.MCP,
+      `開始分析任務：${extractSummary(
+        summary,
+        100
+      )}，初步概念：${conceptSummary}`,
+      undefined,
+      "任務分析"
+    );
+  } catch (error) {
+    console.error("記錄對話日誌時發生錯誤:", error);
+  }
+
   let prompt = `## 代碼庫分析任務\n\n### 任務摘要\n\`\`\`\n${summary}\n\`\`\`\n\n已收到您的初步解答構想：\n\n\`\`\`\n${initialConcept}\n\`\`\`\n\n`;
 
   prompt += `## 技術審核指引\n\n請執行以下分析步驟：\n\n1. 檢查現有程式碼庫中的相似實現或可重用組件
@@ -107,6 +140,23 @@ export async function reflectTask({
   summary,
   analysis,
 }: z.infer<typeof reflectTaskSchema>) {
+  // 記錄任務反思
+  try {
+    // 使用摘要提取工具處理較長的分析
+    const analysisSummary = extractSummary(analysis, 100);
+    await addConversationEntry(
+      ConversationParticipant.MCP,
+      `開始反思任務解決方案：${extractSummary(
+        summary,
+        50
+      )}，分析：${analysisSummary}`,
+      undefined,
+      "任務反思"
+    );
+  } catch (error) {
+    console.error("記錄對話日誌時發生錯誤:", error);
+  }
+
   const prompt = `## 解決方案反思與評估\n\n### 任務摘要\n\`\`\`\n${summary}\n\`\`\`\n\n### 詳細分析結果\n\`\`\`\n${analysis}\n\`\`\`\n\n## 批判性評估指引\n\n請從以下多個維度對您的解決方案進行全面且批判性的審查：\n\n### 1. 技術完整性評估\n- 方案是否存在技術缺陷或邏輯漏洞？
 - 是否考慮了邊緣情況和異常處理？
 - 所有數據流和控制流是否清晰定義？
@@ -166,8 +216,35 @@ export async function splitTasks({
   isOverwrite,
   tasks,
 }: z.infer<typeof splitTasksSchema>) {
+  // 記錄任務拆分
+  try {
+    await addConversationEntry(
+      ConversationParticipant.MCP,
+      `拆分任務：${isOverwrite ? "覆蓋模式" : "新增模式"}，任務數量：${
+        tasks.length
+      }`,
+      undefined,
+      "任務拆分"
+    );
+  } catch (error) {
+    console.error("記錄對話日誌時發生錯誤:", error);
+  }
+
   // 批量創建任務
   const createdTasks = await batchCreateOrUpdateTasks(tasks, isOverwrite);
+
+  // 記錄任務創建成功
+  try {
+    const taskNames = createdTasks.map((task) => task.name).join(", ");
+    await addConversationEntry(
+      ConversationParticipant.MCP,
+      `成功創建任務：${taskNames}`,
+      undefined,
+      "任務創建"
+    );
+  } catch (error) {
+    console.error("記錄對話日誌時發生錯誤:", error);
+  }
 
   // 獲取所有任務，用於顯示完整的依賴關係
   const allTasks = await getAllTasks();
@@ -229,6 +306,18 @@ export async function splitTasks({
 
 // 列出任務工具
 export async function listTasks() {
+  // 記錄查詢任務列表
+  try {
+    await addConversationEntry(
+      ConversationParticipant.MCP,
+      "查詢所有任務列表",
+      undefined,
+      "任務列表查詢"
+    );
+  } catch (error) {
+    console.error("記錄對話日誌時發生錯誤:", error);
+  }
+
   const tasks = await getAllTasks();
 
   if (tasks.length === 0) {
@@ -316,6 +405,18 @@ export async function executeTask({
   const task = await getTaskById(taskId);
 
   if (!task) {
+    // 記錄錯誤日誌
+    try {
+      await addConversationEntry(
+        ConversationParticipant.MCP,
+        `執行任務失敗：找不到ID為 ${taskId} 的任務`,
+        undefined,
+        "錯誤"
+      );
+    } catch (error) {
+      console.error("記錄對話日誌時發生錯誤:", error);
+    }
+
     return {
       content: [
         {
@@ -328,6 +429,18 @@ export async function executeTask({
   }
 
   if (task.status === TaskStatus.COMPLETED) {
+    // 記錄已完成任務的嘗試執行
+    try {
+      await addConversationEntry(
+        ConversationParticipant.MCP,
+        `嘗試執行已完成的任務：${task.name} (ID: ${task.id})`,
+        task.id,
+        "狀態通知"
+      );
+    } catch (error) {
+      console.error("記錄對話日誌時發生錯誤:", error);
+    }
+
     return {
       content: [
         {
@@ -352,6 +465,18 @@ export async function executeTask({
         : `ID: \`${id}\``;
     });
 
+    // 記錄任務被阻擋的情況
+    try {
+      await addConversationEntry(
+        ConversationParticipant.MCP,
+        `任務 ${task.name} (ID: ${task.id}) 被依賴阻擋，等待完成的依賴任務數量: ${blockedBy.length}`,
+        task.id,
+        "依賴阻擋"
+      );
+    } catch (error) {
+      console.error("記錄對話日誌時發生錯誤:", error);
+    }
+
     return {
       content: [
         {
@@ -369,6 +494,18 @@ export async function executeTask({
 
   // 更新任務狀態為進行中
   await updateTaskStatus(taskId, TaskStatus.IN_PROGRESS);
+
+  // 記錄任務開始執行
+  try {
+    await addConversationEntry(
+      ConversationParticipant.MCP,
+      `開始執行任務：${task.name} (ID: ${task.id})`,
+      task.id,
+      "任務啟動"
+    );
+  } catch (error) {
+    console.error("記錄對話日誌時發生錯誤:", error);
+  }
 
   const prompt = `## 任務執行指示\n\n### 任務詳情\n\n- **名稱:** ${
     task.name
@@ -408,6 +545,18 @@ export async function verifyTask({ taskId }: z.infer<typeof verifyTaskSchema>) {
   const task = await getTaskById(taskId);
 
   if (!task) {
+    // 記錄錯誤日誌
+    try {
+      await addConversationEntry(
+        ConversationParticipant.MCP,
+        `驗證任務失敗：找不到ID為 ${taskId} 的任務`,
+        undefined,
+        "錯誤"
+      );
+    } catch (error) {
+      console.error("記錄對話日誌時發生錯誤:", error);
+    }
+
     return {
       content: [
         {
@@ -420,6 +569,18 @@ export async function verifyTask({ taskId }: z.infer<typeof verifyTaskSchema>) {
   }
 
   if (task.status !== TaskStatus.IN_PROGRESS) {
+    // 記錄狀態錯誤
+    try {
+      await addConversationEntry(
+        ConversationParticipant.MCP,
+        `驗證任務狀態錯誤：任務 ${task.name} (ID: ${task.id}) 當前狀態為 ${task.status}，不處於進行中狀態`,
+        task.id,
+        "狀態錯誤"
+      );
+    } catch (error) {
+      console.error("記錄對話日誌時發生錯誤:", error);
+    }
+
     return {
       content: [
         {
@@ -429,6 +590,18 @@ export async function verifyTask({ taskId }: z.infer<typeof verifyTaskSchema>) {
       ],
       isError: true,
     };
+  }
+
+  // 記錄開始驗證
+  try {
+    await addConversationEntry(
+      ConversationParticipant.MCP,
+      `開始驗證任務：${task.name} (ID: ${task.id})`,
+      task.id,
+      "任務驗證"
+    );
+  } catch (error) {
+    console.error("記錄對話日誌時發生錯誤:", error);
   }
 
   const prompt = `## 任務驗證評估\n\n### 任務資料\n\n- **名稱:** ${
@@ -476,6 +649,18 @@ export async function completeTask({
   const task = await getTaskById(taskId);
 
   if (!task) {
+    // 記錄錯誤日誌
+    try {
+      await addConversationEntry(
+        ConversationParticipant.MCP,
+        `完成任務失敗：找不到ID為 ${taskId} 的任務`,
+        undefined,
+        "錯誤"
+      );
+    } catch (error) {
+      console.error("記錄對話日誌時發生錯誤:", error);
+    }
+
     return {
       content: [
         {
@@ -488,6 +673,18 @@ export async function completeTask({
   }
 
   if (task.status !== TaskStatus.IN_PROGRESS) {
+    // 記錄狀態錯誤
+    try {
+      await addConversationEntry(
+        ConversationParticipant.MCP,
+        `完成任務狀態錯誤：任務 ${task.name} (ID: ${task.id}) 當前狀態為 ${task.status}，不是進行中狀態`,
+        task.id,
+        "狀態錯誤"
+      );
+    } catch (error) {
+      console.error("記錄對話日誌時發生錯誤:", error);
+    }
+
     return {
       content: [
         {
@@ -501,6 +698,18 @@ export async function completeTask({
 
   // 更新任務狀態為已完成
   await updateTaskStatus(taskId, TaskStatus.COMPLETED);
+
+  // 記錄任務完成
+  try {
+    await addConversationEntry(
+      ConversationParticipant.MCP,
+      `任務成功完成：${task.name} (ID: ${task.id})`,
+      task.id,
+      "任務完成"
+    );
+  } catch (error) {
+    console.error("記錄對話日誌時發生錯誤:", error);
+  }
 
   const prompt = `## 任務完成確認\n\n任務 "${task.name}" (ID: \`${
     task.id
@@ -527,6 +736,18 @@ export async function deleteTask({ taskId }: z.infer<typeof deleteTaskSchema>) {
   const task = await getTaskById(taskId);
 
   if (!task) {
+    // 記錄錯誤日誌
+    try {
+      await addConversationEntry(
+        ConversationParticipant.MCP,
+        `刪除任務失敗：找不到ID為 ${taskId} 的任務`,
+        undefined,
+        "錯誤"
+      );
+    } catch (error) {
+      console.error("記錄對話日誌時發生錯誤:", error);
+    }
+
     return {
       content: [
         {
@@ -539,6 +760,18 @@ export async function deleteTask({ taskId }: z.infer<typeof deleteTaskSchema>) {
   }
 
   if (task.status === TaskStatus.COMPLETED) {
+    // 記錄操作被拒絕
+    try {
+      await addConversationEntry(
+        ConversationParticipant.MCP,
+        `刪除操作被拒絕：嘗試刪除已完成的任務 ${task.name} (ID: ${task.id})`,
+        task.id,
+        "操作被拒絕"
+      );
+    } catch (error) {
+      console.error("記錄對話日誌時發生錯誤:", error);
+    }
+
     return {
       content: [
         {
@@ -550,7 +783,33 @@ export async function deleteTask({ taskId }: z.infer<typeof deleteTaskSchema>) {
     };
   }
 
+  // 記錄要刪除的任務
+  try {
+    await addConversationEntry(
+      ConversationParticipant.MCP,
+      `正在刪除任務：${task.name} (ID: ${task.id})`,
+      task.id,
+      "任務刪除"
+    );
+  } catch (error) {
+    console.error("記錄對話日誌時發生錯誤:", error);
+  }
+
   const result = await modelDeleteTask(taskId);
+
+  // 記錄刪除結果
+  try {
+    await addConversationEntry(
+      ConversationParticipant.MCP,
+      `任務刪除${result.success ? "成功" : "失敗"}：${task.name} (ID: ${
+        task.id
+      })，原因：${result.message}`,
+      result.success ? undefined : task.id,
+      result.success ? "任務刪除成功" : "任務刪除失敗"
+    );
+  } catch (error) {
+    console.error("記錄對話日誌時發生錯誤:", error);
+  }
 
   return {
     content: [

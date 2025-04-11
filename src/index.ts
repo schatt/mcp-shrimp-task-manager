@@ -23,6 +23,14 @@ import {
   deleteTaskSchema,
 } from "./tools/taskTools.js";
 
+// 導入日誌工具函數
+import {
+  listConversationLog,
+  listConversationLogSchema,
+  clearConversationLog,
+  clearConversationLogSchema,
+} from "./tools/logTools.js";
+
 // 導入提示模板
 import {
   planTaskPrompt,
@@ -196,6 +204,54 @@ async function main() {
       },
       async (args) => {
         return await deleteTask(args);
+      }
+    );
+
+    // 註冊日誌查詢工具
+    server.tool(
+      "list_conversation_log",
+      "查詢系統對話日誌，支持按任務 ID 或時間範圍過濾，提供分頁功能處理大量記錄",
+      {
+        taskId: z
+          .string()
+          .optional()
+          .describe("按任務 ID 過濾對話記錄（選填）"),
+        startDate: z
+          .string()
+          .optional()
+          .describe("起始日期過濾，格式為 ISO 日期字串（選填）"),
+        endDate: z
+          .string()
+          .optional()
+          .describe("結束日期過濾，格式為 ISO 日期字串（選填）"),
+        limit: z
+          .number()
+          .int()
+          .positive()
+          .max(100)
+          .default(20)
+          .describe("返回結果數量限制，最大 100（預設：20）"),
+        offset: z
+          .number()
+          .int()
+          .nonnegative()
+          .default(0)
+          .describe("分頁偏移量（預設：0）"),
+      },
+      async (args) => {
+        return await listConversationLog(args);
+      }
+    );
+
+    // 註冊日誌清除工具
+    server.tool(
+      "clear_conversation_log",
+      "清除所有對話日誌記錄，需要明確確認以避免意外操作",
+      {
+        confirm: z.boolean().describe("確認刪除所有日誌記錄（此操作不可逆）"),
+      },
+      async (args) => {
+        return await clearConversationLog(args);
       }
     );
 

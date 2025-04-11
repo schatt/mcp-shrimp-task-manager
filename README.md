@@ -9,6 +9,7 @@
 3. **依賴管理**：處理任務間的依賴關係，確保正確的執行順序
 4. **執行追蹤**：監控任務執行進度和狀態
 5. **任務驗證**：確保任務符合預期要求
+6. **工作日誌**：記錄和查詢對話歷史，提供任務執行過程的完整紀錄
 
 ## 任務管理工作流程
 
@@ -22,6 +23,123 @@
 6. **執行任務 (execute_task)**：執行特定任務
 7. **檢驗任務 (verify_task)**：檢查任務完成情況
 8. **完成任務 (complete_task)**：標記任務完成並提供報告
+
+## 工作日誌功能
+
+### 功能概述
+
+工作日誌系統記錄 MCP 與 LLM 之間的關鍵對話內容，主要目的是：
+
+1. **保存執行脈絡**：記錄任務執行過程中的關鍵決策和事件
+2. **提供可追溯性**：方便回溯查看歷史操作和決策理由
+3. **知識累積**：積累經驗知識，避免重複解決相同問題
+4. **效能分析**：提供數據支持，幫助分析系統效能和改進方向
+
+系統會自動在以下關鍵時刻記錄日誌：
+
+- 任務執行開始時
+- 關鍵決策點
+- 任務驗證過程中
+- 任務完成時
+
+### 如何使用日誌查詢工具
+
+系統提供兩個主要的日誌管理工具：
+
+#### 1. 查詢日誌 (list_conversation_log)
+
+```javascript
+const logResult = await mcp.mcp_shrimp_task_manager.list_conversation_log({
+  taskId: "任務ID", // 選填，按特定任務過濾
+  startDate: "2025-01-01T00:00:00Z", // 選填，開始日期（ISO格式）
+  endDate: "2025-12-31T23:59:59Z", // 選填，結束日期（ISO格式）
+  limit: 20, // 選填，每頁顯示數量，預設20，最大100
+  offset: 0, // 選填，分頁起始位置，預設0
+});
+```
+
+參數說明：
+
+- `taskId`：按任務 ID 過濾日誌
+- `startDate`：查詢開始日期，ISO 格式字串
+- `endDate`：查詢結束日期，ISO 格式字串
+- `limit`：每頁顯示的記錄數量，預設 20，最大 100
+- `offset`：分頁偏移量，用於實現分頁查詢
+
+#### 2. 清除日誌 (clear_conversation_log)
+
+```javascript
+const clearResult = await mcp.mcp_shrimp_task_manager.clear_conversation_log({
+  confirm: true, // 必填，確認刪除操作
+});
+```
+
+注意：清除操作不可逆，請謹慎使用。
+
+### 日誌數據結構
+
+工作日誌的核心數據結構為 `ConversationEntry`：
+
+```typescript
+interface ConversationEntry {
+  id: string; // 唯一識別符
+  timestamp: Date; // 記錄時間
+  participant: ConversationParticipant; // 對話參與者（MCP或LLM）
+  summary: string; // 消息摘要，僅記錄關鍵信息
+  relatedTaskId?: string; // 關聯的任務ID（選填）
+  context?: string; // 額外上下文信息（選填）
+}
+
+enum ConversationParticipant {
+  MCP = "MCP", // 系統方
+  LLM = "LLM", // 模型方
+}
+```
+
+日誌以 JSON 格式存儲在 `data/conversation_log.json` 文件中，當記錄數量超過閾值時，系統會自動將舊日誌歸檔並創建新的日誌文件。
+
+### 開發者指南：擴展或修改日誌功能
+
+#### 關鍵文件
+
+1. **類型定義**：`src/types/index.ts`
+
+   - 包含 `ConversationEntry` 和 `ConversationParticipant` 等核心類型定義
+
+2. **模型層**：`src/models/conversationLogModel.ts`
+
+   - 包含所有日誌相關的數據操作函數
+   - 日誌文件的讀寫、查詢、歸檔等功能
+
+3. **工具層**：`src/tools/logTools.ts`
+
+   - 提供給外部調用的日誌工具函數
+   - 實現格式化輸出和參數處理
+
+4. **摘要提取**：`src/utils/summaryExtractor.ts`
+   - 從完整對話中提取關鍵信息的工具
+   - 使用關鍵詞匹配和重要性評分算法
+
+#### 如何擴展
+
+1. **添加新的日誌查詢方式**
+
+   - 在 `conversationLogModel.ts` 中添加新的查詢函數
+   - 在 `logTools.ts` 中創建相應的工具函數
+   - 在 `index.ts` 中註冊新工具
+
+2. **修改日誌存儲方式**
+
+   - 日誌默認以 JSON 文件形式存儲，可修改 `conversationLogModel.ts` 改用數據庫存儲
+   - 同時更新相關的讀寫函數
+
+3. **優化摘要提取算法**
+
+   - 可在 `summaryExtractor.ts` 中增強或替換摘要提取算法
+   - 考慮添加基於機器學習的摘要方法
+
+4. **添加新的日誌觸發點**
+   - 在關鍵流程中調用 `addConversationEntry` 函數添加新的日誌記錄點
 
 ## 任務依賴關係
 
