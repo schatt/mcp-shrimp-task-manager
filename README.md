@@ -237,7 +237,11 @@ npm run build
 
 ### 在 Cursor IDE 中配置
 
-1. 打開 Cursor IDE 的設定檔案（通常位於 `~/.cursor/settings.json`）
+蝦米任務管理器提供兩種配置方式：全局配置和專案特定配置。
+
+#### 全局配置
+
+1. 打開 Cursor IDE 的全局設定檔案（通常位於 `~/.cursor/settings.json`）
 2. 在 `mcpServers` 部分添加蝦米任務管理器的配置
 
 ```json
@@ -254,7 +258,32 @@ npm run build
 }
 ```
 
-請將 `path/to/mcp-shrimp-task-manager` 替換為實際的路徑。
+請將 `/mcp-shrimp-task-manager` 替換為實際的路徑。
+
+#### 專案特定配置
+
+您也可以在每個專案中設定專屬的配置，這樣能夠針對不同專案使用不同的數據目錄：
+
+1. 在專案根目錄創建 `.cursor` 目錄
+2. 在該目錄下創建 `mcp.json` 文件，內容如下：
+
+```json
+{
+  "mcpServers": {
+    "shrimp-task-manager": {
+      "command": "node",
+      "args": ["/path/to/mcp-shrimp-task-manager/dist/index.js"],
+      "env": {
+        "DATA_DIR": "./data" // 使用相對路徑，指向專案內的數據目錄
+      }
+    }
+  }
+}
+```
+
+**DATA_DIR 參數**是蝦米任務管理器存儲任務數據、對話記錄等信息的目錄，正確設置此參數對於系統的正常運行至關重要。
+
+更多關於專案特定配置的詳細說明和最佳實踐，請參閱[使用指南：專案特定配置](docs/usage-guide.md#project-specific-configuration)。
 
 ### 可用的工具
 
