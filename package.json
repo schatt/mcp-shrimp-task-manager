@@ -1,0 +1,32 @@
+{
+  "name": "mcp-shrimp-task-manager",
+  "version": "1.0.0",
+  "description": "基於MCP的任務管理系統，提供任務規劃、拆分和管理功能",
+  "main": "dist/index.js",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "dev": "ts-node --esm src/index.ts",
+    "start": "node dist/index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "mcp",
+    "task-manager",
+    "agent",
+    "workflow"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.0",
+    "uuid": "^9.0.1",
+    "zod": "^3.22.4"
+  },
+  "devDependencies": {
+    "@types/node": "^20.8.2",
+    "@types/uuid": "^9.0.6",
+    "ts-node": "^10.9.1",
+    "typescript": "^5.2.2"
+  }
+}
