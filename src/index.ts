@@ -38,16 +38,6 @@ import {
   clearConversationLogSchema,
 } from "./tools/logTools.js";
 
-// 導入提示模板
-import {
-  planTaskPrompt,
-  planTaskPromptSchema,
-  executeTaskPrompt,
-  executeTaskPromptSchema,
-  verifyTaskPrompt,
-  verifyTaskPromptSchema,
-} from "./prompts/taskPrompts.js";
-
 async function main() {
   try {
     console.log("啟動蝦米任務管理器服務...");
@@ -391,57 +381,6 @@ async function main() {
       },
       async (args) => {
         return await clearConversationLog(args);
-      }
-    );
-
-    // 註冊提示 - 使用同樣的錯誤處理模式
-    server.prompt(
-      "plan_task_prompt",
-      "生成結構化的新任務規劃，包含明確目標、評估標準與執行步驟",
-      {
-        taskType: z
-          .string()
-          .describe("任務類型，例如 'bug修復'、'功能開發'、'性能優化'等"),
-        description: z
-          .string()
-          .describe("完整詳細的任務問題描述，包含任務背景和目標"),
-        codeContext: z
-          .string()
-          .optional()
-          .describe("相關代碼片段或文件路徑（選填）"),
-      },
-      async (args) => {
-        return await planTaskPrompt(args);
-      }
-    );
-
-    server.prompt(
-      "execute_task_prompt",
-      "提供執行特定任務的詳細指南，包含所有必要上下文與技術細節",
-      {
-        taskId: z.string().describe("待執行任務的唯一標識符"),
-        additionalContext: z
-          .string()
-          .optional()
-          .describe("執行任務時需要參考的額外信息（選填）"),
-      },
-      async (args) => {
-        return await executeTaskPrompt(args);
-      }
-    );
-
-    server.prompt(
-      "verify_task_prompt",
-      "生成全面的任務驗證標準與檢查清單，確保質量與完整性",
-      {
-        taskId: z.string().describe("待驗證任務的唯一標識符"),
-        verificationFocus: z
-          .string()
-          .optional()
-          .describe("特別需要關注的驗證方向，如'安全性'、'性能'等（選填）"),
-      },
-      async (args) => {
-        return await verifyTaskPrompt(args);
       }
     );
 
