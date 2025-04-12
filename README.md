@@ -1,237 +1,49 @@
 # MCP 蝦米任務管理器
 
-基於 Model Context Protocol (MCP)的任務管理系統，幫助 Agent 有效管理和執行任務。
+> 🚀 基於 Model Context Protocol (MCP) 的智能任務管理系統，為 AI Agent 提供高效的程式開發工作流程框架。
 
-## 功能特點
+蝦米任務管理器透過結構化的工作流程引導，協助 Agent 系統性規劃程式開發步驟，強化任務記憶管理機制，有效避免冗餘與重複的編程工作。
 
-1. **任務規劃與分析**：幫助 Agent 理解和分析複雜任務
-2. **任務拆分**：將大型任務拆分為可管理的小任務
-3. **依賴管理**：處理任務間的依賴關係，確保正確的執行順序
-4. **執行追蹤**：監控任務執行進度和狀態
-5. **任務驗證**：確保任務符合預期要求
-6. **工作日誌**：記錄和查詢對話歷史，提供任務執行過程的完整紀錄
-7. **刪除任務**：刪除未完成狀態的任務，維護任務列表整潔
-8. **任務複雜度評估**：自動評估任務複雜度並提供處理建議
-9. **任務摘要自動更新**：完成任務時自動更新摘要，優化記憶效能
+## ✨ 功能特點
 
-## 任務管理工作流程
+- **任務規劃與分析**：深入理解與分析複雜任務需求
+- **智能任務拆分**：將大型任務自動拆分為可管理的小型任務
+- **依賴關係管理**：精確處理任務間的依賴關係，確保正確的執行順序
+- **執行狀態追蹤**：即時監控任務執行進度和狀態
+- **任務完整性驗證**：確保任務成果符合預期要求
+- **完整工作日誌**：記錄和查詢對話歷史，提供任務執行過程的完整紀錄
+- **任務複雜度評估**：自動評估任務複雜度並提供最佳處理建議
+- **任務摘要自動更新**：完成任務時自動產生摘要，優化記憶效能
 
-本系統提供了完整的任務工作流程：
+## 🔄 任務管理工作流程
 
-1. **開始規劃 (plan_task)**：分析任務問題，確定任務範圍
-2. **分析問題 (analyze_task)**：深入分析，檢查現有代碼庫避免重複
-3. **反思構想 (reflect_task)**：批判性審查分析結果，確保方案完善
-4. **拆分任務 (split_tasks)**：將大任務拆分為小任務，建立依賴關係
-5. **列出任務 (list_tasks)**：查看所有任務及其狀態
-6. **執行任務 (execute_task)**：執行特定任務，同時評估任務複雜度
-7. **檢驗任務 (verify_task)**：檢查任務完成情況
-8. **完成任務 (complete_task)**：標記任務完成並提供報告，更新摘要
-9. **刪除任務 (delete_task)**：刪除未完成的任務（不能刪除已完成任務）
+本系統提供完整的任務管理生命週期：
 
-## 新增功能詳情
+1. **開始規劃** `plan_task`：分析任務問題，確定需求範圍
+2. **深入分析** `analyze_task`：檢查現有代碼庫避免重複工作
+3. **方案反思** `reflect_task`：批判性審查分析結果，確保方案完善
+4. **任務拆分** `split_tasks`：將複雜任務分解為小型任務，建立明確依賴關係
+5. **任務列表** `list_tasks`：查看所有任務及其執行狀態
+6. **執行任務** `execute_task`：執行特定任務，同時評估複雜度
+7. **結果檢驗** `verify_task`：全面檢查任務完成情況
+8. **任務完成** `complete_task`：標記任務完成並生成報告，自動更新摘要
+9. **任務管理** `delete_task`：管理未完成的任務（已完成任務將保留在系統中）
 
-### 刪除任務功能
+## 📚 文件資源
 
-允許刪除未完成狀態的任務，但禁止刪除已完成的任務。系統會檢查任務狀態和依賴關係，確保安全刪除。
+- [系統架構](docs/architecture.md)：詳細的系統設計與數據流說明
 
-```javascript
-// 刪除特定任務
-await mcp.mcp_shrimp_task_manager.delete_task({
-  taskId: "task-uuid-here",
-});
-```
-
-更多詳情請參閱 [API 參考文檔](docs/api-reference.md#1-刪除任務功能) 和 [使用指南](docs/usage-guide.md#1-刪除任務功能)。
-
-### 任務複雜度自適應處理
-
-系統會在執行任務時自動評估任務複雜度，並根據複雜度提供適當的處理建議。支持四個複雜度級別：低複雜度、中等複雜度、高複雜度和極高複雜度。
-
-複雜度評估基於多種指標：
-
-- 任務描述長度
-- 依賴任務數量
-- 注記長度
-
-更多詳情請參閱 [API 參考文檔](docs/api-reference.md#2-任務複雜度自適應處理) 和 [使用指南](docs/usage-guide.md#2-任務複雜度自適應處理)。
-
-### 任務摘要自動更新機制
-
-當任務完成時，系統會自動生成或使用提供的摘要信息，優化 LLM 的記憶效能。
-
-```javascript
-// 提供自定義摘要
-await mcp.mcp_shrimp_task_manager.complete_task({
-  taskId: "task-uuid-here",
-  summary: "詳細的任務完成摘要...",
-});
-
-// 或使用自動生成的摘要
-await mcp.mcp_shrimp_task_manager.complete_task({
-  taskId: "task-uuid-here",
-});
-```
-
-更多詳情請參閱 [API 參考文檔](docs/api-reference.md#3-任務摘要自動更新機制) 和 [使用指南](docs/usage-guide.md#3-任務摘要自動更新機制)。
-
-## 工作日誌功能
-
-### 功能概述
-
-工作日誌系統記錄 MCP 與 LLM 之間的關鍵對話內容，主要目的是：
-
-1. **保存執行脈絡**：記錄任務執行過程中的關鍵決策和事件
-2. **提供可追溯性**：方便回溯查看歷史操作和決策理由
-3. **知識累積**：積累經驗知識，避免重複解決相同問題
-4. **效能分析**：提供數據支持，幫助分析系統效能和改進方向
-
-系統會自動在以下關鍵時刻記錄日誌：
-
-- 任務執行開始時
-- 關鍵決策點
-- 任務驗證過程中
-- 任務完成時
-
-### 如何使用日誌查詢工具
-
-系統提供兩個主要的日誌管理工具：
-
-#### 1. 查詢日誌 (list_conversation_log)
-
-```javascript
-const logResult = await mcp.mcp_shrimp_task_manager.list_conversation_log({
-  taskId: "任務ID", // 選填，按特定任務過濾
-  startDate: "2025-01-01T00:00:00Z", // 選填，開始日期（ISO格式）
-  endDate: "2025-12-31T23:59:59Z", // 選填，結束日期（ISO格式）
-  limit: 20, // 選填，每頁顯示數量，預設20，最大100
-  offset: 0, // 選填，分頁起始位置，預設0
-});
-```
-
-參數說明：
-
-- `taskId`：按任務 ID 過濾日誌
-- `startDate`：查詢開始日期，ISO 格式字串
-- `endDate`：查詢結束日期，ISO 格式字串
-- `limit`：每頁顯示的記錄數量，預設 20，最大 100
-- `offset`：分頁偏移量，用於實現分頁查詢
-
-#### 2. 清除日誌 (clear_conversation_log)
-
-```javascript
-const clearResult = await mcp.mcp_shrimp_task_manager.clear_conversation_log({
-  confirm: true, // 必填，確認刪除操作
-});
-```
-
-注意：清除操作不可逆，請謹慎使用。
-
-### 日誌數據結構
-
-工作日誌的核心數據結構為 `ConversationEntry`：
-
-```typescript
-interface ConversationEntry {
-  id: string; // 唯一識別符
-  timestamp: Date; // 記錄時間
-  participant: ConversationParticipant; // 對話參與者（MCP或LLM）
-  summary: string; // 消息摘要，僅記錄關鍵信息
-  relatedTaskId?: string; // 關聯的任務ID（選填）
-  context?: string; // 額外上下文信息（選填）
-}
-
-enum ConversationParticipant {
-  MCP = "MCP", // 系統方
-  LLM = "LLM", // 模型方
-}
-```
-
-日誌以 JSON 格式存儲在 `data/conversation_log.json` 文件中，當記錄數量超過閾值時，系統會自動將舊日誌歸檔並創建新的日誌文件。
-
-### 開發者指南：擴展或修改日誌功能
-
-#### 關鍵文件
-
-1. **類型定義**：`src/types/index.ts`
-
-   - 包含 `ConversationEntry` 和 `ConversationParticipant` 等核心類型定義
-
-2. **模型層**：`src/models/conversationLogModel.ts`
-
-   - 包含所有日誌相關的數據操作函數
-   - 日誌文件的讀寫、查詢、歸檔等功能
-
-3. **工具層**：`src/tools/logTools.ts`
-
-   - 提供給外部調用的日誌工具函數
-   - 實現格式化輸出和參數處理
-
-4. **摘要提取**：`src/utils/summaryExtractor.ts`
-   - 從完整對話中提取關鍵信息的工具
-   - 使用關鍵詞匹配和重要性評分算法
-
-#### 如何擴展
-
-1. **添加新的日誌查詢方式**
-
-   - 在 `conversationLogModel.ts` 中添加新的查詢函數
-   - 在 `logTools.ts` 中創建相應的工具函數
-   - 在 `index.ts` 中註冊新工具
-
-2. **修改日誌存儲方式**
-
-   - 日誌默認以 JSON 文件形式存儲，可修改 `conversationLogModel.ts` 改用數據庫存儲
-   - 同時更新相關的讀寫函數
-
-3. **優化摘要提取算法**
-
-   - 可在 `summaryExtractor.ts` 中增強或替換摘要提取算法
-   - 考慮添加基於機器學習的摘要方法
-
-4. **添加新的日誌觸發點**
-   - 在關鍵流程中調用 `addConversationEntry` 函數添加新的日誌記錄點
-
-## 任務依賴關係
-
-系統支持兩種方式指定任務依賴：
-
-1. **通過任務名稱**（推薦）：使用任務名稱直接引用依賴任務，更直觀易讀
-
-   ```json
-   {
-     "name": "實現前端表單",
-     "dependencies": ["設計UI界面", "定義API規格"]
-   }
-   ```
-
-2. **通過任務 ID**：使用任務的唯一標識符，適用於需要精確引用的場景
-   ```json
-   {
-     "name": "部署應用",
-     "dependencies": ["a1b2c3d4-e5f6-g7h8-i9j0-k1l2m3n4o5p6"]
-   }
-   ```
-
-這種靈活的依賴指定方式讓您可以在同一批次創建的任務間建立依賴關係，無需預先知道任務 ID。
-
-## 文檔資源
-
-- [API 參考文檔](docs/api-reference.md)：詳細的 API 接口說明和參數列表
-- [使用指南](docs/usage-guide.md)：功能使用場景和最佳實踐
-- [示例代碼與案例](docs/examples.md)：具體使用案例和代碼示例
-- [系統架構](docs/architecture.md)：系統架構設計和數據流
-
-## 安裝與使用
+## 🔧 安裝與使用
 
 ```bash
-# 安裝依賴
+# 安裝依賴套件
 npm install
 
-# 啟動服務
+# 建置並啟動服務
 npm run build
 ```
 
-## 在支援 MCP 的客戶端中使用
+## 🔌 在支援 MCP 的客戶端中使用
 
 蝦米任務管理器可以與任何支援 Model Context Protocol 的客戶端一起使用，例如 Cursor IDE。
 
@@ -241,8 +53,8 @@ npm run build
 
 #### 全局配置
 
-1. 打開 Cursor IDE 的全局設定檔案（通常位於 `~/.cursor/mcp.json`）
-2. 在 `mcpServers` 部分添加蝦米任務管理器的配置
+1. 開啟 Cursor IDE 的全局設定檔案（通常位於 `~/.cursor/mcp.json`）
+2. 在 `mcpServers` 區段中添加以下配置：
 
 ```json
 {
@@ -258,11 +70,11 @@ npm run build
 }
 ```
 
-請將 `/mcp-shrimp-task-manager` 替換為實際的路徑。
+> ⚠️ 請將 `/mcp-shrimp-task-manager` 替換為您的實際路徑。
 
 #### 專案特定配置
 
-您也可以在每個專案中設定專屬的配置，這樣能夠針對不同專案使用不同的數據目錄：
+您也可以為每個專案設定專屬配置，以便針對不同專案使用獨立的數據目錄：
 
 1. 在專案根目錄創建 `.cursor` 目錄
 2. 在該目錄下創建 `mcp.json` 文件，內容如下：
@@ -281,74 +93,72 @@ npm run build
 }
 ```
 
-**DATA_DIR 參數**是蝦米任務管理器存儲任務數據、對話記錄等信息的目錄，正確設置此參數對於系統的正常運行至關重要。此參數必須使用絕對路徑，使用相對路徑可能導致系統無法正確定位數據目錄，造成數據丟失或功能失效。
+### ⚠️ 重要配置說明
 
-> **警告**：DATA_DIR 參數僅支援絕對路徑設置。使用相對路徑可能導致以下問題：
+**DATA_DIR 參數**是蝦米任務管理器存儲任務數據、對話記錄等信息的目錄，正確設置此參數對於系統的正常運行至關重要。此參數必須使用**絕對路徑**，使用相對路徑可能導致系統無法正確定位數據目錄，造成數據丟失或功能失效。
+
+> **警告**：使用相對路徑可能導致以下問題：
 >
 > - 數據檔案找不到，導致系統初始化失敗
 > - 任務狀態丟失或無法正確保存
 > - 應用程式在不同環境下行為不一致
 > - 系統崩潰或無法啟動
 
-更多關於專案特定配置的詳細說明和最佳實踐，請參閱[使用指南：專案特定配置](docs/usage-guide.md#project-specific-configuration)。
+## 💡 系統提示詞指導
 
-### 可用的工具
+### Cursor IDE 配置
 
-在 Cursor IDE 中，配置完成後，您可以使用以下工具：
+您可以啟用 Cursor Settings => Features => Custom modes 功能，並配置以下兩個模式：
 
-- **開始規劃**：`plan_task`
-- **分析問題**：`analyze_task`
-- **反思構想**：`reflect_task`
-- **拆分任務**：`split_tasks`
-- **列出任務**：`list_tasks`
-- **執行任務**：`execute_task`
-- **檢驗任務**：`verify_task`
-- **完成任務**：`complete_task`
-- **刪除任務**：`delete_task`
-- **查詢日誌**：`list_conversation_log`
-- **清除日誌**：`clear_conversation_log`
+#### TaskPlanner 模式
 
-### 使用範例
-
-在 Cursor IDE 中，您可以這樣使用蝦米任務管理器：
-
-```javascript
-// 開始規劃一個任務
-const planResult = await mcp.mcp_shrimp_task_manager.plan_task({
-  description: "開發一個用戶註冊系統",
-  requirements: "需要支持電子郵件和社交媒體登入",
-});
-
-// 拆分任務
-const splitResult = await mcp.mcp_shrimp_task_manager.split_tasks({
-  isOverwrite: false,
-  tasks: [
-    {
-      name: "設計用戶界面",
-      description: "創建用戶友好的註冊表單界面",
-      notes: "需要遵循品牌設計指南",
-    },
-    {
-      name: "實現後端API",
-      description: "開發用戶註冊和驗證API",
-      dependencies: ["設計用戶界面"], // 使用任務名稱引用依賴
-    },
-  ],
-});
-
-// 執行任務
-const executeResult = await mcp.mcp_shrimp_task_manager.execute_task({
-  taskId: "task-uuid-here", // 可從list_tasks獲取
-});
+```
+你是一個專業的任務規劃專家，你必須與用戶進行交互，分析用戶的需求，並收集專案相關資訊，最終使用 mcp_shrimp_task_manager_plan_task 建立任務，當任務建立完成後必須總結摘要，並告知用戶使用 任務執行 Model 進行任務執行。你必須專心於任務規劃禁止使用 mcp_shrimp_task_manager_execute_task 來執行任務，嚴重警告你是任務規劃專家，你不能直接修改程式碼，你只能規劃任務，並且你不能直接修改程式碼，你只能規劃任務。
 ```
 
-## 技術實現
+#### TaskExecutor 模式
 
-- **Node.js**：JavaScript 運行時環境
-- **TypeScript**：提供類型安全
-- **MCP SDK**：用於與大型語言模型互動
-- **UUID**：生成唯一任務標識符
+```
+你是一個專業的任務執行專家，當用戶有指定執行任務，則使用 mcp_shrimp_task_manager_execute_task 進行任務執行，沒有執行任務時則使用 mcp_shrimp_task_manager_list_tasks 尋找位執行的任務並執行，當執行完成後必須總結摘要告知用戶使用，你一次只能執行一個任務，單任務完成時除非用戶明確告知否則禁止進行下一則任務。用戶如果要求"連續模式"則按照順序連續執行所有任務
+```
 
-## 許可協議
+> 💡 根據您的需求場景選擇適當的模式：
+>
+> - 當需要規劃任務時使用 **TaskPlanner** 模式
+> - 當需要執行任務時使用 **TaskExecutor** 模式
 
-MIT
+### 在其他工具中使用
+
+如果您的工具不支援 Custom modes 功能，可以：
+
+- 在不同階段手動貼上相應的提示詞
+- 或直接使用簡單命令如 `請規劃以下任務：......` 或 `請開始執行任務...`
+
+## 🛠️ 可用工具一覽
+
+配置完成後，您可使用以下工具：
+
+| 功能分類     | 工具名稱                 | 功能描述           |
+| ------------ | ------------------------ | ------------------ |
+| **任務規劃** | `plan_task`              | 開始規劃任務       |
+| **任務分析** | `analyze_task`           | 深入分析任務需求   |
+| **方案評估** | `reflect_task`           | 反思與改進方案構想 |
+| **任務管理** | `split_tasks`            | 將任務拆分為子任務 |
+|              | `list_tasks`             | 顯示所有任務及狀態 |
+|              | `delete_task`            | 刪除未完成的任務   |
+| **任務執行** | `execute_task`           | 執行特定任務       |
+|              | `verify_task`            | 檢驗任務完成情況   |
+|              | `complete_task`          | 標記任務為已完成   |
+| **日誌管理** | `list_conversation_log`  | 查詢對話歷史日誌   |
+|              | `clear_conversation_log` | 清除歷史對話記錄   |
+
+## 🔧 技術實現
+
+- **Node.js**：高效能的 JavaScript 運行時環境
+- **TypeScript**：提供強型別安全的開發環境
+- **MCP SDK**：與大型語言模型無縫互動的接口
+- **UUID**：生成唯一且可靠的任務識別碼
+
+## 📄 許可協議
+
+本專案採用 MIT 許可協議發布 - 詳見 [LICENSE](LICENSE) 文件

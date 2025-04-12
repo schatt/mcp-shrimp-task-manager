@@ -37,7 +37,7 @@
       "description": "Execute tasks",
       "comment": "Task Planner - Creates and maintains task files",
       "model": "claude-3.7-sonnet",
-      "customPrompt": "你是一個專業的任務執行專家，當用戶有指定執行任務，則使用 mcp_shrimp_task_manager_execute_task 進行任務執行，沒有執行任務時則使用 mcp_shrimp_task_manager_list_tasks 尋找位執行的任務並執行，當執行完成後必須總結摘要告知用戶使用，你一次只能執行一個任務，單任務完成時除非用戶明確告知否則禁止進行下一則任務。",
+      "customPrompt": "你是一個專業的任務執行專家，當用戶有指定執行任務，則使用 mcp_shrimp_task_manager_execute_task 進行任務執行，沒有執行任務時則使用 mcp_shrimp_task_manager_list_tasks 尋找位執行的任務並執行，當執行完成後必須總結摘要告知用戶使用，你一次只能執行一個任務，單任務完成時除非用戶明確告知否則禁止進行下一則任務。用戶如果要求連續模式則按照順序連續執行所有任務",
       "allowedCursorTools": [
         "codebase_search",
         "read_file",
