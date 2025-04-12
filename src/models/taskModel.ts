@@ -263,37 +263,94 @@ export async function batchCreateOrUpdateTasks(
     dependencies?: string[];
     relatedFiles?: RelatedFile[];
   }>,
-  isOverwrite: boolean
+  updateMode: "append" | "overwrite" | "selective"
 ): Promise<Task[]> {
-  // 獲取現有任務，建立名稱到ID的映射
-  const existingTasks = isOverwrite ? [] : await readTasks();
+  // 獲取現有任務
+  const existingTasks = await readTasks();
   const nameToIdMap = new Map<string, string>();
+  const idToTaskMap = new Map<string, Task>();
 
   // 添加現有任務到映射表
   existingTasks.forEach((task) => {
     nameToIdMap.set(task.name, task.id);
+    idToTaskMap.set(task.id, task);
   });
 
-  if (isOverwrite) {
-    // 覆蓋模式：刪除所有現有任務
-    await writeTasks([]);
+  // 處理不同的更新模式
+  if (updateMode === "overwrite") {
+    // 覆蓋模式：只刪除未完成的任務，保留已完成的任務
+    const completedTasks = existingTasks.filter(
+      (task) => task.status === TaskStatus.COMPLETED
+    );
+    await writeTasks(completedTasks);
+
+    // 更新映射表，只保留已完成的任務
+    nameToIdMap.clear();
+    idToTaskMap.clear();
+    completedTasks.forEach((task) => {
+      nameToIdMap.set(task.name, task.id);
+      idToTaskMap.set(task.id, task);
+    });
+  } else if (updateMode === "selective") {
+    // selective 模式：保留未在清單中的現有任務，更新名稱匹配的任務
+    // 不做任何預處理，保留所有現有任務，在處理每個新任務時進行選擇性更新
+  } else {
+    // append 模式：保留所有現有任務，不需要特殊處理
   }
 
-  // 第一階段：創建所有任務，但不設置依賴
+  // 創建任務名稱集合，用於選擇性更新模式
+  const taskNameSet = new Set(taskDataList.map((task) => task.name));
+
+  // 準備最終的任務清單，如果是 selective 模式，先保留不在新清單中的任務
+  let finalTaskList: Task[] = [];
+  if (updateMode === "selective") {
+    finalTaskList = existingTasks.filter((task) => !taskNameSet.has(task.name));
+  }
+
+  // 第一階段：創建或更新任務，但不設置依賴
   const firstPassTasks: Array<{ task: Task; originalDeps: string[] }> = [];
 
   for (const taskData of taskDataList) {
-    // 創建任務，暫時不設置依賴
-    const newTask = await createTask(
-      taskData.name,
-      taskData.description,
-      taskData.notes,
-      [], // 空依賴列表
-      taskData.relatedFiles // 添加關聯檔案
-    );
+    let newTask: Task;
+
+    // 查找是否存在同名任務
+    const existingTaskId = nameToIdMap.get(taskData.name);
+    const isExistingTask = existingTaskId !== undefined;
+
+    if (isExistingTask && updateMode === "selective") {
+      // 選擇性更新模式：更新現有任務
+      const existingTask = idToTaskMap.get(existingTaskId)!;
+
+      // 更新任務內容但保留原始ID和創建時間
+      newTask = (await updateTask(existingTaskId, {
+        name: taskData.name,
+        description: taskData.description,
+        notes: taskData.notes,
+        // 暫時不更新依賴，在第二階段處理
+        relatedFiles: taskData.relatedFiles,
+      })) as Task;
+
+      // 如果更新失敗，使用現有任務作為後備
+      if (!newTask) {
+        console.warn(
+          `警告：更新任務 "${taskData.name}" 失敗，使用現有任務作為後備`
+        );
+        newTask = existingTask;
+      }
+    } else {
+      // 創建新任務
+      newTask = await createTask(
+        taskData.name,
+        taskData.description,
+        taskData.notes,
+        [], // 空依賴列表，在第二階段設置
+        taskData.relatedFiles
+      );
+    }
 
     // 將新任務添加到映射表
     nameToIdMap.set(newTask.name, newTask.id);
+    idToTaskMap.set(newTask.id, newTask);
 
     // 保存原始依賴信息
     firstPassTasks.push({
@@ -302,8 +359,8 @@ export async function batchCreateOrUpdateTasks(
     });
   }
 
-  // 第二階段：更新所有任務的依賴關係
-  const finalTasks: Task[] = [];
+  // 第二階段：更新所有新增或修改任務的依賴關係
+  const processedTasks: Task[] = [];
 
   for (const { task, originalDeps } of firstPassTasks) {
     // 解析依賴關係
@@ -337,13 +394,18 @@ export async function batchCreateOrUpdateTasks(
     });
 
     if (updatedTask) {
-      finalTasks.push(updatedTask);
+      processedTasks.push(updatedTask);
     } else {
-      finalTasks.push(task); // 回退到原始任務
+      processedTasks.push(task); // 回退到原始任務
     }
   }
 
-  return finalTasks;
+  // 如果是選擇性更新模式，合併保留的任務和新建/更新的任務
+  if (updateMode === "selective") {
+    return [...finalTaskList, ...processedTasks];
+  }
+
+  return processedTasks;
 }
 
 // 檢查任務是否可以執行（所有依賴都已完成）

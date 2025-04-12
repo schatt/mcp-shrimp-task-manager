@@ -51,7 +51,7 @@ async function main() {
     // 註冊工具 - 使用已定義的schema物件，並添加內嵌錯誤處理
     server.tool(
       "plan_task",
-      "初始化並詳細規劃任務流程，建立明確的目標與成功標準",
+      "初始化並詳細規劃任務流程，建立明確的目標與成功標準，可選擇參考現有任務進行延續規劃",
       {
         description: z
           .string()
@@ -64,6 +64,11 @@ async function main() {
           .string()
           .optional()
           .describe("任務的特定技術要求、業務約束條件或品質標準（選填）"),
+        existingTasksReference: z
+          .boolean()
+          .optional()
+          .default(false)
+          .describe("是否參考現有任務作為規劃基礎，用於任務調整和延續性規劃"),
       },
       async (args) => {
         return await planTask(args);
@@ -128,12 +133,13 @@ async function main() {
 
     server.tool(
       "split_tasks",
-      "將複雜任務分解為獨立且可追蹤的子任務，建立明確的依賴關係和優先順序，dependencies 是一個字串陣列，支援任務名稱或任務ID(UUID)",
+      "將複雜任務分解為獨立且可追蹤的子任務，建立明確的依賴關係和優先順序。支援三種任務更新模式：追加(append)、覆蓋(overwrite)和選擇性更新(selective)，其中覆蓋模式只會刪除未完成的任務並保留已完成任務，選擇性更新模式可根據任務名稱智能匹配更新現有任務，同時保留其他任務。",
       {
-        isOverwrite: z
-          .boolean()
+        updateMode: z
+          .enum(["append", "overwrite", "selective"])
+          .optional()
           .describe(
-            "任務覆蓋模式選擇（true：清除並覆蓋所有現有任務；false：保留現有任務並新增）"
+            "任務更新模式選擇：'append'(保留所有現有任務並添加新任務)、'overwrite'(清除所有未完成任務並完全替換，保留已完成任務)、'selective'(智能更新：根據任務名稱匹配更新現有任務，保留不在列表中的任務，推薦用於任務微調)"
           ),
         tasks: z
           .array(

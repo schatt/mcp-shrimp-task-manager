@@ -31,6 +31,35 @@ import {
 } from "../utils/summaryExtractor.js";
 import { loadTaskRelatedFiles } from "../utils/fileLoader.js";
 
+/**
+ * 將任務狀態轉換為更友好的顯示文字
+ */
+function getTaskStatusDisplay(status: TaskStatus): string {
+  switch (status) {
+    case TaskStatus.PENDING:
+      return "待處理";
+    case TaskStatus.IN_PROGRESS:
+      return "進行中";
+    case TaskStatus.COMPLETED:
+      return "已完成";
+    default:
+      return status;
+  }
+}
+
+/**
+ * 格式化日期為更友好的顯示格式
+ */
+function formatDate(date: Date): string {
+  return date.toLocaleString("zh-TW", {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
+
 // 開始規劃工具
 export const planTaskSchema = z.object({
   description: z
@@ -43,11 +72,17 @@ export const planTaskSchema = z.object({
     .string()
     .optional()
     .describe("任務的特定技術要求、業務約束條件或品質標準（選填）"),
+  existingTasksReference: z
+    .boolean()
+    .optional()
+    .default(false)
+    .describe("是否參考現有任務作為規劃基礎，用於任務調整和延續性規劃"),
 });
 
 export async function planTask({
   description,
   requirements,
+  existingTasksReference = false,
 }: z.infer<typeof planTaskSchema>) {
   // 記錄任務規劃開始
   try {
@@ -67,6 +102,132 @@ export async function planTask({
 
   if (requirements) {
     prompt += `## 附加要求與限制條件\n\n請確保方案完全符合以下要求：\n\n\`\`\`\n${requirements}\n\`\`\`\n\n`;
+  }
+
+  // 當 existingTasksReference 為 true 時，從數據庫中載入所有任務作為參考
+  if (existingTasksReference) {
+    try {
+      const allTasks = await getAllTasks();
+
+      // 將任務分為已完成和未完成兩類
+      const completedTasks = allTasks.filter(
+        (task) => task.status === TaskStatus.COMPLETED
+      );
+      const pendingTasks = allTasks.filter(
+        (task) => task.status !== TaskStatus.COMPLETED
+      );
+
+      // 如果存在任務，則添加到提示詞中
+      if (allTasks.length > 0) {
+        prompt += `## 現有任務參考\n\n您正在對現有任務進行調整或延續規劃。以下任務資訊將作為您分析和規劃的基礎：\n\n`;
+
+        // 添加已完成任務的參考
+        if (completedTasks.length > 0) {
+          prompt += `### 已完成的任務（僅供參考，不可修改）\n\n`;
+          prompt += `以下任務已標記為完成，作為系統穩定功能的基石和固定參考點：\n\n`;
+
+          // 最多顯示10個已完成任務，避免提示詞過長
+          const tasksToShow =
+            completedTasks.length > 10
+              ? completedTasks.slice(0, 10)
+              : completedTasks;
+
+          tasksToShow.forEach((task, index) => {
+            // 使用摘要提取工具處理較長的描述
+            const taskDescriptionSummary = extractSummary(
+              task.description,
+              100
+            );
+            prompt += `${index + 1}. **${task.name}** (ID: \`${task.id}\`)\n`;
+            prompt += `   - 描述：${taskDescriptionSummary}\n`;
+            if (task.completedAt) {
+              prompt += `   - 完成時間：${formatDate(task.completedAt)}\n`;
+            }
+
+            if (index < tasksToShow.length - 1) {
+              prompt += `\n`;
+            }
+          });
+
+          if (completedTasks.length > 10) {
+            prompt += `\n*（僅顯示前10個已完成任務，實際共有 ${completedTasks.length} 個已完成任務）*\n`;
+          }
+        }
+
+        // 添加未完成任務的參考
+        if (pendingTasks.length > 0) {
+          prompt += `\n### 未完成的任務（可根據需要調整）\n\n`;
+          prompt += `以下任務尚未完成，您可以根據新需求對其進行調整或重新規劃：\n\n`;
+
+          pendingTasks.forEach((task, index) => {
+            // 使用摘要提取工具處理較長的描述
+            const taskDescriptionSummary = extractSummary(
+              task.description,
+              150
+            );
+            prompt += `${index + 1}. **${task.name}** (ID: \`${task.id}\`)\n`;
+            prompt += `   - 描述：${taskDescriptionSummary}\n`;
+            prompt += `   - 狀態：${getTaskStatusDisplay(task.status)}\n`;
+
+            // 如果有依賴關係，也顯示出來
+            if (task.dependencies && task.dependencies.length > 0) {
+              prompt += `   - 依賴：${task.dependencies
+                .map((dep) => `\`${dep.taskId}\``)
+                .join(", ")}\n`;
+            }
+
+            if (index < pendingTasks.length - 1) {
+              prompt += `\n`;
+            }
+          });
+        }
+
+        prompt += `\n## 任務調整指南\n\n`;
+        prompt += `規劃新任務或調整現有任務時，請嚴格遵循以下五項原則：\n\n`;
+        prompt += `1. **已完成任務保護原則** - 已完成的任務是系統穩定功能的基石，絕對不可修改或刪除。\n`;
+        prompt += `2. **未完成任務可調整原則** - 未完成的任務可以根據新需求進行調整，包括修改描述、依賴關係等，或建議移除。\n`;
+        prompt += `3. **任務ID一致性原則** - 引用現有任務時必須使用其原始ID，以確保系統跟踪的準確性。\n`;
+        prompt += `4. **依賴關係完整性原則** - 調整任務計劃時必須維護依賴關係的完整性：\n`;
+        prompt += `   - 不創建循環依賴\n`;
+        prompt += `   - 不依賴已標記為移除的任務\n`;
+        prompt += `   - 確保新增依賴關係合理且必要\n`;
+        prompt += `5. **任務延續性原則** - 新任務應與現有任務構成連貫整體，維持整體計劃的邏輯性和可行性。\n\n`;
+        prompt += `**重要提醒：** 系統強制執行已完成任務保護機制，無法修改已完成的任務。請在規劃階段充分考慮這一限制。\n\n`;
+
+        // 添加選擇性任務更新模式指導
+        prompt += `## 選擇性任務更新指南\n\n`;
+        prompt += `任務更新時，您可以選擇以下三種更新模式，每種模式適用於不同的場景：\n\n`;
+        prompt += `### 1. **追加模式(append)**\n`;
+        prompt += `- **說明**：保留所有現有任務，僅添加新任務\n`;
+        prompt += `- **適用場景**：逐步擴展功能，添加獨立的新特性，現有任務計劃仍然有效\n`;
+        prompt += `- **使用方式**：split_tasks 工具中設置 \`updateMode="append"\`\n`;
+        prompt += `- **潛在問題**：長期使用可能導致積累過多已不再相關但未完成的任務\n\n`;
+
+        prompt += `### 2. **覆蓋模式(overwrite)**\n`;
+        prompt += `- **說明**：清除所有現有未完成任務，完全使用新任務列表替換\n`;
+        prompt += `- **適用場景**：徹底變更方向，現有未完成任務已完全不相關\n`;
+        prompt += `- **使用方式**：split_tasks 工具中設置 \`updateMode="overwrite"\`\n`;
+        prompt += `- **潛在問題**：可能會丟失有價值的未完成任務，需要確保所有重要任務都在新列表中\n\n`;
+
+        prompt += `### 3. **選擇性更新模式(selective)**\n`;
+        prompt += `- **說明**：根據任務名稱匹配選擇性地更新任務，保留不在列表中的現有任務\n`;
+        prompt += `- **適用場景**：部分調整任務計劃，保留部分未完成任務，更新或添加其他任務\n`;
+        prompt += `- **使用方式**：split_tasks 工具中設置 \`updateMode="selective"\`\n`;
+        prompt += `- **工作原理**：\n`;
+        prompt += `  1. 對於名稱相同的任務，更新其內容（描述、注釋等），保留原ID和創建時間\n`;
+        prompt += `  2. 新任務名稱的條目將被創建為新任務\n`;
+        prompt += `  3. 不在提交列表中的現有任務將被保留不變\n`;
+        prompt += `- **最佳實踐**：在需要微調部分任務時優先選擇此模式，既避免重建所有任務，又能保持計劃的連續性\n\n`;
+
+        prompt += `### 實際應用建議\n`;
+        prompt += `- 對於小範圍調整，優先使用 **selective** 模式，精確更新目標任務\n`;
+        prompt += `- 需要添加新功能時，可使用 **append** 模式保留現有工作\n`;
+        prompt += `- 僅在徹底重構計劃時使用 **overwrite** 模式，謹慎權衡是否真正需要刪除所有未完成任務\n`;
+        prompt += `- 無論使用哪種模式，始終需要**維護依賴關係的完整性和正確性**\n\n`;
+      }
+    } catch (error) {
+      console.error("載入現有任務時發生錯誤:", error);
+    }
   }
 
   prompt += `## 分析指引\n\n1. 首先確定任務的確切目標和預期成果
@@ -290,6 +451,11 @@ export async function reflectTask({
   - 建立明確的依賴關係和執行順序
   - 為每個子任務設定明確的完成標準和驗收條件
 
+## split_tasks 的 updateMode 選擇建議
+  - 若希望**保留所有現有任務並添加新任務**，使用 updateMode="append"
+  - 若希望**清除所有未完成任務**，但保留已完成任務，使用 updateMode="overwrite"
+  - 若希望**選擇性更新特定任務**，同時保留其他未完成任務，使用 updateMode="selective"
+
 您的批判性評估將決定最終方案的質量，請務必嚴格審查，不放過任何潛在問題。`;
 
   return {
@@ -305,10 +471,11 @@ export async function reflectTask({
 // 拆分任務工具
 export const splitTasksSchema = z
   .object({
-    isOverwrite: z
-      .boolean()
+    updateMode: z
+      .enum(["append", "overwrite", "selective"])
+      .optional()
       .describe(
-        "任務覆蓋模式選擇（true：清除並覆蓋所有現有任務；false：保留現有任務並新增）"
+        "任務更新模式：'append'(保留現有任務並新增)、'overwrite'(清除所有未完成任務並重建)、'selective'(根據名稱匹配更新現有任務，保留其餘任務)"
       ),
     tasks: z
       .array(
@@ -378,16 +545,28 @@ export const splitTasksSchema = z
   );
 
 export async function splitTasks({
-  isOverwrite,
+  updateMode,
   tasks,
 }: z.infer<typeof splitTasksSchema>) {
+  // 如果未指定更新模式，預設為 "append" 模式
+  const effectiveUpdateMode = updateMode || "append";
+
+  // 根據不同更新模式生成日誌訊息
+  let updateModeMessage = "";
+  if (effectiveUpdateMode === "append") {
+    updateModeMessage = "追加模式：保留現有任務並新增";
+  } else if (effectiveUpdateMode === "overwrite") {
+    updateModeMessage = "覆蓋模式：清除所有未完成任務並重建";
+  } else if (effectiveUpdateMode === "selective") {
+    updateModeMessage =
+      "選擇性更新模式：根據任務名稱更新現有任務、新增缺少任務，保留其餘任務";
+  }
+
   // 記錄任務拆分
   try {
     await addConversationEntry(
       ConversationParticipant.MCP,
-      `拆分任務：${isOverwrite ? "覆蓋模式" : "新增模式"}，任務數量：${
-        tasks.length
-      }`,
+      `拆分任務：${updateModeMessage}，任務數量：${tasks.length}`,
       undefined,
       "任務拆分"
     );
@@ -395,8 +574,11 @@ export async function splitTasks({
     console.error("記錄對話日誌時發生錯誤:", error);
   }
 
-  // 批量創建任務
-  const createdTasks = await batchCreateOrUpdateTasks(tasks, isOverwrite);
+  // 批量創建任務 - 將 updateMode 傳遞給 batchCreateOrUpdateTasks
+  const createdTasks = await batchCreateOrUpdateTasks(
+    tasks,
+    effectiveUpdateMode
+  );
 
   // 記錄任務創建成功
   try {
@@ -414,11 +596,15 @@ export async function splitTasks({
   // 獲取所有任務，用於顯示完整的依賴關係
   const allTasks = await getAllTasks();
 
-  const prompt = `## 任務拆分結果 - ${
-    isOverwrite ? "覆蓋模式" : "新增模式"
-  }\n\n### 系統確認\n任務已成功${
-    isOverwrite ? "覆蓋現有任務清單" : "新增至現有任務清單"
-  }。\n\n## 任務拆分指南\n\n### 有效的任務拆分策略\n\n1. **按功能分解** - 將大功能拆分為獨立可測試的子功能
+  let prompt = `## 任務拆分結果 - ${effectiveUpdateMode} 模式\n\n### 系統確認\n任務已成功${
+    effectiveUpdateMode === "overwrite"
+      ? "覆蓋未完成的任務清單（已完成任務已保留）"
+      : effectiveUpdateMode === "selective"
+      ? "選擇性更新任務清單"
+      : "新增至現有任務清單"
+  }。\n\n`;
+
+  prompt += `## 任務拆分指南\n\n### 有效的任務拆分策略\n\n1. **按功能分解** - 將大功能拆分為獨立可測試的子功能
    - 每個子功能應有清晰的輸入、輸出和功能邊界
    - 確保子功能間邏輯關係明確且最小化耦合
    - 避免功能過度細分導致管理複雜度增加

@@ -129,7 +129,10 @@
 
 **參數**：
 
-- `isOverwrite: boolean` (必填) - 任務覆蓋模式選擇（true：清除並覆蓋所有現有任務；false：保留現有任務並新增）
+- `updateMode?: "append" | "overwrite" | "selective"` (選填) - 任務更新模式選擇：
+  - `append`（預設）：保留所有現有任務並添加新任務
+  - `overwrite`：清除所有未完成任務並完全替換
+  - `selective`：根據任務名稱匹配更新現有任務，保留不在列表中的任務
 - `tasks: Array<object>` (必填) - 結構化的任務清單，每個任務應保持原子性且有明確的完成標準
   - `name: string` (必填) - 簡潔明確的任務名稱，應能清晰表達任務目的
     - 不超過 100 個字符
