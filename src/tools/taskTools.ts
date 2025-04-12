@@ -472,10 +472,10 @@ export async function reflectTask({
 export const splitTasksSchema = z
   .object({
     updateMode: z
-      .enum(["append", "overwrite", "selective"])
+      .enum(["append", "overwrite", "selective", "clearAllTasks"])
       .optional()
       .describe(
-        "任務更新模式：'append'(保留現有任務並新增)、'overwrite'(清除所有未完成任務並重建)、'selective'(根據名稱匹配更新現有任務，保留其餘任務)"
+        "任務更新模式：'append'(保留現有任務並新增)、'overwrite'(清除所有未完成任務並重建)、'selective'(根據名稱匹配更新現有任務，保留其餘任務)、'clearAllTasks'(清除所有任務並創建備份)"
       ),
     tasks: z
       .array(
@@ -551,6 +551,58 @@ export async function splitTasks({
   // 如果未指定更新模式，預設為 "append" 模式
   const effectiveUpdateMode = updateMode || "append";
 
+  // 處理 clearAllTasks 模式，直接調用 modelClearAllTasks 函數
+  if (effectiveUpdateMode === "clearAllTasks") {
+    const clearResult = await modelClearAllTasks();
+
+    // 記錄清除結果
+    try {
+      await addConversationEntry(
+        ConversationParticipant.MCP,
+        `清除所有任務：${clearResult.success ? "成功" : "失敗"}，${
+          clearResult.message
+        }`,
+        undefined,
+        "任務清除"
+      );
+    } catch (error) {
+      console.error("記錄對話日誌時發生錯誤:", error);
+    }
+
+    // 返回清除操作結果
+    let prompt = `## 任務清除結果\n\n### 系統通知\n${clearResult.message}\n\n`;
+
+    if (clearResult.success) {
+      if (clearResult.backupFile) {
+        prompt += `### 備份信息\n備份文件已創建：${clearResult.backupFile}\n\n`;
+      }
+
+      if (tasks.length > 0) {
+        prompt += `系統將繼續創建您請求的 ${tasks.length} 個新任務。\n`;
+      } else {
+        prompt += `### 注意\n您沒有提供任何新任務。如需創建新任務，請使用 "append" 模式並提供任務列表。\n`;
+        return {
+          content: [
+            {
+              type: "text" as const,
+              text: prompt,
+            },
+          ],
+        };
+      }
+    } else {
+      prompt += `### 錯誤信息\n清除任務時遇到問題：${clearResult.message}\n任務清單未更改。\n`;
+      return {
+        content: [
+          {
+            type: "text" as const,
+            text: prompt,
+          },
+        ],
+      };
+    }
+  }
+
   // 根據不同更新模式生成日誌訊息
   let updateModeMessage = "";
   if (effectiveUpdateMode === "append") {
@@ -560,6 +612,8 @@ export async function splitTasks({
   } else if (effectiveUpdateMode === "selective") {
     updateModeMessage =
       "選擇性更新模式：根據任務名稱更新現有任務、新增缺少任務，保留其餘任務";
+  } else if (effectiveUpdateMode === "clearAllTasks") {
+    updateModeMessage = "清除模式：清除所有任務並創建備份";
   }
 
   // 記錄任務拆分
