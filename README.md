@@ -161,4 +161,4 @@ npm run build
 
 ## 📄 許可協議
 
-本專案採用 MIT 許可協議發布 - 詳見 [LICENSE](LICENSE) 文件
+本專案採用 MIT 許可協議發布
