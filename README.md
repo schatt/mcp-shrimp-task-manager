@@ -1,5 +1,7 @@
 # MCP 蝦米任務管理器
 
+[![smithery badge](https://smithery.ai/badge/@cjo4m06/mcp-shrimp-task-manager)](https://smithery.ai/server/@cjo4m06/mcp-shrimp-task-manager)
+
 > 🚀 基於 Model Context Protocol (MCP) 的智能任務管理系統，為 AI Agent 提供高效的程式開發工作流程框架。
 
 蝦米任務管理器透過結構化的工作流程引導，協助 Agent 系統性規劃程式開發步驟，強化任務記憶管理機制，有效避免冗餘與重複的編程工作。
@@ -35,6 +37,15 @@
 
 ## 🔧 安裝與使用
 
+### Installing via Smithery
+
+To install 蝦米任務管理器 for Claude Desktop automatically via [Smithery](https://smithery.ai/server/@cjo4m06/mcp-shrimp-task-manager):
+
+```bash
+npx -y @smithery/cli install @cjo4m06/mcp-shrimp-task-manager --client claude
+```
+
+### Manual Installation
 ```bash
 # 安裝依賴套件
 npm install
