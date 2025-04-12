@@ -133,13 +133,12 @@ async function main() {
 
     server.tool(
       "split_tasks",
-      "將複雜任務分解為獨立且可追蹤的子任務，建立明確的依賴關係和優先順序。支援三種任務更新模式：追加(append)、覆蓋(overwrite)和選擇性更新(selective)，其中覆蓋模式只會刪除未完成的任務並保留已完成任務，選擇性更新模式可根據任務名稱智能匹配更新現有任務，同時保留其他任務。",
+      "將複雜任務分解為獨立且可追蹤的子任務，建立明確的依賴關係和優先順序。支援四種任務更新模式：追加(append)、覆蓋(overwrite)、選擇性更新(selective)和清除所有任務(clearAllTasks)，其中覆蓋模式只會刪除未完成的任務並保留已完成任務，選擇性更新模式可根據任務名稱智能匹配更新現有任務，同時保留其他任務，如果你需要規劃全新的任務請使用清除所有任務模式會清除所有任務並創建備份。",
       {
         updateMode: z
-          .enum(["append", "overwrite", "selective"])
-          .optional()
+          .enum(["append", "overwrite", "selective", "clearAllTasks"])
           .describe(
-            "任務更新模式選擇：'append'(保留所有現有任務並添加新任務)、'overwrite'(清除所有未完成任務並完全替換，保留已完成任務)、'selective'(智能更新：根據任務名稱匹配更新現有任務，保留不在列表中的任務，推薦用於任務微調)"
+            "任務更新模式選擇：'append'(保留所有現有任務並添加新任務)、'overwrite'(清除所有未完成任務並完全替換，保留已完成任務)、'selective'(智能更新：根據任務名稱匹配更新現有任務，保留不在列表中的任務，推薦用於任務微調)、'clearAllTasks'(清除所有任務並創建備份)"
           ),
         tasks: z
           .array(

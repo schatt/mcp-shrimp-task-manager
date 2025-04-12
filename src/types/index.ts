@@ -66,12 +66,13 @@ export interface ReflectTaskArgs {
 // 拆分任務的參數：用於將大型任務分解為可管理的小型任務
 export interface SplitTasksArgs {
   /**
-   * 任務更新模式（可選）：
-   * - "append"：保留所有現有任務，新增提供的任務（預設值）
+   * 任務更新模式（必填）：
+   * - "append"：保留所有現有任務，新增提供的任務
    * - "overwrite"：保留已完成的任務，但刪除所有未完成的任務，然後新增提供的任務
    * - "selective"：保留所有未提供名稱的現有任務，更新名稱匹配的任務
+   * - "clearAllTasks"：清除所有任務並創建備份
    */
-  updateMode?: "append" | "overwrite" | "selective";
+  updateMode: "append" | "overwrite" | "selective" | "clearAllTasks";
   tasks: Array<{
     name: string; // 簡潔明確的任務名稱，應能清晰表達任務目的
     description: string; // 詳細的任務描述，包含實施要點、技術細節和驗收標準

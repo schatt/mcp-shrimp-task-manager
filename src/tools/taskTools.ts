@@ -451,10 +451,11 @@ export async function reflectTask({
   - 建立明確的依賴關係和執行順序
   - 為每個子任務設定明確的完成標準和驗收條件
 
-## split_tasks 的 updateMode 選擇建議
+## split_tasks 的 updateMode 選擇建議（必填參數）
   - 若希望**保留所有現有任務並添加新任務**，使用 updateMode="append"
   - 若希望**清除所有未完成任務**，但保留已完成任務，使用 updateMode="overwrite"
   - 若希望**選擇性更新特定任務**，同時保留其他未完成任務，使用 updateMode="selective"
+  - 若希望**清除所有任務**並自動創建備份，使用 updateMode="clearAllTasks"
 
 您的批判性評估將決定最終方案的質量，請務必嚴格審查，不放過任何潛在問題。`;
 
@@ -473,9 +474,8 @@ export const splitTasksSchema = z
   .object({
     updateMode: z
       .enum(["append", "overwrite", "selective", "clearAllTasks"])
-      .optional()
       .describe(
-        "任務更新模式：'append'(保留現有任務並新增)、'overwrite'(清除所有未完成任務並重建)、'selective'(根據名稱匹配更新現有任務，保留其餘任務)、'clearAllTasks'(清除所有任務並創建備份)"
+        "任務更新模式（必填）：'append'(保留現有任務並新增)、'overwrite'(清除所有未完成任務並重建)、'selective'(根據名稱匹配更新現有任務，保留其餘任務)、'clearAllTasks'(清除所有任務並創建備份)"
       ),
     tasks: z
       .array(
@@ -548,11 +548,8 @@ export async function splitTasks({
   updateMode,
   tasks,
 }: z.infer<typeof splitTasksSchema>) {
-  // 如果未指定更新模式，預設為 "append" 模式
-  const effectiveUpdateMode = updateMode || "append";
-
   // 處理 clearAllTasks 模式，直接調用 modelClearAllTasks 函數
-  if (effectiveUpdateMode === "clearAllTasks") {
+  if (updateMode === "clearAllTasks") {
     const clearResult = await modelClearAllTasks();
 
     // 記錄清除結果
@@ -605,14 +602,14 @@ export async function splitTasks({
 
   // 根據不同更新模式生成日誌訊息
   let updateModeMessage = "";
-  if (effectiveUpdateMode === "append") {
+  if (updateMode === "append") {
     updateModeMessage = "追加模式：保留現有任務並新增";
-  } else if (effectiveUpdateMode === "overwrite") {
+  } else if (updateMode === "overwrite") {
     updateModeMessage = "覆蓋模式：清除所有未完成任務並重建";
-  } else if (effectiveUpdateMode === "selective") {
+  } else if (updateMode === "selective") {
     updateModeMessage =
       "選擇性更新模式：根據任務名稱更新現有任務、新增缺少任務，保留其餘任務";
-  } else if (effectiveUpdateMode === "clearAllTasks") {
+  } else if (updateMode === "clearAllTasks") {
     updateModeMessage = "清除模式：清除所有任務並創建備份";
   }
 
@@ -629,10 +626,7 @@ export async function splitTasks({
   }
 
   // 批量創建任務 - 將 updateMode 傳遞給 batchCreateOrUpdateTasks
-  const createdTasks = await batchCreateOrUpdateTasks(
-    tasks,
-    effectiveUpdateMode
-  );
+  const createdTasks = await batchCreateOrUpdateTasks(tasks, updateMode);
 
   // 記錄任務創建成功
   try {
@@ -650,10 +644,10 @@ export async function splitTasks({
   // 獲取所有任務，用於顯示完整的依賴關係
   const allTasks = await getAllTasks();
 
-  let prompt = `## 任務拆分結果 - ${effectiveUpdateMode} 模式\n\n### 系統確認\n任務已成功${
-    effectiveUpdateMode === "overwrite"
+  let prompt = `## 任務拆分結果 - ${updateMode} 模式\n\n### 系統確認\n任務已成功${
+    updateMode === "overwrite"
       ? "覆蓋未完成的任務清單（已完成任務已保留）"
-      : effectiveUpdateMode === "selective"
+      : updateMode === "selective"
       ? "選擇性更新任務清單"
       : "新增至現有任務清單"
   }。\n\n`;

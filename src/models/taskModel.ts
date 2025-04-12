@@ -263,7 +263,7 @@ export async function batchCreateOrUpdateTasks(
     dependencies?: string[];
     relatedFiles?: RelatedFile[];
   }>,
-  updateMode: "append" | "overwrite" | "selective" | "clearAllTasks"
+  updateMode: "append" | "overwrite" | "selective" | "clearAllTasks" // 必填參數，指定任務更新策略
 ): Promise<Task[]> {
   // 獲取現有任務
   const existingTasks = await readTasks();
