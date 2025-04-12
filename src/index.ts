@@ -30,14 +30,6 @@ import {
   updateTaskRelatedFilesSchema,
 } from "./tools/taskTools.js";
 
-// 導入日誌工具函數
-import {
-  listConversationLog,
-  listConversationLogSchema,
-  clearConversationLog,
-  clearConversationLogSchema,
-} from "./tools/logTools.js";
-
 async function main() {
   try {
     console.log("啟動蝦米任務管理器服務...");
@@ -133,12 +125,12 @@ async function main() {
 
     server.tool(
       "split_tasks",
-      "將複雜任務分解為獨立且可追蹤的子任務，建立明確的依賴關係和優先順序。支援四種任務更新模式：追加(append)、覆蓋(overwrite)、選擇性更新(selective)和清除所有任務(clearAllTasks)，其中覆蓋模式只會刪除未完成的任務並保留已完成任務，選擇性更新模式可根據任務名稱智能匹配更新現有任務，同時保留其他任務，如果你需要規劃全新的任務請使用清除所有任務模式會清除所有任務並創建備份。",
+      "將複雜任務分解為獨立且可追蹤的子任務，建立明確的依賴關係和優先順序。支援四種任務更新模式：追加(append)、覆蓋(overwrite)、選擇性更新(selective)和清除所有任務(clearAllTasks)，其中覆蓋模式只會刪除未完成的任務並保留已完成任務，選擇性更新模式可根據任務名稱智能匹配更新現有任務，同時保留其他任務，如果你需要規劃全新的任務請使用清除所有任務模式會清除所有任務並創建備份。請優先使用清除所有任務模式，只有用戶要求變更或修改計畫內容才使用其他模式",
       {
         updateMode: z
           .enum(["append", "overwrite", "selective", "clearAllTasks"])
           .describe(
-            "任務更新模式選擇：'append'(保留所有現有任務並添加新任務)、'overwrite'(清除所有未完成任務並完全替換，保留已完成任務)、'selective'(智能更新：根據任務名稱匹配更新現有任務，保留不在列表中的任務，推薦用於任務微調)、'clearAllTasks'(清除所有任務並創建備份)"
+            "任務更新模式選擇：'append'(保留所有現有任務並添加新任務)、'overwrite'(清除所有未完成任務並完全替換，保留已完成任務)、'selective'(智能更新：根據任務名稱匹配更新現有任務，保留不在列表中的任務，推薦用於任務微調)、'clearAllTasks'(清除所有任務並創建備份)。\n預設為'clearAllTasks'模式，只有用戶要求變更或修改計畫內容才使用其他模式"
           ),
         tasks: z
           .array(
@@ -338,54 +330,6 @@ async function main() {
       },
       async (args) => {
         return await updateTaskRelatedFiles(args);
-      }
-    );
-
-    // 註冊日誌查詢工具
-    server.tool(
-      "list_conversation_log",
-      "查詢系統對話日誌，支持按任務 ID 或時間範圍過濾，提供分頁功能處理大量記錄",
-      {
-        taskId: z
-          .string()
-          .optional()
-          .describe("按任務 ID 過濾對話記錄（選填）"),
-        startDate: z
-          .string()
-          .optional()
-          .describe("起始日期過濾，格式為 ISO 日期字串（選填）"),
-        endDate: z
-          .string()
-          .optional()
-          .describe("結束日期過濾，格式為 ISO 日期字串（選填）"),
-        limit: z
-          .number()
-          .int()
-          .positive()
-          .max(100)
-          .default(20)
-          .describe("返回結果數量限制，最大 100（預設：20）"),
-        offset: z
-          .number()
-          .int()
-          .nonnegative()
-          .default(0)
-          .describe("分頁偏移量（預設：0）"),
-      },
-      async (args) => {
-        return await listConversationLog(args);
-      }
-    );
-
-    // 註冊日誌清除工具
-    server.tool(
-      "clear_conversation_log",
-      "清除所有對話日誌記錄，需要明確確認以避免意外操作",
-      {
-        confirm: z.boolean().describe("確認刪除所有日誌記錄（此操作不可逆）"),
-      },
-      async (args) => {
-        return await clearConversationLog(args);
       }
     );
 

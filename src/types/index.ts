@@ -100,31 +100,6 @@ export interface CompleteTaskArgs {
   summary?: string; // 任務完成摘要，簡潔描述實施結果和重要決策（選填，如未提供將自動生成）
 }
 
-// 對話參與者類型：定義對話中的參與方身份
-export enum ConversationParticipant {
-  MCP = "MCP", // 系統方（MCP）
-  LLM = "LLM", // 模型方（LLM）
-}
-
-// 對話日誌條目：記錄 MCP 與 LLM 之間的重要對話內容
-export interface ConversationEntry {
-  id: string; // 日誌條目的唯一標識符
-  timestamp: Date; // 記錄的時間戳
-  participant: ConversationParticipant; // 對話參與者（MCP 或 LLM）
-  summary: string; // 消息摘要，只記錄關鍵信息點而非完整對話
-  relatedTaskId?: string; // 關聯的任務 ID（選填），用於將對話與特定任務關聯
-  context?: string; // 額外的上下文信息（選填），提供對話發生的背景
-}
-
-// 對話日誌列表參數：用於查詢對話日誌的參數
-export interface ListConversationLogArgs {
-  taskId?: string; // 按任務 ID 過濾（選填）
-  startDate?: Date; // 起始日期過濾（選填）
-  endDate?: Date; // 結束日期過濾（選填）
-  limit?: number; // 返回結果數量限制（選填）
-  offset?: number; // 分頁偏移量（選填）
-}
-
 // 任務複雜度級別：定義任務的複雜程度分類
 export enum TaskComplexityLevel {
   LOW = "低複雜度", // 簡單且直接的任務，通常不需要特殊處理

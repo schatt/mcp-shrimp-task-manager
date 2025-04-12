@@ -45,20 +45,6 @@
 - `summary?: string` - 任務完成摘要，簡潔描述實施結果和重要決策（僅適用於已完成的任務）
 - `relatedFiles?: RelatedFile[]` - 與任務相關的文件列表（選填）
 
-### 對話參與者類型枚舉 (ConversationParticipant)
-
-- `MCP = "MCP"` - 系統方（MCP）
-- `LLM = "LLM"` - 模型方（LLM）
-
-### 對話日誌條目 (ConversationEntry)
-
-- `id: string` - 日誌條目的唯一標識符
-- `timestamp: Date` - 記錄的時間戳
-- `participant: ConversationParticipant` - 對話參與者（MCP 或 LLM）
-- `summary: string` - 消息摘要，只記錄關鍵信息點而非完整對話
-- `relatedTaskId?: string` - 關聯的任務 ID（選填），用於將對話與特定任務關聯
-- `context?: string` - 額外的上下文信息（選填），提供對話發生的背景
-
 ### 任務複雜度級別枚舉 (TaskComplexityLevel)
 
 - `LOW = "低複雜度"` - 簡單且直接的任務，通常不需要特殊處理
@@ -251,34 +237,6 @@
 
 - 返回一個包含文件更新結果的響應，包括成功或失敗的訊息
 
-### 13. list_conversation_log
-
-**描述**：查詢系統對話日誌，支持按任務 ID 或時間範圍過濾，提供分頁功能處理大量記錄
-
-**參數**：
-
-- `taskId?: string` (選填) - 按任務 ID 過濾對話記錄
-- `startDate?: string` (選填) - 起始日期過濾，格式為 ISO 日期字串
-- `endDate?: string` (選填) - 結束日期過濾，格式為 ISO 日期字串
-- `limit?: number` (選填，預設 20) - 返回結果數量限制，最大 100
-- `offset?: number` (選填，預設 0) - 分頁偏移量
-
-**返回值**：
-
-- 返回一個包含對話日誌查詢結果的響應，包括日誌條目列表及分頁信息
-
-### 14. clear_conversation_log
-
-**描述**：清除所有對話日誌記錄，需要明確確認以避免意外操作
-
-**參數**：
-
-- `confirm: boolean` (必填) - 確認刪除所有日誌記錄（此操作不可逆）
-
-**返回值**：
-
-- 返回一個包含清除操作結果的響應，包括成功或失敗的訊息
-
 ## 工具函數重要細節
 
 ### 依賴關係 (dependencies) 處理
@@ -300,13 +258,6 @@
 - 文件按類型優先級排序：待修改 > 參考資料 > 依賴文件 > 輸出結果 > 其他
 - 支持指定代碼區塊行號範圍，便於精確定位關鍵實現
 
-### 日誌管理
-
-- 系統會自動記錄重要操作到對話日誌
-- 長文本會自動使用 `extractSummary` 函數提取摘要，避免日誌過於冗長
-- 日誌條目數量超過閾值時會進行自動輪換和歸檔
-- 日誌查詢支持多種過濾條件和分頁功能
-
 ## 實用工具函數
 
 ### 摘要提取 (summaryExtractor.ts)
@@ -314,7 +265,6 @@
 - `extractSummary` - 從文本中提取簡短摘要，自動處理 Markdown 格式
 - `generateTaskSummary` - 基於任務名稱和描述生成任務完成摘要
 - `extractTitle` - 從內容中提取適合作為標題的文本
-- `extractSummaryFromConversation` - 從對話記錄中提取摘要信息
 
 ### 文件加載 (fileLoader.ts)
 
