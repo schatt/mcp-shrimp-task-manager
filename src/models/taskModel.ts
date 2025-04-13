@@ -171,6 +171,9 @@ export async function updateTaskContent(
     description?: string;
     notes?: string;
     relatedFiles?: RelatedFile[];
+    dependencies?: string[];
+    implementationGuide?: string;
+    verificationCriteria?: string;
   }
 ): Promise<{ success: boolean; message: string; task?: Task }> {
   // 獲取任務並檢查是否存在
@@ -202,6 +205,20 @@ export async function updateTaskContent(
 
   if (updates.relatedFiles !== undefined) {
     updateObj.relatedFiles = updates.relatedFiles;
+  }
+
+  if (updates.dependencies !== undefined) {
+    updateObj.dependencies = updates.dependencies.map((dep) => ({
+      taskId: dep,
+    }));
+  }
+
+  if (updates.implementationGuide !== undefined) {
+    updateObj.implementationGuide = updates.implementationGuide;
+  }
+
+  if (updates.verificationCriteria !== undefined) {
+    updateObj.verificationCriteria = updates.verificationCriteria;
   }
 
   // 如果沒有要更新的內容，提前返回

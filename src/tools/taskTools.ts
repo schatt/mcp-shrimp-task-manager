@@ -267,7 +267,8 @@ export const analyzeTaskSchema = z.object({
   initialConcept: z
     .string()
     .min(50, {
-      message: "初步解答構想過於簡短，請提供更完整的技術方案和實施策略詳情",
+      message:
+        "初步解答構想過於簡短，請提供更完整的技術方案和實施策略詳情，如果需要提供程式碼請使用 pseudocode 格式且盡量精簡只保留核心實現部分",
     })
     .describe("初步解答構想，包含技術方案、架構設計和實施策略"),
   previousAnalysis: z
@@ -352,7 +353,9 @@ export const reflectTaskSchema = z
         message:
           "技術分析結果過於簡略，請提供更詳盡的技術細節、依賴組件和實施方案說明",
       })
-      .describe("完整詳盡的技術分析結果，包括所有技術細節、依賴組件和實施方案"),
+      .describe(
+        "完整詳盡的技術分析結果，包括所有技術細節、依賴組件和實施方案，如果需要提供程式碼請使用 pseudocode 格式且盡量精簡只保留核心實現部分"
+      ),
   })
   .refine((data) => data.summary.length * 3 <= data.analysis.length, {
     message:
@@ -395,6 +398,7 @@ export async function reflectTask({
 
 - **如果確認方案已足夠完善**：
   - 請使用「split_tasks」工具，將解決方案分解為具體、可執行的子任務
+  - 如果任務太多或內容過長，請分批使用「split_tasks」工具，每次只提交一小部分任務
   - 建立明確的依賴關係和執行順序
   - 為每個子任務設定明確的完成標準和驗收條件
 
@@ -409,7 +413,7 @@ export async function reflectTask({
 拆分任務時，已將規劃與分析階段產生的關鍵知識保留並融入到任務中：
 
 1. **全局分析結果** - 所有任務都已關聯完整的分析文檔，在執行時可查看
-2. **任務專屬實現指南** - 每個任務都已保存具體的實現方法和建議
+2. **任務專屬實現指南** - 每個任務都已保存具體的實現方法和建議，如果可以請提供 pseudocode
 3. **任務專屬驗證標準** - 每個任務都設置了明確的驗證要求和檢查點
 
 此機制確保了任務執行者可以獲得完整的背景知識和技術細節，無需重新思考或推導解決方案。
@@ -486,8 +490,9 @@ export const splitTasksSchema = z
             .describe("與任務相關的檔案列表，包含檔案路徑、類型和描述"),
           implementationGuide: z
             .string()
-            .optional()
-            .describe("此特定任務的具體實現方法和步驟"),
+            .describe(
+              "此特定任務的具體實現方法和步驟，請參考之前的分析結果提供 pseudocode"
+            ),
           verificationCriteria: z
             .string()
             .optional()
@@ -1518,6 +1523,18 @@ export const updateTaskContentSchema = z
       )
       .optional()
       .describe("與任務相關的文件列表（選填）"),
+    dependencies: z
+      .array(z.string())
+      .optional()
+      .describe("任務的新依賴關係（選填）"),
+    implementationGuide: z
+      .string()
+      .optional()
+      .describe("任務的新實現指南（選填）"),
+    verificationCriteria: z
+      .string()
+      .optional()
+      .describe("任務的新驗證標準（選填）"),
   })
   .refine(
     (data) => {
@@ -1541,7 +1558,10 @@ export const updateTaskContentSchema = z
         data.name ||
         data.description ||
         data.notes ||
-        (data.relatedFiles && data.relatedFiles.length > 0)
+        data.dependencies ||
+        data.implementationGuide ||
+        data.verificationCriteria ||
+        data.relatedFiles
       );
     },
     {
@@ -1557,6 +1577,9 @@ export async function updateTaskContent({
   description,
   notes,
   relatedFiles,
+  dependencies,
+  implementationGuide,
+  verificationCriteria,
 }: z.infer<typeof updateTaskContentSchema>) {
   // 獲取任務以檢查它是否存在
   const task = await getTaskById(taskId);
@@ -1580,6 +1603,10 @@ export async function updateTaskContent({
   if (notes) updateSummary += `，更新注記`;
   if (relatedFiles)
     updateSummary += `，更新相關文件 (${relatedFiles.length} 個)`;
+  if (dependencies)
+    updateSummary += `，更新依賴關係 (${dependencies.length} 個)`;
+  if (implementationGuide) updateSummary += `，更新實現指南`;
+  if (verificationCriteria) updateSummary += `，更新驗證標準`;
 
   // 執行更新操作
   const result = await modelUpdateTaskContent(taskId, {
@@ -1587,6 +1614,9 @@ export async function updateTaskContent({
     description,
     notes,
     relatedFiles,
+    dependencies,
+    implementationGuide,
+    verificationCriteria,
   });
 
   // 構建響應消息

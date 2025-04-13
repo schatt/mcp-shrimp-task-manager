@@ -69,7 +69,7 @@ async function main() {
 
     server.tool(
       "analyze_task",
-      "深入分析任務需求並系統性檢查代碼庫，評估技術可行性與潛在風險",
+      "深入分析任務需求並系統性檢查代碼庫，評估技術可行性與潛在風險，如果需要提供程式碼請使用 pseudocode 格式且盡量精簡只保留核心實現部分",
       {
         summary: z
           .string()
@@ -84,7 +84,9 @@ async function main() {
             message:
               "初步解答構想過於簡短，請提供更完整的技術方案和實施策略詳情",
           })
-          .describe("初步解答構想，包含技術方案、架構設計和實施策略"),
+          .describe(
+            "初步解答構想，包含技術方案、架構設計和實施策略，如果需要提供程式碼請使用 pseudocode 格式且盡量精簡只保留核心實現部分"
+          ),
         previousAnalysis: z
           .string()
           .optional()
@@ -99,7 +101,7 @@ async function main() {
 
     server.tool(
       "reflect_task",
-      "批判性審查分析結果，評估方案完整性並識別優化機會，確保解決方案符合最佳實踐",
+      "批判性審查分析結果，評估方案完整性並識別優化機會，確保解決方案符合最佳實踐，如果需要提供程式碼請使用 pseudocode 格式且盡量精簡只保留核心實現部分",
       {
         summary: z
           .string()
@@ -115,7 +117,7 @@ async function main() {
               "技術分析結果過於簡略，請提供更詳盡的技術細節、依賴組件和實施方案說明",
           })
           .describe(
-            "完整詳盡的技術分析結果，包括所有技術細節、依賴組件和實施方案"
+            "完整詳盡的技術分析結果，包括所有技術細節、依賴組件和實施方案，如果需要提供程式碼請使用 pseudocode 格式且盡量精簡只保留核心實現部分"
           ),
       },
       async (args) => {
@@ -125,7 +127,7 @@ async function main() {
 
     server.tool(
       "split_tasks",
-      "將複雜任務分解為獨立且可追蹤的子任務，建立明確的依賴關係和優先順序。支援四種任務更新模式：追加(append)、覆蓋(overwrite)、選擇性更新(selective)和清除所有任務(clearAllTasks)，其中覆蓋模式只會刪除未完成的任務並保留已完成任務，選擇性更新模式可根據任務名稱智能匹配更新現有任務，同時保留其他任務，如果你需要規劃全新的任務請使用清除所有任務模式會清除所有任務並創建備份。請優先使用清除所有任務模式，只有用戶要求變更或修改計畫內容才使用其他模式",
+      "將複雜任務分解為獨立且可追蹤的子任務，建立明確的依賴關係和優先順序。支援四種任務更新模式：追加(append)、覆蓋(overwrite)、選擇性更新(selective)和清除所有任務(clearAllTasks)，其中覆蓋模式只會刪除未完成的任務並保留已完成任務，選擇性更新模式可根據任務名稱智能匹配更新現有任務，同時保留其他任務，如果你需要規劃全新的任務請使用清除所有任務模式會清除所有任務並創建備份。請優先使用清除所有任務模式，只有用戶要求變更或修改計畫內容才使用其他模式。\n\n**請參考之前的分析結果提供 pseudocode\n\n**如果任務太多或內容過長，請分批使用「split_tasks」工具，每次只提交一小部分任務",
       {
         updateMode: z
           .enum(["append", "overwrite", "selective", "clearAllTasks"])
@@ -186,8 +188,9 @@ async function main() {
                 .describe("與任務相關的檔案列表，包含檔案路徑、類型和描述"),
               implementationGuide: z
                 .string()
-                .optional()
-                .describe("此特定任務的具體實現方法和步驟"),
+                .describe(
+                  "此特定任務的具體實現方法和步驟，請參考之前的分析結果提供 pseudocode"
+                ),
               verificationCriteria: z
                 .string()
                 .optional()
@@ -293,6 +296,54 @@ async function main() {
         name: z.string().optional().describe("任務的新名稱（選填）"),
         description: z.string().optional().describe("任務的新描述內容（選填）"),
         notes: z.string().optional().describe("任務的新補充說明（選填）"),
+        dependencies: z
+          .array(z.string())
+          .optional()
+          .describe("任務的新依賴關係（選填）"),
+        relatedFiles: z
+          .array(
+            z.object({
+              path: z
+                .string()
+                .min(1, { message: "文件路徑不能為空，請提供有效的文件路徑" })
+                .describe("文件路徑，可以是相對於項目根目錄的路徑或絕對路徑"),
+              type: z
+                .enum([
+                  RelatedFileType.TO_MODIFY,
+                  RelatedFileType.REFERENCE,
+                  RelatedFileType.CREATE,
+                  RelatedFileType.DEPENDENCY,
+                  RelatedFileType.OTHER,
+                ])
+                .describe("文件與任務的關係類型"),
+              description: z
+                .string()
+                .optional()
+                .describe("文件的補充描述（選填）"),
+              lineStart: z
+                .number()
+                .int()
+                .positive()
+                .optional()
+                .describe("相關代碼區塊的起始行（選填）"),
+              lineEnd: z
+                .number()
+                .int()
+                .positive()
+                .optional()
+                .describe("相關代碼區塊的結束行（選填）"),
+            })
+          )
+          .optional()
+          .describe("與任務相關的文件列表（選填）"),
+        implementationGuide: z
+          .string()
+          .optional()
+          .describe("任務的新實現指南（選填）"),
+        verificationCriteria: z
+          .string()
+          .optional()
+          .describe("任務的新驗證標準（選填）"),
       },
       async (args) => {
         return await updateTaskContent(args);
