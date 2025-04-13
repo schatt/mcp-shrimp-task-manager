@@ -1,6 +1,6 @@
 {
   "name": "mcp-shrimp-task-manager",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "基於MCP的任務管理系統，提供任務規劃、拆分和管理功能",
   "main": "dist/index.js",
   "type": "module",
