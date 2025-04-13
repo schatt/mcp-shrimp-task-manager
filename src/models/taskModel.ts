@@ -694,31 +694,49 @@ export async function clearAllTasks(): Promise<{
     // 確保數據目錄存在
     await ensureDataDir();
 
-    // 讀取現有任務，用於創建備份
-    const tasks = await readTasks();
+    // 讀取現有任務
+    const allTasks = await readTasks();
 
     // 如果沒有任務，直接返回
-    if (tasks.length === 0) {
+    if (allTasks.length === 0) {
       return { success: true, message: "沒有任務需要清除" };
     }
+
+    // 篩選出已完成的任務
+    const completedTasks = allTasks.filter(
+      (task) => task.status === TaskStatus.COMPLETED
+    );
 
     // 創建備份文件名
     const timestamp = new Date()
       .toISOString()
       .replace(/:/g, "-")
       .replace(/\..+/, "");
-    const backupFileName = `tasks_backup_${timestamp}.json`;
-    const backupFilePath = path.join(DATA_DIR, backupFileName);
+    const backupFileName = `tasks_memory_${timestamp}.json`;
 
-    // 創建備份
-    await fs.writeFile(backupFilePath, JSON.stringify({ tasks }, null, 2));
+    // 確保 memory 目錄存在
+    const MEMORY_DIR = path.join(DATA_DIR, "memory");
+    try {
+      await fs.access(MEMORY_DIR);
+    } catch (error) {
+      await fs.mkdir(MEMORY_DIR, { recursive: true });
+    }
+
+    // 創建 memory 目錄下的備份路徑
+    const memoryFilePath = path.join(MEMORY_DIR, backupFileName);
+
+    // 同時寫入到 memory 目錄 (只包含已完成的任務)
+    await fs.writeFile(
+      memoryFilePath,
+      JSON.stringify({ tasks: completedTasks }, null, 2)
+    );
 
     // 清空任務文件
     await writeTasks([]);
 
     return {
       success: true,
-      message: `已成功清除所有任務，共 ${tasks.length} 個任務被刪除`,
+      message: `已成功清除所有任務，共 ${allTasks.length} 個任務被刪除，已備份 ${completedTasks.length} 個已完成的任務至 memory 目錄`,
       backupFile: backupFileName,
     };
   } catch (error) {

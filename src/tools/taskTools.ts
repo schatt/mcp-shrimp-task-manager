@@ -1,4 +1,6 @@
 import { z } from "zod";
+import path from "path";
+import { fileURLToPath } from "url";
 import {
   getAllTasks,
   getTaskById,
@@ -211,6 +213,12 @@ export async function planTask({
     }
   }
 
+  const __filename = fileURLToPath(import.meta.url);
+  const __dirname = path.dirname(__filename);
+  const PROJECT_ROOT = path.resolve(__dirname, "../..");
+  const DATA_DIR = process.env.DATA_DIR || path.join(PROJECT_ROOT, "data");
+  const MEMORY_DIR = path.join(DATA_DIR, "memory");
+
   prompt += `## 分析指引\n\n1. 首先確定任務的確切目標和預期成果
 2. 識別任務中可能的技術挑戰和關鍵決策點
 3. 考慮潛在的解決方案和替代方案
@@ -230,6 +238,33 @@ export async function planTask({
 - 當你遇到不理解專有名詞時，請勿產生幻覺
 - 你可以適當的時候網路搜尋工具，查詢相關的內容
 - 當你遇到需要查詢的內容時，請使用網路搜尋工具，例如包括但不限於 ddg_search、web、web_search 等等...
+
+## 任務記憶檢索指南
+
+過去執行過的任務都會被備份到 **${MEMORY_DIR}** 目錄中。當規劃新任務或解決類似問題時，請務必先參考歷史記錄以提高效率：
+
+1. **查找相關歷史任務**：
+   - 所有歷史任務備份都保存在 **${MEMORY_DIR}** 子目錄下
+   - 備份文件命名格式為 **tasks_memory_YYYY-MM-DDThh-mm-ss.json**
+   - 您可以按時間順序查看，或根據任務相關性選擇特定備份
+
+2. **分析歷史任務內容**：
+   - 查閱歷史任務的描述、實施方法和執行結果
+   - 識別與當前任務相似的模式或解決方案
+   - 評估過去任務的成功經驗和需要改進的地方
+
+3. **應用歷史經驗**：
+   - 借鑒成功的實施策略和方法
+   - 避免重複過去的錯誤或低效方案
+   - 識別可重用的代碼、模式或工具
+   - 考慮如何改進或擴展過去的解決方案
+
+4. **智能參考建議**：
+   - 在規劃新任務時，主動查找和引用相關的歷史任務
+   - 在任務描述或實施指南中引用相關歷史記錄的位置
+   - 明確說明哪些部分可以重用或需要修改
+
+通過有效利用任務記憶功能，您可以避免重複工作、借鑒成功經驗，並確保解決方案的一致性和可靠性。
 
 ## 下一步行動\n\n完成初步分析後，請使用「analyze_task」工具提交您的分析結果，必須包含以下兩個關鍵部分：\n\n1. **結構化的任務摘要**：
    - 明確的任務目標和期望成果
