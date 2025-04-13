@@ -262,150 +262,202 @@ export async function batchCreateOrUpdateTasks(
     notes?: string;
     dependencies?: string[];
     relatedFiles?: RelatedFile[];
+    implementationGuide?: string; // 新增：實現指南
+    verificationCriteria?: string; // 新增：驗證標準
   }>,
-  updateMode: "append" | "overwrite" | "selective" | "clearAllTasks" // 必填參數，指定任務更新策略
+  updateMode: "append" | "overwrite" | "selective" | "clearAllTasks", // 必填參數，指定任務更新策略
+  globalAnalysisResult?: string // 新增：全局分析結果
 ): Promise<Task[]> {
-  // 獲取現有任務
+  // 讀取現有的所有任務
   const existingTasks = await readTasks();
-  const nameToIdMap = new Map<string, string>();
-  const idToTaskMap = new Map<string, Task>();
 
-  // 添加現有任務到映射表
-  existingTasks.forEach((task) => {
-    nameToIdMap.set(task.name, task.id);
-    idToTaskMap.set(task.id, task);
-  });
+  // 根據更新模式處理現有任務
+  let tasksToKeep: Task[] = [];
 
-  // 處理不同的更新模式
-  if (updateMode === "overwrite") {
-    // 覆蓋模式：只刪除未完成的任務，保留已完成的任務
-    const completedTasks = existingTasks.filter(
+  if (updateMode === "append") {
+    // 追加模式：保留所有現有任務
+    tasksToKeep = [...existingTasks];
+  } else if (updateMode === "overwrite") {
+    // 覆蓋模式：僅保留已完成的任務，清除所有未完成任務
+    tasksToKeep = existingTasks.filter(
       (task) => task.status === TaskStatus.COMPLETED
     );
-    await writeTasks(completedTasks);
-
-    // 更新映射表，只保留已完成的任務
-    nameToIdMap.clear();
-    idToTaskMap.clear();
-    completedTasks.forEach((task) => {
-      nameToIdMap.set(task.name, task.id);
-      idToTaskMap.set(task.id, task);
-    });
   } else if (updateMode === "selective") {
-    // selective 模式：保留未在清單中的現有任務，更新名稱匹配的任務
-    // 不做任何預處理，保留所有現有任務，在處理每個新任務時進行選擇性更新
-  } else {
-    // append 模式：保留所有現有任務，不需要特殊處理
+    // 選擇性更新模式：根據任務名稱選擇性更新，保留未在更新列表中的任務
+    // 1. 提取待更新任務的名稱清單
+    const updateTaskNames = new Set(taskDataList.map((task) => task.name));
+
+    // 2. 保留所有沒有出現在更新列表中的任務
+    tasksToKeep = existingTasks.filter(
+      (task) => !updateTaskNames.has(task.name)
+    );
+  } else if (updateMode === "clearAllTasks") {
+    // 清除所有任務模式：清空任務列表
+    tasksToKeep = [];
   }
 
-  // 創建任務名稱集合，用於選擇性更新模式
-  const taskNameSet = new Set(taskDataList.map((task) => task.name));
+  // 這個映射將用於存儲名稱到任務ID的映射，用於支持通過名稱引用任務
+  const taskNameToIdMap = new Map<string, string>();
 
-  // 準備最終的任務清單，如果是 selective 模式，先保留不在新清單中的任務
-  let finalTaskList: Task[] = [];
+  // 對於選擇性更新模式，先將現有任務的名稱和ID記錄下來
   if (updateMode === "selective") {
-    finalTaskList = existingTasks.filter((task) => !taskNameSet.has(task.name));
+    existingTasks.forEach((task) => {
+      taskNameToIdMap.set(task.name, task.id);
+    });
   }
 
-  // 第一階段：創建或更新任務，但不設置依賴
-  const firstPassTasks: Array<{ task: Task; originalDeps: string[] }> = [];
+  // 記錄所有任務的名稱和ID，無論是要保留的任務還是新建的任務
+  // 這將用於稍後解析依賴關係
+  tasksToKeep.forEach((task) => {
+    taskNameToIdMap.set(task.name, task.id);
+  });
+
+  // 創建新任務的列表
+  const newTasks: Task[] = [];
 
   for (const taskData of taskDataList) {
-    let newTask: Task;
+    // 檢查是否為選擇性更新模式且該任務名稱已存在
+    if (updateMode === "selective" && taskNameToIdMap.has(taskData.name)) {
+      // 獲取現有任務的ID
+      const existingTaskId = taskNameToIdMap.get(taskData.name)!;
 
-    // 查找是否存在同名任務
-    const existingTaskId = nameToIdMap.get(taskData.name);
-    const isExistingTask = existingTaskId !== undefined;
+      // 查找現有任務
+      const existingTaskIndex = existingTasks.findIndex(
+        (task) => task.id === existingTaskId
+      );
 
-    if (isExistingTask && updateMode === "selective") {
-      // 選擇性更新模式：更新現有任務
-      const existingTask = idToTaskMap.get(existingTaskId)!;
+      // 如果找到現有任務並且該任務未完成，則更新它
+      if (
+        existingTaskIndex !== -1 &&
+        existingTasks[existingTaskIndex].status !== TaskStatus.COMPLETED
+      ) {
+        const taskToUpdate = existingTasks[existingTaskIndex];
 
-      // 更新任務內容但保留原始ID和創建時間
-      newTask = (await updateTask(existingTaskId, {
-        name: taskData.name,
-        description: taskData.description,
-        notes: taskData.notes,
-        // 暫時不更新依賴，在第二階段處理
-        relatedFiles: taskData.relatedFiles,
-      })) as Task;
+        // 更新任務的基本信息，但保留原始ID、創建時間等
+        const updatedTask: Task = {
+          ...taskToUpdate,
+          name: taskData.name,
+          description: taskData.description,
+          notes: taskData.notes,
+          // 後面會處理 dependencies
+          updatedAt: new Date(),
+          // 新增：保存實現指南（如果有）
+          implementationGuide: taskData.implementationGuide,
+          // 新增：保存驗證標準（如果有）
+          verificationCriteria: taskData.verificationCriteria,
+          // 新增：保存全局分析結果（如果有）
+          analysisResult: globalAnalysisResult,
+        };
 
-      // 如果更新失敗，使用現有任務作為後備
-      if (!newTask) {
-        console.warn(
-          `警告：更新任務 "${taskData.name}" 失敗，使用現有任務作為後備`
-        );
-        newTask = existingTask;
+        // 處理相關文件（如果有）
+        if (taskData.relatedFiles) {
+          updatedTask.relatedFiles = taskData.relatedFiles;
+        }
+
+        // 將更新後的任務添加到新任務列表
+        newTasks.push(updatedTask);
+
+        // 從tasksToKeep中移除此任務，因為它已經被更新並添加到newTasks中了
+        tasksToKeep = tasksToKeep.filter((task) => task.id !== existingTaskId);
+      } else {
+        // 如果任務已完成或找不到，則跳過更新，可能在控制台輸出警告
+        if (
+          existingTaskIndex !== -1 &&
+          existingTasks[existingTaskIndex].status === TaskStatus.COMPLETED
+        ) {
+          console.warn(
+            `警告：嘗試更新已完成的任務 "${taskData.name}"，操作被忽略`
+          );
+        } else {
+          console.warn(
+            `警告：嘗試更新不存在的任務 "${taskData.name}"，操作被忽略`
+          );
+        }
       }
     } else {
       // 創建新任務
-      newTask = await createTask(
-        taskData.name,
-        taskData.description,
-        taskData.notes,
-        [], // 空依賴列表，在第二階段設置
-        taskData.relatedFiles
-      );
+      const newTaskId = uuidv4();
+
+      // 將新任務的名稱和ID添加到映射中
+      taskNameToIdMap.set(taskData.name, newTaskId);
+
+      const newTask: Task = {
+        id: newTaskId,
+        name: taskData.name,
+        description: taskData.description,
+        notes: taskData.notes,
+        status: TaskStatus.PENDING,
+        dependencies: [], // 後面會填充
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        relatedFiles: taskData.relatedFiles,
+        // 新增：保存實現指南（如果有）
+        implementationGuide: taskData.implementationGuide,
+        // 新增：保存驗證標準（如果有）
+        verificationCriteria: taskData.verificationCriteria,
+        // 新增：保存全局分析結果（如果有）
+        analysisResult: globalAnalysisResult,
+      };
+
+      newTasks.push(newTask);
     }
-
-    // 將新任務添加到映射表
-    nameToIdMap.set(newTask.name, newTask.id);
-    idToTaskMap.set(newTask.id, newTask);
-
-    // 保存原始依賴信息
-    firstPassTasks.push({
-      task: newTask,
-      originalDeps: taskData.dependencies || [],
-    });
   }
 
-  // 第二階段：更新所有新增或修改任務的依賴關係
-  const processedTasks: Task[] = [];
+  // 處理任務之間的依賴關係
+  for (let i = 0; i < taskDataList.length; i++) {
+    const taskData = taskDataList[i];
+    const newTask = newTasks[i];
 
-  for (const { task, originalDeps } of firstPassTasks) {
-    // 解析依賴關係
-    const resolvedDependencies: TaskDependency[] = [];
+    // 如果存在依賴關係，處理它們
+    if (taskData.dependencies && taskData.dependencies.length > 0) {
+      const resolvedDependencies: TaskDependency[] = [];
 
-    for (const dep of originalDeps) {
-      // 嘗試將依賴名稱解析為ID
-      let depId = dep;
+      for (const dependencyName of taskData.dependencies) {
+        // 首先嘗試將依賴項解釋為任務ID
+        let dependencyTaskId = dependencyName;
 
-      // 如果不是UUID格式，嘗試將其作為任務名稱解析
-      if (
-        !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
-          dep
-        )
-      ) {
-        const resolvedId = nameToIdMap.get(dep);
-        if (resolvedId) {
-          depId = resolvedId;
+        // 如果依賴項看起來不像UUID，則嘗試將其解釋為任務名稱
+        if (
+          !dependencyName.match(
+            /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+          )
+        ) {
+          // 如果映射中存在此名稱，則使用對應的ID
+          if (taskNameToIdMap.has(dependencyName)) {
+            dependencyTaskId = taskNameToIdMap.get(dependencyName)!;
+          } else {
+            console.warn(
+              `警告：任務 "${taskData.name}" 引用了未知的依賴任務 "${dependencyName}"，此依賴將被忽略`
+            );
+            continue; // 跳過此依賴
+          }
         } else {
-          console.warn(`警告：找不到名為 "${dep}" 的任務，已忽略此依賴`);
-          continue; // 跳過此依賴
+          // 是UUID格式，但需要確認此ID是否對應實際存在的任務
+          const idExists = [...tasksToKeep, ...newTasks].some(
+            (task) => task.id === dependencyTaskId
+          );
+          if (!idExists) {
+            console.warn(
+              `警告：任務 "${taskData.name}" 引用了未知的依賴任務ID "${dependencyTaskId}"，此依賴將被忽略`
+            );
+            continue; // 跳過此依賴
+          }
         }
+
+        resolvedDependencies.push({ taskId: dependencyTaskId });
       }
 
-      resolvedDependencies.push({ taskId: depId });
-    }
-
-    // 更新任務的依賴
-    const updatedTask = await updateTask(task.id, {
-      dependencies: resolvedDependencies,
-    });
-
-    if (updatedTask) {
-      processedTasks.push(updatedTask);
-    } else {
-      processedTasks.push(task); // 回退到原始任務
+      newTask.dependencies = resolvedDependencies;
     }
   }
 
-  // 如果是選擇性更新模式，合併保留的任務和新建/更新的任務
-  if (updateMode === "selective") {
-    return [...finalTaskList, ...processedTasks];
-  }
+  // 合併保留的任務和新任務
+  const allTasks = [...tasksToKeep, ...newTasks];
 
-  return processedTasks;
+  // 寫入更新後的任務列表
+  await writeTasks(allTasks);
+
+  return newTasks;
 }
 
 // 檢查任務是否可以執行（所有依賴都已完成）

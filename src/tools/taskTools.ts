@@ -404,6 +404,16 @@ export async function reflectTask({
   - 若希望**選擇性更新特定任務**，同時保留其他未完成任務，使用 updateMode="selective"
   - 若希望**清除所有任務**並自動創建備份，使用 updateMode="clearAllTasks"
 
+## 知識傳遞機制說明
+
+拆分任務時，已將規劃與分析階段產生的關鍵知識保留並融入到任務中：
+
+1. **全局分析結果** - 所有任務都已關聯完整的分析文檔，在執行時可查看
+2. **任務專屬實現指南** - 每個任務都已保存具體的實現方法和建議
+3. **任務專屬驗證標準** - 每個任務都設置了明確的驗證要求和檢查點
+
+此機制確保了任務執行者可以獲得完整的背景知識和技術細節，無需重新思考或推導解決方案。
+
 您的批判性評估將決定最終方案的質量，請務必嚴格審查，不放過任何潛在問題。`;
 
   return {
@@ -423,6 +433,12 @@ export const splitTasksSchema = z
       .enum(["append", "overwrite", "selective", "clearAllTasks"])
       .describe(
         "任務更新模式（必填）：'append'(保留現有任務並新增)、'overwrite'(清除所有未完成任務並重建)、'selective'(根據名稱匹配更新現有任務，保留其餘任務)、'clearAllTasks'(清除所有任務並創建備份)"
+      ),
+    globalAnalysisResult: z
+      .string()
+      .optional()
+      .describe(
+        "全局分析結果：來自 reflect_task 的完整分析結果，適用於所有任務的通用部分"
       ),
     tasks: z
       .array(
@@ -468,6 +484,14 @@ export const splitTasksSchema = z
             )
             .optional()
             .describe("與任務相關的檔案列表，包含檔案路徑、類型和描述"),
+          implementationGuide: z
+            .string()
+            .optional()
+            .describe("此特定任務的具體實現方法和步驟"),
+          verificationCriteria: z
+            .string()
+            .optional()
+            .describe("此特定任務的驗證標準和檢驗方法"),
         })
       )
       .min(1, { message: "至少需要提供一個任務，請確保任務列表不為空" })
@@ -494,6 +518,7 @@ export const splitTasksSchema = z
 export async function splitTasks({
   updateMode,
   tasks,
+  globalAnalysisResult,
 }: z.infer<typeof splitTasksSchema>) {
   // 處理 clearAllTasks 模式，直接調用 modelClearAllTasks 函數
   if (updateMode === "clearAllTasks") {
@@ -546,8 +571,12 @@ export async function splitTasks({
     updateModeMessage = "清除模式：清除所有任務並創建備份";
   }
 
-  // 批量創建任務 - 將 updateMode 傳遞給 batchCreateOrUpdateTasks
-  const createdTasks = await batchCreateOrUpdateTasks(tasks, updateMode);
+  // 批量創建任務 - 將 updateMode 和 globalAnalysisResult 傳遞給 batchCreateOrUpdateTasks
+  const createdTasks = await batchCreateOrUpdateTasks(
+    tasks,
+    updateMode,
+    globalAnalysisResult
+  );
 
   // 獲取所有任務，用於顯示完整的依賴關係
   const allTasks = await getAllTasks();
@@ -596,26 +625,52 @@ export async function splitTasks({
 - 是否明確了任務的驗收標準？
 
 ## 詳細任務清單\n\n${createdTasks
-    .map(
-      (task, index) =>
-        `### 任務 ${index + 1}：${task.name}\n**ID:** \`${
-          task.id
-        }\`\n**描述:** ${task.description}\n${
-          task.notes ? `**注意事項:** ${task.notes}\n` : ""
-        }${
-          task.dependencies.length > 0
-            ? `**依賴任務:** ${task.dependencies
-                .map((d) => {
-                  // 查找依賴任務的名稱，提供更友好的顯示
-                  const depTask = allTasks.find((t) => t.id === d.taskId);
-                  return depTask
-                    ? `"${depTask.name}" (\`${d.taskId}\`)`
-                    : `\`${d.taskId}\``;
-                })
-                .join(", ")}\n`
-            : "**依賴任務:** 無\n"
-        }`
-    )
+    .map((task, index) => {
+      let taskInfo = `### 任務 ${index + 1}：${task.name}\n**ID:** \`${
+        task.id
+      }\`\n**描述:** ${task.description}\n`;
+
+      if (task.notes) {
+        taskInfo += `**注意事項:** ${task.notes}\n`;
+      }
+
+      // 添加實現指南的顯示（如果有）
+      if (task.implementationGuide) {
+        taskInfo += `**實現指南:** ${
+          task.implementationGuide.length > 100
+            ? task.implementationGuide.substring(0, 100) +
+              "... (執行時可查看完整內容)"
+            : task.implementationGuide
+        }\n`;
+      }
+
+      // 添加驗證標準的顯示（如果有）
+      if (task.verificationCriteria) {
+        taskInfo += `**驗證標準:** ${
+          task.verificationCriteria.length > 100
+            ? task.verificationCriteria.substring(0, 100) +
+              "... (驗證時可查看完整內容)"
+            : task.verificationCriteria
+        }\n`;
+      }
+
+      // 添加依賴任務
+      taskInfo += `${
+        task.dependencies.length > 0
+          ? `**依賴任務:** ${task.dependencies
+              .map((d) => {
+                // 查找依賴任務的名稱，提供更友好的顯示
+                const depTask = allTasks.find((t) => t.id === d.taskId);
+                return depTask
+                  ? `"${depTask.name}" (\`${d.taskId}\`)`
+                  : `\`${d.taskId}\``;
+              })
+              .join(", ")}\n`
+          : "**依賴任務:** 無\n"
+      }`;
+
+      return taskInfo;
+    })
     .join(
       "\n"
     )}\n\n## 任務依賴管理技巧\n\n### 依賴關係設置\n在建立新任務時，可以通過以下方式指定依賴關係：\n\n1. **使用任務名稱**（推薦）：直接使用其他任務的名稱，如 \`"建立用戶界面"\`\n2. **使用任務ID**：使用任務的唯一標識符，如 \`"${
@@ -783,6 +838,21 @@ export async function executeTask({
   }\n- **ID:** \`${task.id}\`\n- **描述:** ${task.description}\n${
     task.notes ? `- **注意事項:** ${task.notes}\n` : ""
   }\n`;
+
+  // ===== 增強：顯示實現指南（如果有） =====
+  if (task.implementationGuide) {
+    prompt += `\n## 實現指南\n\n${task.implementationGuide}\n\n`;
+  }
+
+  // ===== 增強：顯示驗證標準（如果有） =====
+  if (task.verificationCriteria) {
+    prompt += `\n## 驗證標準\n\n${task.verificationCriteria}\n\n`;
+  }
+
+  // ===== 增強：顯示分析結果（如果有） =====
+  if (task.analysisResult) {
+    prompt += `\n## 分析背景\n\n${task.analysisResult}\n\n`;
+  }
 
   // ===== 增強：處理相關文件內容 =====
   let relatedFilesSummary = "";
@@ -1039,13 +1109,36 @@ export async function verifyTask({ taskId }: z.infer<typeof verifyTaskSchema>) {
     };
   }
 
-  const prompt = `## 任務驗證評估\n\n### 任務資料\n\n- **名稱:** ${
+  // 構建基本的任務詳情
+  let prompt = `## 任務驗證評估\n\n### 任務資料\n\n- **名稱:** ${
     task.name
   }\n- **ID:** \`${task.id}\`\n- **描述:** ${task.description}\n${
     task.notes ? `- **注意事項:** ${task.notes}\n` : ""
+  }\n`;
+
+  // 新增：顯示任務特定的驗證標準（如果有）
+  if (task.verificationCriteria) {
+    prompt += `\n## 任務特定驗證標準\n\n${task.verificationCriteria}\n\n`;
   }
 
-## 完整性驗證標準\n\n請根據以下關鍵標準進行嚴格的質量檢查，為每個評估項目提供詳細的證據和具體範例：
+  // 新增：顯示實現指南的主要內容（如果有）
+  if (task.implementationGuide) {
+    prompt += `\n## 實現指南摘要\n\n${
+      task.implementationGuide.length > 200
+        ? task.implementationGuide.substring(0, 200) + "... (參見完整實現指南)"
+        : task.implementationGuide
+    }\n\n`;
+  }
+
+  // 新增：顯示分析結果摘要（如果有）
+  if (task.analysisResult) {
+    prompt += `\n## 分析要點摘要\n\n在驗證時應考慮原始分析中強調的以下關鍵點：\n\n${extractSummary(
+      task.analysisResult,
+      300
+    )}\n\n`;
+  }
+
+  prompt += `## 完整性驗證標準\n\n請根據以下關鍵標準進行嚴格的質量檢查，為每個評估項目提供詳細的證據和具體範例：
 
 ### 1. 需求符合性 (30%)
 #### 核心評估項目：
@@ -1403,7 +1496,7 @@ export const updateTaskContentSchema = z
             .enum([
               RelatedFileType.TO_MODIFY,
               RelatedFileType.REFERENCE,
-              RelatedFileType.OUTPUT,
+              RelatedFileType.CREATE,
               RelatedFileType.DEPENDENCY,
               RelatedFileType.OTHER,
             ])
@@ -1570,7 +1663,7 @@ export const updateTaskRelatedFilesSchema = z
             .enum([
               RelatedFileType.TO_MODIFY,
               RelatedFileType.REFERENCE,
-              RelatedFileType.OUTPUT,
+              RelatedFileType.CREATE,
               RelatedFileType.DEPENDENCY,
               RelatedFileType.OTHER,
             ])

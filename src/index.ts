@@ -132,6 +132,12 @@ async function main() {
           .describe(
             "任務更新模式選擇：'append'(保留所有現有任務並添加新任務)、'overwrite'(清除所有未完成任務並完全替換，保留已完成任務)、'selective'(智能更新：根據任務名稱匹配更新現有任務，保留不在列表中的任務，推薦用於任務微調)、'clearAllTasks'(清除所有任務並創建備份)。\n預設為'clearAllTasks'模式，只有用戶要求變更或修改計畫內容才使用其他模式"
           ),
+        globalAnalysisResult: z
+          .string()
+          .optional()
+          .describe(
+            "全局分析結果：來自 reflect_task 的完整分析結果，適用於所有任務的通用部分"
+          ),
         tasks: z
           .array(
             z.object({
@@ -178,6 +184,14 @@ async function main() {
                 )
                 .optional()
                 .describe("與任務相關的檔案列表，包含檔案路徑、類型和描述"),
+              implementationGuide: z
+                .string()
+                .optional()
+                .describe("此特定任務的具體實現方法和步驟"),
+              verificationCriteria: z
+                .string()
+                .optional()
+                .describe("此特定任務的驗證標準和檢驗方法"),
             })
           )
           .describe("結構化的任務清單，每個任務應保持原子性且有明確的完成標準"),
@@ -303,7 +317,7 @@ async function main() {
                 .enum([
                   RelatedFileType.TO_MODIFY,
                   RelatedFileType.REFERENCE,
-                  RelatedFileType.OUTPUT,
+                  RelatedFileType.CREATE,
                   RelatedFileType.DEPENDENCY,
                   RelatedFileType.OTHER,
                 ])

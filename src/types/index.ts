@@ -15,7 +15,7 @@ export interface TaskDependency {
 export enum RelatedFileType {
   TO_MODIFY = "待修改", // 需要在任務中修改的文件
   REFERENCE = "參考資料", // 任務的參考資料或相關文檔
-  OUTPUT = "輸出結果", // 任務產生的輸出文件
+  CREATE = "待建立", // 需要在任務中建立的文件
   DEPENDENCY = "依賴文件", // 任務依賴的組件或庫文件
   OTHER = "其他", // 其他類型的相關文件
 }
@@ -42,6 +42,15 @@ export interface Task {
   completedAt?: Date; // 任務完成的時間戳（僅適用於已完成的任務）
   summary?: string; // 任務完成摘要，簡潔描述實施結果和重要決策（僅適用於已完成的任務）
   relatedFiles?: RelatedFile[]; // 與任務相關的文件列表（選填）
+
+  // 新增欄位：保存完整的技術分析結果
+  analysisResult?: string; // 來自 analyze_task 和 reflect_task 階段的完整分析結果
+
+  // 新增欄位：保存具體的實現指南
+  implementationGuide?: string; // 具體的實現方法、步驟和建議
+
+  // 新增欄位：保存驗證標準和檢驗方法
+  verificationCriteria?: string; // 明確的驗證標準、測試要點和驗收條件
 }
 
 // 規劃任務的參數：用於初始化任務規劃階段
@@ -73,12 +82,22 @@ export interface SplitTasksArgs {
    * - "clearAllTasks"：清除所有任務並創建備份
    */
   updateMode: "append" | "overwrite" | "selective" | "clearAllTasks";
+
+  // 全局分析結果：用於所有任務的共享分析數據
+  globalAnalysisResult?: string; // 來自 reflect_task 的完整分析結果，適用於所有任務的通用部分
+
   tasks: Array<{
     name: string; // 簡潔明確的任務名稱，應能清晰表達任務目的
     description: string; // 詳細的任務描述，包含實施要點、技術細節和驗收標準
     notes?: string; // 補充說明、特殊處理要求或實施建議（選填）
     dependencies?: string[]; // 此任務依賴的前置任務ID列表，形成任務的有向無環依賴圖
     relatedFiles?: RelatedFile[]; // 與任務相關的文件列表（選填）
+
+    // 新增欄位：任務專屬的實現指南
+    implementationGuide?: string; // 此特定任務的具體實現方法和步驟
+
+    // 新增欄位：任務專屬的驗證標準
+    verificationCriteria?: string; // 此特定任務的驗證標準和檢驗方法
   }>;
 }
 

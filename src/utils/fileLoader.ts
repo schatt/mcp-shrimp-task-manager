@@ -33,7 +33,7 @@ export async function loadTaskRelatedFiles(
     [RelatedFileType.TO_MODIFY]: 1,
     [RelatedFileType.REFERENCE]: 2,
     [RelatedFileType.DEPENDENCY]: 3,
-    [RelatedFileType.OUTPUT]: 4,
+    [RelatedFileType.CREATE]: 4,
     [RelatedFileType.OTHER]: 5,
   };
 
