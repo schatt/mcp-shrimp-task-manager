@@ -28,6 +28,10 @@ import {
   updateTaskContentSchema,
   updateTaskRelatedFiles,
   updateTaskRelatedFilesSchema,
+  queryTask,
+  queryTaskSchema,
+  getTaskDetail,
+  getTaskDetailSchema,
 } from "./tools/taskTools.js";
 
 async function main() {
@@ -395,6 +399,61 @@ async function main() {
       },
       async (args) => {
         return await updateTaskRelatedFiles(args);
+      }
+    );
+
+    // 註冊查詢任務工具
+    server.tool(
+      "query_task",
+      "根據關鍵字或ID搜尋任務，顯示省略版的任務資訊",
+      {
+        query: z
+          .string()
+          .min(1, {
+            message: "查詢內容不能為空，請提供任務ID或搜尋關鍵字",
+          })
+          .describe("搜尋查詢文字，可以是任務ID或多個關鍵字（空格分隔）"),
+        isId: z
+          .boolean()
+          .optional()
+          .default(false)
+          .describe("指定是否為ID查詢模式，默認為否（關鍵字模式）"),
+        page: z
+          .number()
+          .int()
+          .positive()
+          .optional()
+          .default(1)
+          .describe("分頁頁碼，默認為第1頁"),
+        pageSize: z
+          .number()
+          .int()
+          .positive()
+          .min(1)
+          .max(20)
+          .optional()
+          .default(5)
+          .describe("每頁顯示的任務數量，默認為5筆，最大20筆"),
+      },
+      async (args) => {
+        return await queryTask(args);
+      }
+    );
+
+    // 註冊取得任務完整詳情工具
+    server.tool(
+      "get_task_detail",
+      "根據任務ID獲取任務的完整詳細信息，包括未截斷的實現指南和驗證標準等",
+      {
+        taskId: z
+          .string()
+          .min(1, {
+            message: "任務ID不能為空，請提供有效的任務ID",
+          })
+          .describe("欲檢視詳情的任務ID"),
+      },
+      async (args) => {
+        return await getTaskDetail(args);
       }
     );
 

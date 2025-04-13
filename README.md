@@ -1,64 +1,68 @@
-# MCP 蝦米任務管理器
+[English](README.md) | [中文](docs/zh/README.md)
+
+# MCP Shrimp Task Manager
 
 [![smithery badge](https://smithery.ai/badge/@cjo4m06/mcp-shrimp-task-manager)](https://smithery.ai/server/@cjo4m06/mcp-shrimp-task-manager)
 
-> 🚀 基於 Model Context Protocol (MCP) 的智能任務管理系統，為 AI Agent 提供高效的程式開發工作流程框架。
+> 🚀 An intelligent task management system based on Model Context Protocol (MCP), providing an efficient programming workflow framework for AI Agents.
 
-蝦米任務管理器透過結構化的工作流程引導，協助 Agent 系統性規劃程式開發步驟，強化任務記憶管理機制，有效避免冗餘與重複的編程工作。
+Shrimp Task Manager guides Agents through structured workflows for systematic programming, enhancing task memory management mechanisms, and effectively avoiding redundant and repetitive coding work.
 
-## ✨ 功能特點
+## ✨ Features
 
-- **任務規劃與分析**：深入理解與分析複雜任務需求
-- **智能任務拆分**：將大型任務自動拆分為可管理的小型任務
-- **依賴關係管理**：精確處理任務間的依賴關係，確保正確的執行順序
-- **執行狀態追蹤**：即時監控任務執行進度和狀態
-- **任務完整性驗證**：確保任務成果符合預期要求
-- **任務複雜度評估**：自動評估任務複雜度並提供最佳處理建議
-- **任務摘要自動更新**：完成任務時自動產生摘要，優化記憶效能
-- **任務記憶功能**：自動備份任務歷史記錄，提供長期記憶和參考能力
+- **Task Planning and Analysis**: Deep understanding and analysis of complex task requirements
+- **Intelligent Task Decomposition**: Automatically break down large tasks into manageable smaller tasks
+- **Dependency Management**: Precisely handle dependencies between tasks, ensuring correct execution order
+- **Execution Status Tracking**: Real-time monitoring of task execution progress and status
+- **Task Completeness Verification**: Ensure task results meet expected requirements
+- **Task Complexity Assessment**: Automatically evaluate task complexity and provide optimal handling suggestions
+- **Automatic Task Summary Updates**: Automatically generate summaries upon task completion, optimizing memory performance
+- **Task Memory Function**: Automatically backup task history, providing long-term memory and reference capabilities
 
-## 🔄 任務管理工作流程
+## 🔄 Task Management Workflow
 
-本系統提供完整的任務管理生命週期：
+The system provides a complete task management lifecycle:
 
-1. **開始規劃** `plan_task`：分析任務問題，確定需求範圍
-2. **深入分析** `analyze_task`：檢查現有代碼庫避免重複工作
-3. **方案反思** `reflect_task`：批判性審查分析結果，確保方案完善
-4. **任務拆分** `split_tasks`：將複雜任務分解為小型任務，建立明確依賴關係
-5. **任務列表** `list_tasks`：查看所有任務及其執行狀態
-6. **執行任務** `execute_task`：執行特定任務，同時評估複雜度
-7. **結果檢驗** `verify_task`：全面檢查任務完成情況
-8. **任務完成** `complete_task`：標記任務完成並生成報告，自動更新摘要
-9. **任務管理** `delete_task`：管理未完成的任務（已完成任務將保留在系統中）
+1. **Start Planning** `plan_task`: Analyze task problems, determine requirement scope
+2. **In-depth Analysis** `analyze_task`: Check existing codebase to avoid duplicate work
+3. **Solution Reflection** `reflect_task`: Critically review analysis results, ensure comprehensive solutions
+4. **Task Decomposition** `split_tasks`: Break down complex tasks into smaller ones, establish clear dependencies
+5. **Task List** `list_tasks`: View all tasks and their execution status
+6. **Execute Task** `execute_task`: Execute specific tasks while assessing complexity
+7. **Result Verification** `verify_task`: Comprehensively check task completion
+8. **Task Completion** `complete_task`: Mark tasks as complete and generate reports, automatically update summaries
+9. **Task Management** `delete_task`: Manage incomplete tasks (completed tasks remain in the system)
+10. **Query Tasks** `query_task`: Search for related tasks in past memories using keywords
+11. **Display Task** `get_task_detail`: Display complete task guidance
 
-## 🧠 任務記憶功能
+## 🧠 Task Memory Function
 
-蝦米任務管理器具備長期記憶功能，可以自動保存任務執行的歷史記錄，並在規劃新任務時提供參考經驗。
+Shrimp Task Manager has long-term memory capabilities, automatically saving task execution history and providing reference experiences when planning new tasks.
 
-### 功能特點
+### Key Features
 
-- 系統會自動將任務備份到 memory 目錄中
-- 備份文件按照時間順序命名，格式為 tasks_backup_YYYY-MM-DDThh-mm-ss.json
-- 任務規劃 Agent 會自動獲得關於如何利用記憶功能的指導
+- The system automatically backs up tasks to the memory directory
+- Backup files are named in chronological order, in the format tasks_backup_YYYY-MM-DDThh-mm-ss.json
+- Task planning Agents automatically receive guidance on how to use the memory function
 
-### 優勢與效益
+### Advantages and Benefits
 
-- **避免重複工作**：參考過去任務，不必從零開始解決類似問題
-- **借鑒成功經驗**：利用已驗證有效的解決方案，提高開發效率
-- **學習與改進**：識別過去的錯誤或低效方案，持續優化工作流程
-- **知識沉澱**：隨著系統使用時間增長，形成持續擴展的知識庫
+- **Avoid Duplicate Work**: Reference past tasks, no need to solve similar problems from scratch
+- **Learn from Successful Experiences**: Utilize proven effective solutions, improve development efficiency
+- **Learning and Improvement**: Identify past mistakes or inefficient solutions, continuously optimize workflows
+- **Knowledge Accumulation**: Form a continuously expanding knowledge base as system usage increases
 
-通過有效利用任務記憶功能，系統能夠不斷積累經驗，智能化程度和工作效率將持續提升。
+Through effective use of the task memory function, the system can continuously accumulate experience, with intelligence level and work efficiency continuously improving.
 
-## 📚 文件資源
+## 📚 Documentation Resources
 
-- [系統架構](docs/architecture.md)：詳細的系統設計與數據流說明
+- [System Architecture](docs/en/architecture.md): Detailed system design and data flow explanation
 
-## 🔧 安裝與使用
+## 🔧 Installation and Usage
 
 ### Installing via Smithery
 
-To install 蝦米任務管理器 for Claude Desktop automatically via [Smithery](https://smithery.ai/server/@cjo4m06/mcp-shrimp-task-manager):
+To install Shrimp Task Manager for Claude Desktop automatically via [Smithery](https://smithery.ai/server/@cjo4m06/mcp-shrimp-task-manager):
 
 ```bash
 npx -y @smithery/cli install @cjo4m06/mcp-shrimp-task-manager --client claude
@@ -67,25 +71,25 @@ npx -y @smithery/cli install @cjo4m06/mcp-shrimp-task-manager --client claude
 ### Manual Installation
 
 ```bash
-# 安裝依賴套件
+# Install dependencies
 npm install
 
-# 建置並啟動服務
+# Build and start service
 npm run build
 ```
 
-## 🔌 在支援 MCP 的客戶端中使用
+## 🔌 Using with MCP-Compatible Clients
 
-蝦米任務管理器可以與任何支援 Model Context Protocol 的客戶端一起使用，例如 Cursor IDE。
+Shrimp Task Manager can be used with any client that supports the Model Context Protocol, such as Cursor IDE.
 
-### 在 Cursor IDE 中配置
+### Configuration in Cursor IDE
 
-蝦米任務管理器提供兩種配置方式：全局配置和專案特定配置。
+Shrimp Task Manager offers two configuration methods: global configuration and project-specific configuration.
 
-#### 全局配置
+#### Global Configuration
 
-1. 開啟 Cursor IDE 的全局設定檔案（通常位於 `~/.cursor/mcp.json`）
-2. 在 `mcpServers` 區段中添加以下配置：
+1. Open the Cursor IDE global configuration file (usually located at `~/.cursor/mcp.json`)
+2. Add the following configuration in the `mcpServers` section:
 
 ```json
 {
@@ -101,14 +105,14 @@ npm run build
 }
 ```
 
-> ⚠️ 請將 `/mcp-shrimp-task-manager` 替換為您的實際路徑。
+> ⚠️ Please replace `/mcp-shrimp-task-manager` with your actual path.
 
-#### 專案特定配置
+#### Project-Specific Configuration
 
-您也可以為每個專案設定專屬配置，以便針對不同專案使用獨立的數據目錄：
+You can also set up dedicated configurations for each project to use independent data directories for different projects:
 
-1. 在專案根目錄創建 `.cursor` 目錄
-2. 在該目錄下創建 `mcp.json` 文件，內容如下：
+1. Create a `.cursor` directory in the project root
+2. Create an `mcp.json` file in this directory with the following content:
 
 ```json
 {
@@ -117,77 +121,79 @@ npm run build
       "command": "node",
       "args": ["/path/to/mcp-shrimp-task-manager/dist/index.js"],
       "env": {
-        "DATA_DIR": "/path/to/project/data" // 必須使用絕對路徑
+        "DATA_DIR": "/path/to/project/data" // Must use absolute path
       }
     }
   }
 }
 ```
 
-### ⚠️ 重要配置說明
+### ⚠️ Important Configuration Notes
 
-**DATA_DIR 參數**是蝦米任務管理器存儲任務數據、對話記錄等信息的目錄，正確設置此參數對於系統的正常運行至關重要。此參數必須使用**絕對路徑**，使用相對路徑可能導致系統無法正確定位數據目錄，造成數據丟失或功能失效。
+The **DATA_DIR parameter** is the directory where Shrimp Task Manager stores task data, conversation logs, and other information. Setting this parameter correctly is crucial for the normal operation of the system. This parameter must use an **absolute path**; using a relative path may cause the system to incorrectly locate the data directory, resulting in data loss or function failure.
 
-> **警告**：使用相對路徑可能導致以下問題：
+> **Warning**: Using relative paths may cause the following issues:
 >
-> - 數據檔案找不到，導致系統初始化失敗
-> - 任務狀態丟失或無法正確保存
-> - 應用程式在不同環境下行為不一致
-> - 系統崩潰或無法啟動
+> - Data files not found, causing system initialization failure
+> - Task status loss or inability to save correctly
+> - Inconsistent application behavior across different environments
+> - System crashes or failure to start
 
-## 💡 系統提示詞指導
+## 💡 System Prompt Guidance
 
-### Cursor IDE 配置
+### Cursor IDE Configuration
 
-您可以啟用 Cursor Settings => Features => Custom modes 功能，並配置以下兩個模式：
+You can enable Cursor Settings => Features => Custom modes, and configure the following two modes:
 
-#### TaskPlanner 模式
-
-```
-你是一個專業的任務規劃專家，你必須與用戶進行交互，分析用戶的需求，並收集專案相關資訊，最終使用 mcp_shrimp_task_manager_plan_task 建立任務，當任務建立完成後必須總結摘要，並告知用戶使用 任務執行 Model 進行任務執行。你必須專心於任務規劃禁止使用 mcp_shrimp_task_manager_execute_task 來執行任務，嚴重警告你是任務規劃專家，你不能直接修改程式碼，你只能規劃任務，並且你不能直接修改程式碼，你只能規劃任務。
-```
-
-#### TaskExecutor 模式
+#### TaskPlanner Mode
 
 ```
-你是一個專業的任務執行專家，當用戶有指定執行任務，則使用 mcp_shrimp_task_manager_execute_task 進行任務執行，沒有執行任務時則使用 mcp_shrimp_task_manager_list_tasks 尋找位執行的任務並執行，當執行完成後必須總結摘要告知用戶使用，你一次只能執行一個任務，單任務完成時除非用戶明確告知否則禁止進行下一則任務。用戶如果要求"連續模式"則按照順序連續執行所有任務
+You are a professional task planning expert who must interact with users, analyze their requirements, and collect project-related information, ultimately using mcp_shrimp_task_manager_plan_task to establish tasks. When tasks are established, you must summarize and inform users to use the Task Execution Model for task execution. You must focus on task planning and are prohibited from using mcp_shrimp_task_manager_execute_task to execute tasks. Serious warning: you are a task planning expert, you cannot directly modify code, you can only plan tasks, and you cannot directly modify code, you can only plan tasks.
 ```
 
-> 💡 根據您的需求場景選擇適當的模式：
+#### TaskExecutor Mode
+
+```
+You are a professional task execution expert. When users specify task execution, use mcp_shrimp_task_manager_execute_task for task execution. Without specified tasks, use mcp_shrimp_task_manager_list_tasks to find unexecuted tasks and execute them. After completion, you must summarize and inform users. You can only execute one task at a time, and unless explicitly instructed by users, you are prohibited from proceeding to the next task after a single task is completed. If users request "continuous mode," execute all tasks in sequence.
+```
+
+> 💡 Choose the appropriate mode based on your needs:
 >
-> - 當需要規劃任務時使用 **TaskPlanner** 模式
-> - 當需要執行任務時使用 **TaskExecutor** 模式
+> - Use **TaskPlanner** mode when planning tasks
+> - Use **TaskExecutor** mode when executing tasks
 
-### 在其他工具中使用
+### Using with Other Tools
 
-如果您的工具不支援 Custom modes 功能，可以：
+If your tool doesn't support Custom modes, you can:
 
-- 在不同階段手動貼上相應的提示詞
-- 或直接使用簡單命令如 `請規劃以下任務：......` 或 `請開始執行任務...`
+- Manually paste the appropriate prompts at different stages
+- Or directly use simple commands like `Please plan the following task: ......` or `Please start executing the task...`
 
-## 🛠️ 可用工具一覽
+## 🛠️ Available Tools Overview
 
-配置完成後，您可使用以下工具：
+After configuration, you can use the following tools:
 
-| 功能分類     | 工具名稱        | 功能描述           |
-| ------------ | --------------- | ------------------ |
-| **任務規劃** | `plan_task`     | 開始規劃任務       |
-| **任務分析** | `analyze_task`  | 深入分析任務需求   |
-| **方案評估** | `reflect_task`  | 反思與改進方案構想 |
-| **任務管理** | `split_tasks`   | 將任務拆分為子任務 |
-|              | `list_tasks`    | 顯示所有任務及狀態 |
-|              | `delete_task`   | 刪除未完成的任務   |
-| **任務執行** | `execute_task`  | 執行特定任務       |
-|              | `verify_task`   | 檢驗任務完成情況   |
-|              | `complete_task` | 標記任務為已完成   |
+| Category                | Tool Name         | Description                            |
+| ----------------------- | ----------------- | -------------------------------------- |
+| **Task Planning**       | `plan_task`       | Start planning tasks                   |
+| **Task Analysis**       | `analyze_task`    | In-depth analysis of task requirements |
+| **Solution Assessment** | `reflect_task`    | Reflect and improve solution concepts  |
+| **Task Management**     | `split_tasks`     | Break tasks into subtasks              |
+|                         | `list_tasks`      | Display all tasks and status           |
+|                         | `query_task`      | Search and list tasks                  |
+|                         | `get_task_detail` | Display complete task details          |
+|                         | `delete_task`     | Delete incomplete tasks                |
+| **Task Execution**      | `execute_task`    | Execute specific tasks                 |
+|                         | `verify_task`     | Verify task completion                 |
+|                         | `complete_task`   | Mark tasks as completed                |
 
-## 🔧 技術實現
+## 🔧 Technical Implementation
 
-- **Node.js**：高效能的 JavaScript 運行時環境
-- **TypeScript**：提供強型別安全的開發環境
-- **MCP SDK**：與大型語言模型無縫互動的接口
-- **UUID**：生成唯一且可靠的任務識別碼
+- **Node.js**: High-performance JavaScript runtime environment
+- **TypeScript**: Provides type-safe development environment
+- **MCP SDK**: Interface for seamless interaction with large language models
+- **UUID**: Generate unique and reliable task identifiers
 
-## 📄 許可協議
+## 📄 License
 
-本專案採用 MIT 許可協議發布
+This project is released under the MIT License

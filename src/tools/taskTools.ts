@@ -13,6 +13,7 @@ import {
   clearAllTasks as modelClearAllTasks,
   updateTaskContent as modelUpdateTaskContent,
   updateTaskRelatedFiles as modelUpdateTaskRelatedFiles,
+  searchTasksWithCommand,
 } from "../models/taskModel.js";
 import {
   TaskStatus,
@@ -211,9 +212,12 @@ export async function planTask({
 
   prompt += `## 資訊收集指南\n\n`;
   prompt += `1. **詢問用戶** - 當你對任務要求有疑問時，直接詢問用戶\n`;
+  prompt += `2. **查詢記憶** - 使用「query_task」工具查詢以往記憶是否有相關任務\n`;
   prompt += `3. **網路搜索** - 當出現你不理解的名詞或概念時，使用網路搜尋工具找尋答案\n\n`;
 
-  prompt += `## 下一步行動\n\n完成初步分析後，使用「analyze_task」工具提交分析結果，包含：\n\n`;
+  prompt += `## 下一步行動\n\n`;
+  prompt += `- 如果需要請先使用「query_task」工具查詢以往記憶是否有相關任務\n`;
+  prompt += `- 完成初步分析後，使用「analyze_task」工具提交分析結果，包含：\n\n`;
   prompt += `1. **任務摘要** - 目標、範圍、挑戰和限制條件\n`;
   prompt += `2. **初步解答構想** - 可行的技術方案和實施計劃\n`;
 
@@ -1616,3 +1620,249 @@ const formatTaskDetails = (task: Task) => {
 
   return details;
 };
+
+// 查詢任務工具
+export const queryTaskSchema = z.object({
+  query: z
+    .string()
+    .min(1, {
+      message: "查詢內容不能為空，請提供任務ID或搜尋關鍵字",
+    })
+    .describe("搜尋查詢文字，可以是任務ID或多個關鍵字（空格分隔）"),
+  isId: z
+    .boolean()
+    .optional()
+    .default(false)
+    .describe("指定是否為ID查詢模式，默認為否（關鍵字模式）"),
+  page: z
+    .number()
+    .int()
+    .positive()
+    .optional()
+    .default(1)
+    .describe("分頁頁碼，默認為第1頁"),
+  pageSize: z
+    .number()
+    .int()
+    .positive()
+    .min(1)
+    .max(20)
+    .optional()
+    .default(5)
+    .describe("每頁顯示的任務數量，默認為5筆，最大20筆"),
+});
+
+export async function queryTask({
+  query,
+  isId = false,
+  page = 1,
+  pageSize = 3,
+}: z.infer<typeof queryTaskSchema>) {
+  try {
+    // 使用系統指令搜尋函數
+    const results = await searchTasksWithCommand(query, isId, page, pageSize);
+
+    // 格式化任務顯示內容
+    const tasksDisplay = results.tasks.map((task) =>
+      formatTaskForDisplay(task)
+    );
+
+    // 構建分頁指導訊息
+    let paginationMessage = "";
+    if (results.pagination.totalResults > 0) {
+      paginationMessage = `\n\n## 分頁資訊\n\n- 當前頁: ${results.pagination.currentPage}/${results.pagination.totalPages}\n- 顯示結果: ${results.tasks.length}筆（共${results.pagination.totalResults}筆）`;
+
+      if (results.pagination.hasMore) {
+        paginationMessage += `\n\n要查看下一頁結果，請使用相同的查詢參數，但將頁碼設為 ${
+          results.pagination.currentPage + 1
+        }。`;
+      }
+    }
+
+    let responseText = "";
+
+    if (results.tasks.length === 0) {
+      responseText = `## 查詢結果\n\n未找到符合條件的任務。請嘗試使用不同的關鍵字或檢查任務ID是否正確。`;
+    } else {
+      responseText = `## 查詢結果 (${
+        results.pagination.totalResults
+      })\n\n${tasksDisplay.join("\n\n")}${paginationMessage}`;
+    }
+
+    return {
+      content: [
+        {
+          type: "text" as const,
+          text: responseText,
+        },
+      ],
+    };
+  } catch (error) {
+    console.error("查詢任務時發生錯誤:", error);
+    return {
+      content: [
+        {
+          type: "text" as const,
+          text: `## 系統錯誤\n\n查詢任務時發生錯誤: ${
+            error instanceof Error ? error.message : String(error)
+          }`,
+        },
+      ],
+      isError: true,
+    };
+  }
+}
+
+// 格式化任務顯示內容的輔助函數
+function formatTaskForDisplay(task: Task): string {
+  let taskInfo = `### ${task.name}\n**ID:** \`${task.id}\`\n**狀態:** ${task.status}\n**描述:** ${task.description}\n`;
+
+  if (task.notes) {
+    taskInfo += `**注記:** ${task.notes}\n`;
+  }
+
+  if (task.implementationGuide) {
+    taskInfo += `**實現指南:** ${
+      task.implementationGuide.length > 300
+        ? task.implementationGuide.substring(0, 300) + "..."
+        : task.implementationGuide
+    }\n`;
+  }
+
+  if (task.verificationCriteria) {
+    taskInfo += `**驗證標準:** ${
+      task.verificationCriteria.length > 300
+        ? task.verificationCriteria.substring(0, 300) + "..."
+        : task.verificationCriteria
+    }\n`;
+  }
+
+  if (task.summary) {
+    taskInfo += `**完成摘要:** ${task.summary}\n`;
+  }
+
+  taskInfo += `**創建時間:** ${new Date(task.createdAt).toLocaleString(
+    "zh-TW"
+  )}\n`;
+  taskInfo += `**更新時間:** ${new Date(task.updatedAt).toLocaleString(
+    "zh-TW"
+  )}\n`;
+
+  if (task.completedAt) {
+    taskInfo += `**完成時間:** ${new Date(task.completedAt).toLocaleString(
+      "zh-TW"
+    )}\n`;
+  }
+
+  taskInfo += `**詳細內容:** 請使用「get_task_detail」工具查看 ${task.id} 完整任務詳情`;
+
+  return taskInfo;
+}
+
+// 取得完整任務詳情的參數
+export const getTaskDetailSchema = z.object({
+  taskId: z
+    .string()
+    .min(1, {
+      message: "任務ID不能為空，請提供有效的任務ID",
+    })
+    .describe("欲檢視詳情的任務ID"),
+});
+
+// 取得任務完整詳情
+export async function getTaskDetail({
+  taskId,
+}: z.infer<typeof getTaskDetailSchema>) {
+  try {
+    // 檢查任務是否存在
+    const task = await getTaskById(taskId);
+    if (!task) {
+      return {
+        content: [
+          {
+            type: "text" as const,
+            text: `## 錯誤\n\n找不到ID為 \`${taskId}\` 的任務。請確認任務ID是否正確。`,
+          },
+        ],
+        isError: true,
+      };
+    }
+
+    // 格式化完整的任務詳情，不截斷內容
+    const fullTaskDetail = formatFullTaskDetail(task);
+
+    return {
+      content: [
+        {
+          type: "text" as const,
+          text: `## 任務完整詳情\n\n${fullTaskDetail}`,
+        },
+      ],
+    };
+  } catch (error) {
+    console.error("取得任務詳情時發生錯誤:", error);
+    return {
+      content: [
+        {
+          type: "text" as const,
+          text: `## 系統錯誤\n\n取得任務詳情時發生錯誤: ${
+            error instanceof Error ? error.message : String(error)
+          }`,
+        },
+      ],
+      isError: true,
+    };
+  }
+}
+
+// 格式化完整任務詳情的輔助函數，不截斷長內容
+function formatFullTaskDetail(task: Task): string {
+  let taskDetail = `### ${task.name}\n\n**ID:** \`${task.id}\`\n\n**狀態:** ${task.status}\n\n**描述:**\n${task.description}\n\n`;
+
+  if (task.notes) {
+    taskDetail += `**注記:**\n${task.notes}\n\n`;
+  }
+
+  if (task.dependencies && task.dependencies.length > 0) {
+    taskDetail += `**依賴任務:** ${task.dependencies
+      .map((dep) => `\`${dep.taskId}\``)
+      .join(", ")}\n\n`;
+  }
+
+  if (task.implementationGuide) {
+    taskDetail += `**實現指南:**\n\`\`\`\n${task.implementationGuide}\n\`\`\`\n\n`;
+  }
+
+  if (task.verificationCriteria) {
+    taskDetail += `**驗證標準:**\n\`\`\`\n${task.verificationCriteria}\n\`\`\`\n\n`;
+  }
+
+  if (task.relatedFiles && task.relatedFiles.length > 0) {
+    taskDetail += `**相關文件:**\n`;
+    for (const file of task.relatedFiles) {
+      taskDetail += `- \`${file.path}\` (${file.type})${
+        file.description ? `: ${file.description}` : ""
+      }\n`;
+    }
+    taskDetail += `\n`;
+  }
+
+  taskDetail += `**創建時間:** ${new Date(task.createdAt).toLocaleString(
+    "zh-TW"
+  )}\n`;
+  taskDetail += `**更新時間:** ${new Date(task.updatedAt).toLocaleString(
+    "zh-TW"
+  )}\n`;
+
+  if (task.completedAt) {
+    taskDetail += `**完成時間:** ${new Date(task.completedAt).toLocaleString(
+      "zh-TW"
+    )}\n\n`;
+  }
+
+  if (task.summary) {
+    taskDetail += `**完成摘要:**\n${task.summary}\n\n`;
+  }
+
+  return taskDetail;
+}
