@@ -51,6 +51,7 @@ coverage/
 # 資料檔案
 *.sqlite
 data/*.json
+data/*/*.json
 !data/example.json
 
 # Cursor AI 生成的暫存檔案
