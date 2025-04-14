@@ -647,18 +647,6 @@ header nav a[href*="github"]:hover svg {
   transition: all 0.3s ease;
 }
 
-.workflow-icon-mobile::after {
-  content: "";
-  position: absolute;
-  top: 48px;
-  left: 24px;
-  width: 2px;
-  height: 0;
-  background-color: #e2e8f0;
-  animation: verticalLineGrow 1s forwards;
-  animation-delay: 0.5s;
-}
-
 @keyframes verticalLineGrow {
   from {
     height: 0;
@@ -1022,5 +1010,53 @@ footer ul li:hover {
 
   footer .grid {
     gap: 2rem;
+  }
+}
+
+/* 語言切換按鈕 */
+.language-switcher {
+  display: flex;
+  align-items: center;
+  margin-left: 1rem;
+}
+
+.lang-btn {
+  background: transparent;
+  border: 1px solid rgba(203, 213, 225, 0.5);
+  color: var(--gray-dark);
+  font-size: 0.85rem;
+  padding: 0.25rem 0.5rem;
+  margin-left: 0.25rem;
+  border-radius: 0.25rem;
+  cursor: pointer;
+  transition: all var(--transition-speed) ease;
+}
+
+.lang-btn:first-child {
+  margin-left: 0;
+}
+
+.lang-btn:hover {
+  background-color: rgba(59, 130, 246, 0.1);
+  border-color: rgba(59, 130, 246, 0.3);
+}
+
+.lang-btn.active {
+  background-color: var(--primary-color);
+  color: white;
+  border-color: var(--primary-color);
+}
+
+/* 在移動設備上調整語言切換按鈕 */
+@media (max-width: 767px) {
+  .language-switcher {
+    margin: 0.5rem 0;
+    justify-content: center;
+    width: 100%;
+  }
+
+  .lang-btn {
+    padding: 0.4rem 0.75rem;
+    font-size: 0.9rem;
   }
 }

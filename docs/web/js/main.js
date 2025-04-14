@@ -892,11 +892,11 @@ function initWorkflowModal() {
   detailLinks.forEach((link) => {
     link.addEventListener("click", function (e) {
       e.preventDefault();
-      const stepIndex = parseInt(this.getAttribute("data-step")) - 1;
-
-      if (stepIndex >= 0 && stepIndex < workflowDetails["zh-TW"].length) {
-        modalTitle.textContent = workflowDetails["zh-TW"][stepIndex].title;
-        modalContent.innerHTML = workflowDetails["zh-TW"][stepIndex].content;
+      const stepIndex = parseInt(this.getAttribute("data-step"));
+      const lang = localStorage.getItem("preferred-language") || "en";
+      if (stepIndex >= 0 && workflowDetails[lang][stepIndex]) {
+        modalTitle.textContent = workflowDetails[lang][stepIndex].title;
+        modalContent.innerHTML = workflowDetails[lang][stepIndex].content;
         modal.classList.remove("hidden");
         modal.classList.add("active");
       }
@@ -1273,37 +1273,188 @@ function isInViewport(element) {
  * 初始化多語系功能
  */
 function initMultiLanguage() {
-  // 檢查 i18n.js 是否已載入，如果已載入則調用 initLanguage 函數
-  if (typeof initLanguage === "function") {
-    initLanguage();
+  // 檢查 i18n.js 是否已載入
+  if (typeof i18n !== "undefined") {
+    // 優先使用增強版初始化函數
+    if (typeof enhancedInitializeLanguage === "function") {
+      enhancedInitializeLanguage();
+    } else if (typeof initializeLanguage === "function") {
+      // 兼容性處理，如果增強版函數不存在則使用原始方法
+      initializeLanguage();
+    } else {
+      console.warn("多語系初始化函數不可用，將使用基本初始化");
+      // 基本初始化 - 在i18n.js無法正確載入時提供基本功能
+      try {
+        const currentLang =
+          localStorage.getItem("preferred-language") ||
+          (navigator.language && navigator.language.startsWith("zh")
+            ? "zh-TW"
+            : "en");
+        document.documentElement.setAttribute("lang", currentLang);
+      } catch (e) {
+        console.error("基本語言初始化失敗:", e);
+      }
+    }
+
+    // 為語言切換添加自定義事件
+    try {
+      document.querySelectorAll(".lang-btn").forEach(function (btn) {
+        btn.addEventListener("click", function () {
+          const lang = this.getAttribute("data-lang");
+
+          // 優先使用增強版語言切換函數
+          if (typeof enhancedSetLanguage === "function") {
+            enhancedSetLanguage(lang);
+          } else if (typeof setLanguageWithAnimation === "function") {
+            // 次優先使用帶動畫效果的語言切換
+            setLanguageWithAnimation(lang);
+          } else if (typeof setLanguage === "function") {
+            // 兼容性處理，使用基本語言切換函數
+            setLanguage(lang);
+          } else {
+            console.warn("語言切換函數不可用");
+            // 最基本處理 - 更新 HTML lang 屬性並保存偏好
+            try {
+              localStorage.setItem("preferred-language", lang);
+              document.documentElement.setAttribute("lang", lang);
+            } catch (e) {
+              console.error("基本語言切換失敗:", e);
+            }
+          }
+        });
+      });
+    } catch (e) {
+      console.error("為語言按鈕添加事件監聽器時出錯:", e);
+    }
+
+    // 初始化時執行批量翻譯，優化性能
+    if (typeof batchApplyTranslations === "function") {
+      batchApplyTranslations();
+    }
+  } else {
+    console.warn("i18n.js 尚未載入，無法啟用完整多語系功能");
+    // 嘗試提供基本的多語系支持
+    try {
+      const basicLanguageSupport = function () {
+        const langBtns = document.querySelectorAll(".lang-btn");
+        if (langBtns.length === 0) return;
+
+        langBtns.forEach((btn) => {
+          btn.addEventListener("click", function () {
+            const lang = this.getAttribute("data-lang");
+            try {
+              localStorage.setItem("preferred-language", lang);
+              document.documentElement.setAttribute("lang", lang);
+
+              // 更新按鈕狀態
+              langBtns.forEach((b) => {
+                if (b.getAttribute("data-lang") === lang) {
+                  b.classList.add("active");
+                } else {
+                  b.classList.remove("active");
+                }
+              });
+            } catch (e) {
+              console.error("基本語言切換失敗:", e);
+            }
+          });
+        });
+
+        // 初始化按鈕狀態
+        try {
+          const savedLang =
+            localStorage.getItem("preferred-language") ||
+            (navigator.language && navigator.language.startsWith("zh")
+              ? "zh-TW"
+              : "en");
+
+          langBtns.forEach((btn) => {
+            if (btn.getAttribute("data-lang") === savedLang) {
+              btn.classList.add("active");
+            } else {
+              btn.classList.remove("active");
+            }
+          });
+
+          document.documentElement.setAttribute("lang", savedLang);
+        } catch (e) {
+          console.error("初始化語言按鈕狀態失敗:", e);
+        }
+      };
+
+      basicLanguageSupport();
+    } catch (e) {
+      console.error("基本多語系支持初始化失敗:", e);
+    }
   }
 
   // 監聽語言切換事件
-  document.addEventListener("languageChanged", function (event) {
-    const lang = event.detail.language;
-    console.log("Language changed to:", lang);
+  try {
+    document.addEventListener("languageChanged", function (event) {
+      const lang = event.detail.language;
+      console.log("Language changed to:", lang);
 
-    // 語言切換後的特殊處理邏輯
-    // 更新複製按鈕文字
-    const copyBtns = document.querySelectorAll(".copy-cmd-btn");
-    const copyText = lang === "en" ? "Copy" : "複製";
+      // 使用 translateText 函數更新特殊元素
+      const updateSpecialElements = function () {
+        // 安全地取得翻譯函數
+        const getTranslation = (key, defaultText) => {
+          if (typeof safeTranslate === "function") {
+            return safeTranslate(key, defaultText);
+          } else if (typeof translateText === "function") {
+            return translateText(key, defaultText);
+          } else {
+            return lang === "en" ? defaultText.en : defaultText.zh;
+          }
+        };
 
-    copyBtns.forEach((btn) => {
-      // 只更新沒有顯示"已複製"的按鈕
-      if (btn.textContent !== "Copied!" && btn.textContent !== "已複製!") {
-        btn.textContent = copyText;
+        try {
+          // 更新複製按鈕文字
+          const copyBtns = document.querySelectorAll(".copy-cmd-btn");
+          const copyText = getTranslation("common.copy", {
+            en: "Copy",
+            zh: "複製",
+          });
+
+          copyBtns.forEach((btn) => {
+            // 只更新沒有顯示"已複製"的按鈕
+            if (
+              btn.textContent !== "Copied!" &&
+              btn.textContent !== "已複製!"
+            ) {
+              btn.textContent = copyText;
+            }
+          });
+        } catch (e) {
+          console.warn("更新複製按鈕文字失敗:", e);
+        }
+
+        try {
+          // 更新模態窗口中的關閉按鈕文字
+          const closeModalBtn = document.getElementById("close-modal-btn");
+          if (closeModalBtn) {
+            closeModalBtn.textContent = getTranslation("common.close", {
+              en: "Close",
+              zh: "關閉",
+            });
+          }
+        } catch (e) {
+          console.warn("更新關閉按鈕文字失敗:", e);
+        }
+      };
+
+      // 使用 setTimeout 避免阻塞 UI
+      setTimeout(updateSpecialElements, 0);
+
+      // 根據當前語言更新工作流程模態內容
+      try {
+        updateWorkflowModalContent(lang);
+      } catch (e) {
+        console.warn("更新工作流程模態內容失敗:", e);
       }
     });
-
-    // 更新模態窗口中的關閉按鈕文字
-    const closeModalBtn = document.getElementById("close-modal-btn");
-    if (closeModalBtn) {
-      closeModalBtn.textContent = lang === "en" ? "Close" : "關閉";
-    }
-
-    // 根據當前語言更新工作流程模態內容
-    updateWorkflowModalContent(lang);
-  });
+  } catch (e) {
+    console.error("添加語言變更事件監聽器失敗:", e);
+  }
 }
 
 /**
@@ -1326,8 +1477,19 @@ function updateWorkflowModalContent(lang) {
 
     if (workflowDetails[langKey] && workflowDetails[langKey][currentStep]) {
       const stepData = workflowDetails[langKey][currentStep];
-      modalTitle.textContent = stepData.title;
-      modalContent.innerHTML = stepData.content;
+
+      // 使用 requestAnimationFrame 優化渲染性能
+      requestAnimationFrame(function () {
+        modalTitle.textContent = stepData.title;
+        modalContent.innerHTML = stepData.content;
+
+        // 為動態生成的內容添加 data-i18n 屬性
+        const dynamicElements = modalContent.querySelectorAll("h4, p, li");
+        dynamicElements.forEach(function (el, index) {
+          const key = `workflow.step${currentStep}.content.${index}`;
+          el.setAttribute("data-i18n-dynamic", key);
+        });
+      });
     }
   }
 }
