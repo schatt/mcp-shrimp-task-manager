@@ -260,10 +260,11 @@ export const analyzeTaskSchema = z.object({
   initialConcept: z
     .string()
     .min(50, {
-      message:
-        "初步解答構想過於簡短，請提供更完整的技術方案和實施策略詳情，如果需要提供程式碼請使用 pseudocode 格式且盡量精簡只保留核心實現部分",
+      message: "初步解答構想過於簡短，請提供更完整的技術方案和實施策略詳情",
     })
-    .describe("初步解答構想，包含技術方案、架構設計和實施策略"),
+    .describe(
+      "初步解答構想，包含技術方案、架構設計和實施策略，如果需要提供程式碼請使用 pseudocode 格式且盡量精簡只保留核心實現部分"
+    ),
   previousAnalysis: z
     .string()
     .optional()
@@ -323,29 +324,23 @@ export async function analyzeTask({
 }
 
 // 反思構想工具
-export const reflectTaskSchema = z
-  .object({
-    summary: z
-      .string()
-      .min(20, {
-        message: "任務摘要太短，請確保包含完整的任務目標和範圍以維持分析連續性",
-      })
-      .describe("結構化的任務摘要，保持與分析階段一致以確保連續性"),
-    analysis: z
-      .string()
-      .min(100, {
-        message:
-          "技術分析結果過於簡略，請提供更詳盡的技術細節、依賴組件和實施方案說明",
-      })
-      .describe(
-        "完整詳盡的技術分析結果，包括所有技術細節、依賴組件和實施方案，如果需要提供程式碼請使用 pseudocode 格式且盡量精簡只保留核心實現部分"
-      ),
-  })
-  .refine((data) => data.summary.length * 3 <= data.analysis.length, {
-    message:
-      "分析內容應該比摘要更詳細，建議分析部分至少是摘要長度的3倍以提供足夠的技術深度",
-    path: ["analysis"],
-  });
+export const reflectTaskSchema = z.object({
+  summary: z
+    .string()
+    .min(20, {
+      message: "任務摘要太短，請確保包含完整的任務目標和範圍以維持分析連續性",
+    })
+    .describe("結構化的任務摘要，保持與分析階段一致以確保連續性"),
+  analysis: z
+    .string()
+    .min(100, {
+      message:
+        "技術分析結果過於簡略，請提供更詳盡的技術細節、依賴組件和實施方案說明",
+    })
+    .describe(
+      "完整詳盡的技術分析結果，包括所有技術細節、依賴組件和實施方案，如果需要提供程式碼請使用 pseudocode 格式且盡量精簡只保留核心實現部分"
+    ),
+});
 
 export async function reflectTask({
   summary,
@@ -401,100 +396,112 @@ export async function reflectTask({
 }
 
 // 拆分任務工具
-export const splitTasksSchema = z
-  .object({
-    updateMode: z
-      .enum(["append", "overwrite", "selective", "clearAllTasks"])
-      .describe(
-        "任務更新模式（必填）：'append'(保留現有任務並新增)、'overwrite'(清除所有未完成任務並重建)、'selective'(根據名稱匹配更新現有任務，保留其餘任務)、'clearAllTasks'(清除所有任務並創建備份)"
-      ),
-    globalAnalysisResult: z
-      .string()
-      .optional()
-      .describe(
-        "全局分析結果：來自 reflect_task 的完整分析結果，適用於所有任務的通用部分"
-      ),
-    tasks: z
-      .array(
-        z.object({
-          name: z
-            .string()
-            .max(100, { message: "任務名稱過長，請保持簡潔，不超過100個字符" })
-            .describe("簡潔明確的任務名稱，應能清晰表達任務目的"),
-          description: z
-            .string()
-            .min(10, {
-              message:
-                "任務描述太簡短，請提供更詳細的描述，包含實施要點和驗收標準",
+export const splitTasksSchema = z.object({
+  updateMode: z
+    .enum(["append", "overwrite", "selective", "clearAllTasks"])
+    .describe(
+      "任務更新模式選擇：'append'(保留所有現有任務並添加新任務)、'overwrite'(清除所有未完成任務並完全替換，保留已完成任務)、'selective'(智能更新：根據任務名稱匹配更新現有任務，保留不在列表中的任務，推薦用於任務微調)、'clearAllTasks'(清除所有任務並創建備份)。\n預設為'clearAllTasks'模式，只有用戶要求變更或修改計畫內容才使用其他模式"
+    ),
+  globalAnalysisResult: z
+    .string()
+    .optional()
+    .describe(
+      "全局分析結果：來自 reflect_task 的完整分析結果，適用於所有任務的通用部分"
+    ),
+  tasks: z
+    .array(
+      z.object({
+        name: z
+          .string()
+          .max(100, {
+            message: "任務名稱過長，請保持簡潔，不超過100個字符",
+          })
+          .describe("簡潔明確的任務名稱，應能清晰表達任務目的"),
+        description: z
+          .string()
+          .min(10, {
+            message: "任務描述太短，請詳細說明實施要點、技術細節和驗收標準",
+          })
+          .describe("詳細的任務描述，包含實施要點、技術細節和驗收標準"),
+        notes: z
+          .string()
+          .optional()
+          .describe("補充說明、特殊處理要求或實施建議（選填）"),
+        dependencies: z
+          .array(z.string(), {
+            message: "必須是字串陣列，支援任務名稱或任務ID(UUID)",
+          })
+          .optional()
+          .describe(
+            "此任務依賴的前置任務ID或任務名稱列表，支持兩種引用方式，名稱引用更直觀，是一個字串陣列"
+          ),
+        relatedFiles: z
+          .array(
+            z.object({
+              path: z
+                .string()
+                .min(1, { message: "檔案路徑不能為空" })
+                .describe("文件路徑，可以是相對於項目根目錄的路徑或絕對路徑"),
+              type: z
+                .nativeEnum(RelatedFileType)
+                .describe("檔案類型，用於區分不同類型的檔案"),
+              description: z
+                .string()
+                .min(1, { message: "檔案描述不能為空" })
+                .describe("檔案描述，用於說明檔案的用途和內容"),
+              lineStart: z
+                .number()
+                .int()
+                .positive()
+                .optional()
+                .describe("相關代碼區塊的起始行（選填）"),
+              lineEnd: z
+                .number()
+                .int()
+                .positive()
+                .optional()
+                .describe("相關代碼區塊的結束行（選填）"),
             })
-            .describe("詳細的任務描述，包含實施要點、技術細節和驗收標準"),
-          notes: z
-            .string()
-            .optional()
-            .describe("補充說明、特殊處理要求或實施建議（選填）"),
-          dependencies: z
-            .array(z.string(), {
-              message: "必須是字串陣列，支援任務名稱或任務ID(UUID)",
-            })
-            .optional()
-            .describe(
-              "此任務依賴的前置任務ID或任務名稱列表，支持兩種引用方式，名稱引用更直觀"
-            ),
-          relatedFiles: z
-            .array(
-              z.object({
-                path: z
-                  .string()
-                  .min(1, { message: "檔案路徑不能為空" })
-                  .describe("檔案路徑，相對於專案根目錄"),
-                type: z
-                  .nativeEnum(RelatedFileType)
-                  .describe("檔案類型，用於區分不同類型的檔案"),
-                description: z
-                  .string()
-                  .min(1, { message: "檔案描述不能為空" })
-                  .describe("檔案描述，用於說明檔案的用途和內容"),
-              })
-            )
-            .optional()
-            .describe("與任務相關的檔案列表，包含檔案路徑、類型和描述"),
-          implementationGuide: z
-            .string()
-            .describe(
-              "此特定任務的具體實現方法和步驟，請參考之前的分析結果提供 pseudocode"
-            ),
-          verificationCriteria: z
-            .string()
-            .optional()
-            .describe("此特定任務的驗證標準和檢驗方法"),
-        })
-      )
-      .min(1, { message: "至少需要提供一個任務，請確保任務列表不為空" })
-      .describe("結構化的任務清單，每個任務應保持原子性且有明確的完成標準"),
-  })
-  .refine(
-    (data) => {
-      // 檢查任務名稱是否有重複
-      const nameSet = new Set();
-      for (const task of data.tasks) {
-        if (nameSet.has(task.name)) {
-          return false;
-        }
-        nameSet.add(task.name);
-      }
-      return true;
-    },
-    {
-      message: "任務列表中存在重複的任務名稱，請確保每個任務名稱是唯一的",
-      path: ["tasks"],
-    }
-  );
+          )
+          .optional()
+          .describe(
+            "與任務相關的檔案列表，用於記錄與任務相關的代碼文件、參考資料、要建立的檔案等（選填）"
+          ),
+        implementationGuide: z
+          .string()
+          .describe(
+            "此特定任務的具體實現方法和步驟，請參考之前的分析結果提供 pseudocode"
+          ),
+        verificationCriteria: z
+          .string()
+          .optional()
+          .describe("此特定任務的驗證標準和檢驗方法"),
+      })
+    )
+    .describe("結構化的任務清單，每個任務應保持原子性且有明確的完成標準"),
+});
 
 export async function splitTasks({
   updateMode,
   tasks,
   globalAnalysisResult,
 }: z.infer<typeof splitTasksSchema>) {
+  // 檢查 tasks 裡面的 name 是否有重複
+  const nameSet = new Set();
+  for (const task of tasks) {
+    if (nameSet.has(task.name)) {
+      return {
+        content: [
+          {
+            type: "text" as const,
+            text: "tasks 參數中存在重複的任務名稱，請確保每個任務名稱是唯一的",
+          },
+        ],
+      };
+    }
+    nameSet.add(task.name);
+  }
+
   // 處理 clearAllTasks 模式，直接調用 modelClearAllTasks 函數
   if (updateMode === "clearAllTasks") {
     const clearResult = await modelClearAllTasks();
@@ -644,16 +651,44 @@ export async function splitTasks({
   };
 }
 
-// 列出任務工具
-export async function listTasks() {
-  const tasks = await getAllTasks();
+export const listTasksSchema = z.object({
+  status: z
+    .enum(["all", "pending", "in_progress", "completed"])
+    .describe("要列出的任務狀態，可選擇 'all' 列出所有任務，或指定具體狀態"),
+});
 
-  if (tasks.length === 0) {
+// 列出任務工具
+export async function listTasks({ status }: z.infer<typeof listTasksSchema>) {
+  const tasks = await getAllTasks();
+  let filteredTasks = tasks;
+  switch (status) {
+    case "all":
+      break;
+    case "pending":
+      filteredTasks = tasks.filter(
+        (task) => task.status === TaskStatus.PENDING
+      );
+      break;
+    case "in_progress":
+      filteredTasks = tasks.filter(
+        (task) => task.status === TaskStatus.IN_PROGRESS
+      );
+      break;
+    case "completed":
+      filteredTasks = tasks.filter(
+        (task) => task.status === TaskStatus.COMPLETED
+      );
+      break;
+  }
+
+  if (filteredTasks.length === 0) {
     return {
       content: [
         {
           type: "text" as const,
-          text: "## 系統通知\n\n目前系統中沒有註冊任何任務。請先使用「split_tasks」工具創建任務結構，再進行後續操作。",
+          text: `## 系統通知\n\n目前系統中沒有${
+            status === "all" ? "任何" : `任何 ${status} 的`
+          }任務。請查詢其他狀態任務或先使用「split_tasks」工具創建任務結構，再進行後續操作。`,
         },
       ],
     };
@@ -964,7 +999,7 @@ export const verifyTaskSchema = z.object({
   taskId: z
     .string()
     .uuid({ message: "任務ID格式無效，請提供有效的UUID格式" })
-    .describe("待驗證任務的唯一標識符，必須是狀態為「進行中」的有效任務ID"),
+    .describe("待驗證任務的唯一標識符，必須是系統中存在的有效任務ID"),
 });
 
 export async function verifyTask({ taskId }: z.infer<typeof verifyTaskSchema>) {
@@ -1221,108 +1256,54 @@ export async function clearAllTasks({
 }
 
 // 更新任務內容工具
-export const updateTaskContentSchema = z
-  .object({
-    taskId: z
-      .string()
-      .uuid({ message: "任務ID格式無效，請提供有效的UUID格式" })
-      .describe("待更新任務的唯一標識符，必須是系統中存在且未完成的任務ID"),
-    name: z
-      .string()
-      .min(5, {
-        message: "任務名稱太短，請提供更清晰明確的名稱以便識別任務目的",
+export const updateTaskContentSchema = z.object({
+  taskId: z
+    .string()
+    .uuid({ message: "任務ID格式無效，請提供有效的UUID格式" })
+    .describe("待更新任務的唯一標識符，必須是系統中存在且未完成的任務ID"),
+  name: z.string().optional().describe("任務的新名稱（選填）"),
+  description: z.string().optional().describe("任務的新描述內容（選填）"),
+  notes: z.string().optional().describe("任務的新補充說明（選填）"),
+  dependencies: z
+    .array(z.string())
+    .optional()
+    .describe("任務的新依賴關係（選填）"),
+  relatedFiles: z
+    .array(
+      z.object({
+        path: z
+          .string()
+          .min(1, { message: "文件路徑不能為空，請提供有效的文件路徑" })
+          .describe("文件路徑，可以是相對於項目根目錄的路徑或絕對路徑"),
+        type: z.nativeEnum(RelatedFileType).describe("文件與任務的關係類型"),
+        description: z.string().optional().describe("文件的補充描述（選填）"),
+        lineStart: z
+          .number()
+          .int()
+          .positive()
+          .optional()
+          .describe("相關代碼區塊的起始行（選填）"),
+        lineEnd: z
+          .number()
+          .int()
+          .positive()
+          .optional()
+          .describe("相關代碼區塊的結束行（選填）"),
       })
-      .max(100, { message: "任務名稱過長，請保持簡潔，不超過100個字符" })
-      .optional()
-      .describe("任務的新名稱（選填）"),
-    description: z
-      .string()
-      .min(20, {
-        message: "任務描述太簡短，請提供更詳細的描述，包含實施要點和驗收標準",
-      })
-      .optional()
-      .describe("任務的新描述內容（選填）"),
-    notes: z.string().optional().describe("任務的新補充說明（選填）"),
-    relatedFiles: z
-      .array(
-        z.object({
-          path: z
-            .string()
-            .min(1, { message: "文件路徑不能為空，請提供有效的文件路徑" })
-            .describe("文件路徑，可以是相對於項目根目錄的路徑或絕對路徑"),
-          type: z
-            .enum([
-              RelatedFileType.TO_MODIFY,
-              RelatedFileType.REFERENCE,
-              RelatedFileType.CREATE,
-              RelatedFileType.DEPENDENCY,
-              RelatedFileType.OTHER,
-            ])
-            .describe("文件與任務的關係類型"),
-          description: z.string().optional().describe("文件的補充描述（選填）"),
-          lineStart: z
-            .number()
-            .int()
-            .positive()
-            .optional()
-            .describe("相關代碼區塊的起始行（選填）"),
-          lineEnd: z
-            .number()
-            .int()
-            .positive()
-            .optional()
-            .describe("相關代碼區塊的結束行（選填）"),
-        })
-      )
-      .optional()
-      .describe("與任務相關的文件列表（選填）"),
-    dependencies: z
-      .array(z.string())
-      .optional()
-      .describe("任務的新依賴關係（選填）"),
-    implementationGuide: z
-      .string()
-      .optional()
-      .describe("任務的新實現指南（選填）"),
-    verificationCriteria: z
-      .string()
-      .optional()
-      .describe("任務的新驗證標準（選填）"),
-  })
-  .refine(
-    (data) => {
-      // 確保行號有效：如果有起始行，就必須有結束行，反之亦然
-      if (data.relatedFiles) {
-        for (const file of data.relatedFiles) {
-          if (
-            (file.lineStart && !file.lineEnd) ||
-            (!file.lineStart && file.lineEnd)
-          ) {
-            return false;
-          }
-          // 確保起始行小於結束行
-          if (file.lineStart && file.lineEnd && file.lineStart > file.lineEnd) {
-            return false;
-          }
-        }
-      }
-      // 確保至少有一個字段被更新
-      return !!(
-        data.name ||
-        data.description ||
-        data.notes ||
-        data.dependencies ||
-        data.implementationGuide ||
-        data.verificationCriteria ||
-        data.relatedFiles
-      );
-    },
-    {
-      message:
-        "更新請求無效：1. 行號設置必須同時包含起始行和結束行，且起始行必須小於結束行；2. 至少需要更新一個字段（名稱、描述、注記或相關文件）",
-      path: ["relatedFiles"],
-    }
-  );
+    )
+    .optional()
+    .describe(
+      "與任務相關的文件列表，用於記錄與任務相關的代碼文件、參考資料、要建立的檔案等（選填）"
+    ),
+  implementationGuide: z
+    .string()
+    .optional()
+    .describe("任務的新實現指南（選填）"),
+  verificationCriteria: z
+    .string()
+    .optional()
+    .describe("任務的新驗證標準（選填）"),
+});
 
 export async function updateTaskContent({
   taskId,
@@ -1334,6 +1315,46 @@ export async function updateTaskContent({
   implementationGuide,
   verificationCriteria,
 }: z.infer<typeof updateTaskContentSchema>) {
+  if (relatedFiles) {
+    for (const file of relatedFiles) {
+      if (
+        (file.lineStart && !file.lineEnd) ||
+        (!file.lineStart && file.lineEnd) ||
+        (file.lineStart && file.lineEnd && file.lineStart > file.lineEnd)
+      ) {
+        return {
+          content: [
+            {
+              type: "text" as const,
+              text: `## 操作失敗\n\n行號設置無效：必須同時設置起始行和結束行，且起始行必須小於結束行`,
+            },
+          ],
+        };
+      }
+    }
+  }
+
+  if (
+    !(
+      name ||
+      description ||
+      notes ||
+      dependencies ||
+      implementationGuide ||
+      verificationCriteria ||
+      relatedFiles
+    )
+  ) {
+    return {
+      content: [
+        {
+          type: "text" as const,
+          text: `## 操作失敗\n\n至少需要更新一個字段（名稱、描述、注記或相關文件）`,
+        },
+      ],
+    };
+  }
+
   // 獲取任務以檢查它是否存在
   const task = await getTaskById(taskId);
 
@@ -1429,91 +1450,69 @@ export async function updateTaskContent({
 }
 
 // 更新任務相關文件工具
-export const updateTaskRelatedFilesSchema = z
-  .object({
-    taskId: z
-      .string()
-      .uuid({ message: "任務ID格式無效，請提供有效的UUID格式" })
-      .describe("待更新任務的唯一標識符，必須是系統中存在且未完成的任務ID"),
-    relatedFiles: z
-      .array(
-        z.object({
-          path: z
-            .string()
-            .min(1, { message: "文件路徑不能為空，請提供有效的文件路徑" })
-            .describe("文件路徑，可以是相對於項目根目錄的路徑或絕對路徑"),
-          type: z
-            .enum([
-              RelatedFileType.TO_MODIFY,
-              RelatedFileType.REFERENCE,
-              RelatedFileType.CREATE,
-              RelatedFileType.DEPENDENCY,
-              RelatedFileType.OTHER,
-            ])
-            .describe("文件與任務的關係類型"),
-          description: z.string().optional().describe("文件的補充描述（選填）"),
-          lineStart: z
-            .number()
-            .int()
-            .positive()
-            .optional()
-            .describe("相關代碼區塊的起始行（選填）"),
-          lineEnd: z
-            .number()
-            .int()
-            .positive()
-            .optional()
-            .describe("相關代碼區塊的結束行（選填）"),
-        })
-      )
-      .min(1, { message: "至少需要提供一個相關文件，請確保文件列表不為空" })
-      .describe("與任務相關的文件列表"),
-  })
-  .refine(
-    (data) => {
-      // 檢查文件路徑是否有重複
-      const pathSet = new Set();
-      for (const file of data.relatedFiles) {
-        if (pathSet.has(file.path)) {
-          return false;
-        }
-        pathSet.add(file.path);
-      }
-      return true;
-    },
-    {
-      message: "文件列表中存在重複的文件路徑，請確保每個文件路徑是唯一的",
-      path: ["relatedFiles"],
-    }
-  )
-  .refine(
-    (data) => {
-      // 確保行號有效：如果有起始行，就必須有結束行，反之亦然
-      for (const file of data.relatedFiles) {
-        if (
-          (file.lineStart && !file.lineEnd) ||
-          (!file.lineStart && file.lineEnd)
-        ) {
-          return false;
-        }
-        // 確保起始行小於結束行
-        if (file.lineStart && file.lineEnd && file.lineStart > file.lineEnd) {
-          return false;
-        }
-      }
-      return true;
-    },
-    {
-      message:
-        "行號設置無效：必須同時設置起始行和結束行，且起始行必須小於結束行",
-      path: ["relatedFiles"],
-    }
-  );
+export const updateTaskRelatedFilesSchema = z.object({
+  taskId: z
+    .string()
+    .uuid({ message: "任務ID格式無效，請提供有效的UUID格式" })
+    .describe("待更新任務的唯一標識符，必須是系統中存在且未完成的任務ID"),
+  relatedFiles: z
+    .array(
+      z.object({
+        path: z
+          .string()
+          .min(1, { message: "文件路徑不能為空，請提供有效的文件路徑" })
+          .describe("文件路徑，可以是相對於項目根目錄的路徑或絕對路徑"),
+        type: z
+          .enum([
+            RelatedFileType.TO_MODIFY,
+            RelatedFileType.REFERENCE,
+            RelatedFileType.CREATE,
+            RelatedFileType.DEPENDENCY,
+            RelatedFileType.OTHER,
+          ])
+          .describe("文件與任務的關係類型"),
+        description: z.string().optional().describe("文件的補充描述（選填）"),
+        lineStart: z
+          .number()
+          .int()
+          .positive()
+          .optional()
+          .describe("相關代碼區塊的起始行（選填）"),
+        lineEnd: z
+          .number()
+          .int()
+          .positive()
+          .optional()
+          .describe("相關代碼區塊的結束行（選填）"),
+      })
+    )
+    .min(1, { message: "至少需要提供一個相關文件，請確保文件列表不為空" })
+    .describe("與任務相關的文件列表"),
+});
 
 export async function updateTaskRelatedFiles({
   taskId,
   relatedFiles,
 }: z.infer<typeof updateTaskRelatedFilesSchema>) {
+  if (relatedFiles) {
+    for (const file of relatedFiles) {
+      if (
+        (file.lineStart && !file.lineEnd) ||
+        (!file.lineStart && file.lineEnd) ||
+        (file.lineStart && file.lineEnd && file.lineStart > file.lineEnd)
+      ) {
+        return {
+          content: [
+            {
+              type: "text" as const,
+              text: `## 操作失敗\n\n行號設置無效：必須同時設置起始行和結束行，且起始行必須小於結束行`,
+            },
+          ],
+        };
+      }
+    }
+  }
+
   // 獲取任務以檢查它是否存在
   const task = await getTaskById(taskId);
 
