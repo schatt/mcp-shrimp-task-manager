@@ -2,47 +2,6 @@ import { z } from "zod";
 import { ThoughtData, ThoughtStage } from "../types/index.js";
 
 /**
- * 思維資料驗證結構
- */
-const thoughtDataSchema = z.object({
-  thought: z
-    .string()
-    .min(1, {
-      message: "思維內容不能為空，請提供有效的思考內容",
-    })
-    .describe("思維內容"),
-  thoughtNumber: z
-    .number()
-    .int()
-    .positive({
-      message: "思維編號必須是正整數",
-    })
-    .describe("思維編號"),
-  totalThoughts: z
-    .number()
-    .int()
-    .positive({
-      message: "總思維數必須是正整數",
-    })
-    .describe("總思維數"),
-  nextThoughtNeeded: z.boolean().describe("是否需要更多思維"),
-  stage: z
-    .nativeEnum(ThoughtStage, {
-      message: "思維階段不能為空，請提供有效的思考階段",
-    })
-    .describe("思維階段"),
-  tags: z.array(z.string()).optional().describe("思維標籤，是一個陣列字串"),
-  axioms_used: z
-    .array(z.string())
-    .optional()
-    .describe("使用的公理，是一個陣列字串"),
-  assumptions_challenged: z
-    .array(z.string())
-    .optional()
-    .describe("挑戰的假設，是一個陣列字串"),
-});
-
-/**
  * 格式化思維內容，返回美觀的格式化輸出
  * @param thoughtData 思維資料
  * @returns 格式化後的思維輸出
@@ -97,14 +56,41 @@ function formatThought(thoughtData: ThoughtData): string {
  * processThought工具的參數結構
  */
 export const processThoughtSchema = z.object({
-  thought: z.string().describe("思維內容"),
-  thought_number: z.number().int().positive().describe("當前思維編號"),
-  total_thoughts: z.number().int().positive().describe("預計總思維數量"),
+  thought: z
+    .string()
+    .min(1, {
+      message: "思維內容不能為空，請提供有效的思考內容",
+    })
+    .describe("思維內容"),
+  thought_number: z
+    .number()
+    .int()
+    .positive({
+      message: "思維編號必須是正整數",
+    })
+    .describe("當前思維編號"),
+  total_thoughts: z
+    .number()
+    .int()
+    .positive({
+      message: "總思維數必須是正整數",
+    })
+    .describe("預計總思維數量"),
   next_thought_needed: z.boolean().describe("是否需要下一步思維"),
-  stage: z.string().describe("思考階段"),
-  tags: z.array(z.string()).optional().describe("思維標籤"),
-  axioms_used: z.array(z.string()).optional().describe("使用的公理"),
-  assumptions_challenged: z.array(z.string()).optional().describe("挑戰的假設"),
+  stage: z
+    .nativeEnum(ThoughtStage, {
+      message: "思維階段不能為空，請提供有效的思考階段",
+    })
+    .describe("思考階段"),
+  tags: z.array(z.string()).optional().describe("思維標籤，是一個陣列字串"),
+  axioms_used: z
+    .array(z.string())
+    .optional()
+    .describe("使用的公理，是一個陣列字串"),
+  assumptions_challenged: z
+    .array(z.string())
+    .optional()
+    .describe("挑戰的假設，是一個陣列字串"),
 });
 
 /**
