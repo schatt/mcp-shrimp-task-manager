@@ -57,6 +57,7 @@
 ## 📚 文件資源
 
 - [系統架構](architecture.md)：詳細的系統設計與數據流說明
+- [提示詞自定義指南](prompt-customization.md)：透過環境變數自定義工具提示詞的說明
 
 ## 🔧 安裝與使用
 
@@ -138,6 +139,33 @@ npm run build
 > - 任務狀態丟失或無法正確保存
 > - 應用程式在不同環境下行為不一致
 > - 系統崩潰或無法啟動
+
+### 🔧 環境變數配置
+
+蝦米任務管理器支援透過環境變數自定義提示詞行為，讓您無需修改程式碼即可微調 AI 助手的回應。您可以在配置中或透過 `.env` 文件設置這些變數：
+
+```json
+{
+  "mcpServers": {
+    "shrimp-task-manager": {
+      "command": "node",
+      "args": ["/path/to/mcp-shrimp-task-manager/dist/index.js"],
+      "env": {
+        "DATA_DIR": "/path/to/project/data",
+        "MCP_PROMPT_PLAN_TASK": "自定義規劃指導...",
+        "MCP_PROMPT_EXECUTE_TASK_APPEND": "附加執行說明..."
+      }
+    }
+  }
+}
+```
+
+提供兩種自定義方式：
+
+- **覆蓋模式**（`MCP_PROMPT_[FUNCTION_NAME]`）：完全替換預設提示詞
+- **追加模式**（`MCP_PROMPT_[FUNCTION_NAME]_APPEND`）：在現有提示詞基礎上增加內容
+
+有關自定義提示詞的詳細說明，包括支援的參數和範例，請參閱[提示詞自定義指南](prompt-customization.md)。
 
 ## 💡 系統提示詞指導
 

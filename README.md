@@ -57,6 +57,7 @@ Through effective use of the task memory function, the system can continuously a
 ## 📚 Documentation Resources
 
 - [System Architecture](docs/en/architecture.md): Detailed system design and data flow explanation
+- [Prompt Customization Guide](docs/en/prompt-customization.md): Instructions for customizing tool prompts via environment variables
 
 ## 🔧 Installation and Usage
 
@@ -138,6 +139,33 @@ The **DATA_DIR parameter** is the directory where Shrimp Task Manager stores tas
 > - Task status loss or inability to save correctly
 > - Inconsistent application behavior across different environments
 > - System crashes or failure to start
+
+### 🔧 Environment Variable Configuration
+
+Shrimp Task Manager supports customizing prompt behavior through environment variables, allowing you to fine-tune AI assistant responses without modifying code. You can set these variables in the configuration or through an `.env` file:
+
+```json
+{
+  "mcpServers": {
+    "shrimp-task-manager": {
+      "command": "node",
+      "args": ["/path/to/mcp-shrimp-task-manager/dist/index.js"],
+      "env": {
+        "DATA_DIR": "/path/to/project/data",
+        "MCP_PROMPT_PLAN_TASK": "Custom planning guidance...",
+        "MCP_PROMPT_EXECUTE_TASK_APPEND": "Additional execution instructions..."
+      }
+    }
+  }
+}
+```
+
+There are two customization methods:
+
+- **Override Mode** (`MCP_PROMPT_[FUNCTION_NAME]`): Completely replace the default prompt
+- **Append Mode** (`MCP_PROMPT_[FUNCTION_NAME]_APPEND`): Add content to the existing prompt
+
+For detailed instructions on customizing prompts, including supported parameters and examples, see the [Prompt Customization Guide](docs/en/prompt-customization.md).
 
 ## 💡 System Prompt Guidance
 

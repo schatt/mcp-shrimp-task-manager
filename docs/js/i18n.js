@@ -10,6 +10,7 @@ const i18n = {
     "nav.github": "GitHub",
     "nav.menu-button": "菜單",
     "nav.logo.alt": "蝦米任務管理器標誌",
+    "nav.prompt-custom": "提示詞配置",
     // 英雄區
     "hero.title": "Shrimp Task Manager",
     "hero.subtitle": "為AI編程助手提供結構化任務管理的智能系統",
@@ -262,6 +263,33 @@ const i18n = {
 當執行完成後必須總結摘要告知用戶結論，
 你一次只能執行一個任務，當任務完成時除非用戶明確告知否則禁止進行下一則任務。
 用戶如果要求「連續模式」則按照順序連續執行所有任務。`,
+    // Prompt 自定義功能區塊
+    "prompt-custom.title": "Prompt 自定義功能",
+    "prompt-custom.subtitle":
+      "透過環境變數自定義系統提示詞，無需修改代碼即可定制 AI 助手行為",
+
+    "prompt-custom.overview.title": "功能概述",
+    "prompt-custom.overview.description":
+      "Prompt 自定義允許用戶透過環境變數調整 AI 助手的行為表現，提供兩種自定義方式：完全覆蓋原始提示詞或在原有基礎上追加內容。",
+
+    "prompt-custom.benefits.title": "主要好處",
+    "prompt-custom.benefits.item1":
+      "個性化定制：根據特定項目或領域需求調整系統行為",
+    "prompt-custom.benefits.item2":
+      "效率提升：針對重複任務類型進行優化，減少冗余說明",
+    "prompt-custom.benefits.item3":
+      "品牌一致性：確保輸出內容符合組織的風格指南和標準",
+    "prompt-custom.benefits.item4":
+      "專業適應性：為特定技術領域或行業調整專業術語和標準",
+    "prompt-custom.benefits.item5":
+      "團隊協作：統一團隊成員使用的提示詞，保證一致的工作方式",
+
+    "prompt-custom.usage.title": "使用方法",
+    "prompt-custom.usage.env.title": "環境變數配置",
+    "prompt-custom.usage.env.description":
+      "設置環境變數來自定義各功能的提示詞，使用特定命名規則：",
+    "prompt-custom.usage.more": "查看詳細文檔了解更多配置方式和參數使用說明。",
+    "prompt-custom.view-docs": "查看完整文檔",
   },
   en: {
     // 導航欄
@@ -272,6 +300,7 @@ const i18n = {
     "nav.github": "GitHub",
     "nav.menu-button": "Menu",
     "nav.logo.alt": "Shrimp Task Manager Logo",
+    "nav.prompt-custom": "Prompt Config",
     // 英雄區
     "hero.title": "Shrimp Task Manager",
     "hero.subtitle":
@@ -557,6 +586,34 @@ If no task is specified, use "list_tasks" to find unexecuted tasks and execute t
 When the execution is completed, a summary must be given to inform the user of the conclusion.
 You can only perform one task at a time, and when a task is completed, you are prohibited from performing the next task unless the user explicitly tells you to.
 If the user requests "continuous mode", all tasks will be executed in sequence.`,
+    // Prompt 自定義功能區塊
+    "prompt-custom.title": "Prompt Customization",
+    "prompt-custom.subtitle":
+      "Customize AI assistant behavior through environment variables, without modifying code",
+
+    "prompt-custom.overview.title": "Feature Overview",
+    "prompt-custom.overview.description":
+      "Prompt customization allows users to adjust AI assistant behavior through environment variables, providing two customization methods: completely override original prompts or append content to existing ones.",
+
+    "prompt-custom.benefits.title": "Key Benefits",
+    "prompt-custom.benefits.item1":
+      "Personalized customization: Adjust system behavior for specific projects or domains",
+    "prompt-custom.benefits.item2":
+      "Efficiency improvement: Optimize for repetitive task types, reducing redundant instructions",
+    "prompt-custom.benefits.item3":
+      "Brand consistency: Ensure output content adheres to organization style guides and standards",
+    "prompt-custom.benefits.item4":
+      "Professional adaptability: Adjust terminology and standards for specific technical fields or industries",
+    "prompt-custom.benefits.item5":
+      "Team collaboration: Unify prompts used by team members, ensuring consistent workflow",
+
+    "prompt-custom.usage.title": "Usage Guide",
+    "prompt-custom.usage.env.title": "Environment Variables Configuration",
+    "prompt-custom.usage.env.description":
+      "Set environment variables to customize prompts for each function, using specific naming conventions:",
+    "prompt-custom.usage.more":
+      "View detailed documentation for more configuration methods and parameter usage.",
+    "prompt-custom.view-docs": "View Complete Documentation",
   },
 };
 
@@ -575,6 +632,16 @@ function applyTranslations(lang) {
       element.textContent = i18n[lang][key];
     } else {
       console.warn(`未找到翻譯鍵: ${key}`);
+    }
+  });
+
+  // 處理語言特定的連結
+  document.querySelectorAll(".lang-specific").forEach((element) => {
+    if (element.hasAttribute(`data-lang-${lang}`)) {
+      const langSpecificHref = element.getAttribute(`data-lang-${lang}`);
+      if (langSpecificHref) {
+        element.setAttribute("href", langSpecificHref);
+      }
     }
   });
 }

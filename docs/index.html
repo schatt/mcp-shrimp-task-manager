@@ -53,8 +53,8 @@
             >Shrimp Task Manager</span
           >
         </div>
-        <div class="hidden md:flex items-center">
-          <div class="flex space-x-6">
+        <div class="hidden xl:flex items-center">
+          <div class="flex space-x-5">
             <a
               href="#pain-points"
               class="hover:text-blue-600 transition"
@@ -72,6 +72,12 @@
               class="hover:text-blue-600 transition"
               data-i18n="nav.workflow"
               >工作流程</a
+            >
+            <a
+              href="#prompt-customization"
+              class="hover:text-blue-600 transition"
+              data-i18n="nav.prompt-custom"
+              >提示詞配置</a
             >
             <a
               href="#installation"
@@ -113,7 +119,7 @@
             </button>
           </div>
         </div>
-        <button class="md:hidden" id="menu-toggle">
+        <button class="xl:hidden" id="menu-toggle">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             class="h-6 w-6"
@@ -153,6 +159,12 @@
             class="hover:text-blue-600 transition py-1"
             data-i18n="nav.workflow"
             >工作流程</a
+          >
+          <a
+            href="#prompt-customization"
+            class="hover:text-blue-600 transition py-1"
+            data-i18n="nav.prompt-custom"
+            >提示詞配置</a
           >
           <a
             href="#installation"
@@ -1444,6 +1456,131 @@
               上面的工作流程並非固定不變的，Agent
               會根據分析情況進行重複迭代不同步驟，直到達到預期效果。
             </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Prompt 自定義功能區塊 -->
+      <section
+        id="prompt-customization"
+        class="py-16 bg-gray-50 section-padding"
+      >
+        <div class="container mx-auto px-4">
+          <div class="text-center mb-12" data-aos="fade-up">
+            <h2
+              class="text-3xl md:text-4xl font-bold mb-4"
+              data-i18n="prompt-custom.title"
+            >
+              Prompt 自定義功能
+            </h2>
+            <p
+              class="text-lg text-gray-600 max-w-3xl mx-auto"
+              data-i18n="prompt-custom.subtitle"
+            >
+              透過環境變數自定義系統提示詞，無需修改代碼即可定制 AI 助手行為
+            </p>
+          </div>
+
+          <!-- 內容區塊 - 將在後續任務中填充 -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <!-- 左側：功能概述與好處 -->
+            <div data-aos="fade-right" data-aos-delay="100">
+              <div class="bg-white rounded-lg shadow-md p-6 h-full">
+                <h3
+                  class="text-xl font-bold text-purple-600 mb-4"
+                  data-i18n="prompt-custom.overview.title"
+                >
+                  功能概述
+                </h3>
+                <p
+                  class="text-gray-700 mb-6"
+                  data-i18n="prompt-custom.overview.description"
+                >
+                  Prompt 自定義允許用戶透過環境變數調整 AI
+                  助手的行為表現，提供兩種自定義方式：完全覆蓋原始提示詞或在原有基礎上追加內容。
+                </p>
+
+                <h4
+                  class="text-lg font-semibold text-gray-800 mb-3"
+                  data-i18n="prompt-custom.benefits.title"
+                >
+                  主要好處
+                </h4>
+                <ul class="list-disc ml-5 mb-4 space-y-2 text-gray-700">
+                  <li data-i18n="prompt-custom.benefits.item1">
+                    個性化定制：根據特定項目或領域需求調整系統行為
+                  </li>
+                  <li data-i18n="prompt-custom.benefits.item2">
+                    效率提升：針對重複任務類型進行優化，減少冗余說明
+                  </li>
+                  <li data-i18n="prompt-custom.benefits.item3">
+                    品牌一致性：確保輸出內容符合組織的風格指南和標準
+                  </li>
+                  <li data-i18n="prompt-custom.benefits.item4">
+                    專業適應性：為特定技術領域或行業調整專業術語和標準
+                  </li>
+                  <li data-i18n="prompt-custom.benefits.item5">
+                    團隊協作：統一團隊成員使用的提示詞，保證一致的工作方式
+                  </li>
+                </ul>
+              </div>
+            </div>
+
+            <!-- 右側：使用方法與示例 -->
+            <div data-aos="fade-left" data-aos-delay="200">
+              <div class="bg-white rounded-lg shadow-md p-6 h-full">
+                <h3
+                  class="text-xl font-bold text-purple-600 mb-4"
+                  data-i18n="prompt-custom.usage.title"
+                >
+                  使用方法
+                </h3>
+
+                <h4
+                  class="text-lg font-semibold text-gray-800 mb-3"
+                  data-i18n="prompt-custom.usage.env.title"
+                >
+                  環境變數配置
+                </h4>
+                <p
+                  class="text-gray-700 mb-4"
+                  data-i18n="prompt-custom.usage.env.description"
+                >
+                  設置環境變數來自定義各功能的提示詞，使用特定命名規則：
+                </p>
+
+                <div
+                  class="mockup-code bg-gray-900 text-gray-100 p-4 rounded-lg mb-6 text-sm"
+                >
+                  <pre class="whitespace-pre-wrap">
+# 覆蓋模式: MCP_PROMPT_[FUNCTION_NAME]
+# 追加模式: MCP_PROMPT_[FUNCTION_NAME]_APPEND
+
+# 示例:
+MCP_PROMPT_PLAN_TASK="自定義的任務規劃提示詞"
+MCP_PROMPT_EXECUTE_TASK_APPEND="額外的任務執行指導"
+</pre
+                  >
+                </div>
+
+                <p
+                  class="text-gray-700 mb-4"
+                  data-i18n="prompt-custom.usage.more"
+                >
+                  查看詳細文檔了解更多配置方式和參數使用說明。
+                </p>
+
+                <a
+                  href="https://github.com/cjo4m06/mcp-shrimp-task-manager/tree/main/docs/en/prompt-customization.md"
+                  class="btn btn-primary lang-specific"
+                  data-lang-zh-tw="https://github.com/cjo4m06/mcp-shrimp-task-manager/tree/main/docs/zh/prompt-customization.md"
+                  data-lang-en="https://github.com/cjo4m06/mcp-shrimp-task-manager/tree/main/docs/en/prompt-customization.md"
+                  data-i18n="prompt-custom.view-docs"
+                >
+                  查看完整文檔
+                </a>
+              </div>
+            </div>
           </div>
         </div>
       </section>
