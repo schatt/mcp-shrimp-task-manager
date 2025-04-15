@@ -38,6 +38,12 @@ import {
   getTaskDetailSchema,
 } from "./tools/taskTools.js";
 
+// 導入思維鏈工具
+import {
+  processThought,
+  processThoughtSchema,
+} from "./tools/thoughtChainTools.js";
+
 async function main() {
   try {
     console.log("啟動蝦米任務管理器服務...");
@@ -177,6 +183,16 @@ async function main() {
       getTaskDetailSchema.shape,
       async (args) => {
         return await getTaskDetail(args);
+      }
+    );
+
+    // 註冊思維鏈工具
+    server.tool(
+      "process_thought",
+      "你可以透過靈活的、可適應和發展的思考過程來分析問題，隨著理解的加深，每個想法都可以建立、質疑或修改先前的見解。你可以質疑想法、假設想法、驗證想法，並且可以建立新的想法。你將重複這個過程，直到你對問題有足夠的理解，並且能夠提出有效的解決方案。",
+      processThoughtSchema.shape,
+      async (args) => {
+        return await processThought(args);
       }
     );
 
