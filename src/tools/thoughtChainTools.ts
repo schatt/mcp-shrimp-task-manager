@@ -31,9 +31,15 @@ const thoughtDataSchema = z.object({
       message: "思維階段不能為空，請提供有效的思考階段",
     })
     .describe("思維階段"),
-  tags: z.array(z.string()).optional().describe("思維標籤"),
-  axioms_used: z.array(z.string()).optional().describe("使用的公理"),
-  assumptions_challenged: z.array(z.string()).optional().describe("挑戰的假設"),
+  tags: z.array(z.string()).optional().describe("思維標籤，是一個陣列字串"),
+  axioms_used: z
+    .array(z.string())
+    .optional()
+    .describe("使用的公理，是一個陣列字串"),
+  assumptions_challenged: z
+    .array(z.string())
+    .optional()
+    .describe("挑戰的假設，是一個陣列字串"),
 });
 
 /**

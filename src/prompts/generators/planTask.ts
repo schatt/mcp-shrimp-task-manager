@@ -182,9 +182,16 @@ export function getPlanTaskPrompt(params: PlanTaskPromptParams): string {
   basePrompt += templates.nextStepsTemplate;
   basePrompt += templates.nextStepsContent1;
   basePrompt += templates.nextStepsContent1Detail;
-  basePrompt += templates.nextStepsContent2;
-  basePrompt += templates.nextStepsContent2Detail1;
-  basePrompt += templates.nextStepsContent2Detail2;
+
+  if (process.env.ENABLE_THOUGHT_CHAIN !== "false") {
+    basePrompt += templates.nextStepsThoughtTemplate;
+    basePrompt += templates.nextStepsThoughtDetail1;
+    basePrompt += templates.nextStepsThoughtDetail2;
+  } else {
+    basePrompt += templates.nextStepsContent2;
+    basePrompt += templates.nextStepsContent2Detail1;
+    basePrompt += templates.nextStepsContent2Detail2;
+  }
 
   // 載入可能的自定義 prompt
   return loadPrompt(basePrompt, "PLAN_TASK");

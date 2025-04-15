@@ -153,7 +153,8 @@ npm run build
       "env": {
         "DATA_DIR": "/path/to/project/data",
         "MCP_PROMPT_PLAN_TASK": "自定義規劃指導...",
-        "MCP_PROMPT_EXECUTE_TASK_APPEND": "附加執行說明..."
+        "MCP_PROMPT_EXECUTE_TASK_APPEND": "附加執行說明...",
+        "ENABLE_THOUGHT_CHAIN": "true"
       }
     }
   }
@@ -164,6 +165,11 @@ npm run build
 
 - **覆蓋模式**（`MCP_PROMPT_[FUNCTION_NAME]`）：完全替換預設提示詞
 - **追加模式**（`MCP_PROMPT_[FUNCTION_NAME]_APPEND`）：在現有提示詞基礎上增加內容
+
+此外，還有其他系統配置變數：
+
+- **DATA_DIR**：指定任務數據存儲的目錄
+- **ENABLE_THOUGHT_CHAIN**：控制任務規劃工作流中的思考模式。當設置為 `true`（預設值）時，系統引導用戶使用 `process_thought` 工具進行逐步推理。當設置為 `false` 時，系統直接使用 `analyze_task` 提交分析結果，跳過詳細的思考過程。
 
 有關自定義提示詞的詳細說明，包括支援的參數和範例，請參閱[提示詞自定義指南](prompt-customization.md)。
 
