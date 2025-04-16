@@ -10,11 +10,13 @@
  */
 export enum ThoughtStage {
   PROBLEM_DEFINITION = "問題定義", // 定義問題和目標的階段
-  RESEARCH = "研究", // 收集和分析資訊的階段
+  COLLECT_INFORMATION = "收集資訊", // 收集和分析資訊的階段
+  RESEARCH = "研究", // 研究資訊的階段
   ANALYSIS = "分析", // 深入解析問題和可能解決方案的階段
   SYNTHESIS = "綜合", // 整合分析結果形成方案的階段
   CONCLUSION = "結論", // 總結思考過程並提出最終解決方案的階段
   QUESTIONING = "質疑", // 質疑和批判的階段
+  PLANNING = "規劃", // 規劃和計劃的階段
 }
 
 /**

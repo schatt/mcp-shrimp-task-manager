@@ -78,10 +78,13 @@ export const processThoughtSchema = z.object({
     .describe("預計總思維數量"),
   next_thought_needed: z.boolean().describe("是否需要下一步思維"),
   stage: z
-    .nativeEnum(ThoughtStage, {
+    .string()
+    .min(1, {
       message: "思維階段不能為空，請提供有效的思考階段",
     })
-    .describe("思考階段"),
+    .describe(
+      "思考階段，可以選擇的階段有：問題定義、收集資訊、研究、分析、綜合、結論、質疑、規劃"
+    ),
   tags: z.array(z.string()).optional().describe("思維標籤，是一個陣列字串"),
   axioms_used: z
     .array(z.string())
