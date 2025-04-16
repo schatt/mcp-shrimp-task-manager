@@ -194,8 +194,8 @@ export async function analyzeTask({
 export const reflectTaskSchema = z.object({
   summary: z
     .string()
-    .min(20, {
-      message: "任務摘要不能少於20個字符，請提供更詳細的描述以確保任務目標明確",
+    .min(10, {
+      message: "任務摘要不能少於10個字符，請提供更詳細的描述以確保任務目標明確",
     })
     .describe("結構化的任務摘要，保持與分析階段一致以確保連續性"),
   analysis: z
