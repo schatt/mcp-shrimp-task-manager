@@ -94,6 +94,6 @@ export const nextStepsContent2 = `**第二步：使用 analyze_task 提交分析
 export const nextStepsContent2Detail1 = `1. **任務摘要** - 目標、範圍、挑戰和限制條件\n`;
 export const nextStepsContent2Detail2 = `2. **初步解答構想** - 可行的技術方案和實施計劃\n`;
 
-export const nextStepsThoughtTemplate = `**第二步：使用「process_thought」思考答案：\n`;
-export const nextStepsThoughtDetail1 = `1. **思考過程** - 逐步推理過程，包括假設、驗證和調整\n`;
-export const nextStepsThoughtDetail2 = `2. 請務必先使用「process_thought」工具思考，禁止直接回答\n`;
+export const nextStepsThoughtTemplate = `**第二步：必須強制使用「process_thought」思考答案 (禁止直接使用analyze_task)**\n`;
+export const nextStepsThoughtDetail1 = `1. **強制思考過程** - 必須展示逐步推理過程，包括假設、驗證和調整\n`;
+export const nextStepsThoughtDetail2 = `2. 警告：必須先使用「process_thought」工具思考，嚴格禁止直接使用analyze_task或直接回答\n`;
