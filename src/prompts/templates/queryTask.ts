@@ -5,36 +5,74 @@
 
 /**
  * queryTask 相關的提示模板
+ * 注意：所有變數格式已統一為 {變數} 格式，移除了 {{變數}} 格式
  */
 
 /**
+ * 查詢模式模板 - 已將三元運算符拆分為兩個獨立常量
+ */
+export const searchModeIdTemplate = "任務ID查詢";
+export const searchModeKeywordTemplate = "關鍵字查詢";
+
+/**
  * 查詢頭部模板
+ * 注意：三元運算符已替換為 {searchMode} 變數
  */
 export const searchHeaderTemplate = `
 # 任務查詢結果
 
 ## 查詢資訊
-- 查詢詞: {{query}}
-- 查詢模式: {{isId ? "任務ID查詢" : "關鍵字查詢"}}
-- 總計找到: {{totalTasks}} 筆任務
+- 查詢詞: {query}
+- 查詢模式: {searchMode}
+- 總計找到: {totalTasks} 筆任務
 `;
 
 /**
- * 沒有結果時的模板
+ * 沒有結果時的模板 - 已拆分為ID查詢和關鍵字查詢兩個獨立模板
+ * 原模板保留作為參考：
+ * export const noResultsTemplate = `
+ * ## 無符合結果
+ * 沒有找到符合 "{query}" 的任務。
+ *
+ * ### 可能的原因:
+ * {{#if isId}}
+ * - 您提供的任務ID不存在或格式不正確
+ * - 任務可能已被刪除
+ * {{else}}
+ * - 關鍵字拼寫可能有誤
+ * - 請嘗試使用更簡短或相近的關鍵詞
+ * - 任務清單可能為空
+ * {{/if}}
+ *
+ * 您可以使用 \`list_tasks\` 命令查看所有現有任務。
+ * `;
  */
-export const noResultsTemplate = `
+
+/**
+ * 沒有結果時的模板 - ID查詢
+ */
+export const noResultsIdTemplate = `
 ## 無符合結果
-沒有找到符合 "{{query}}" 的任務。
+沒有找到符合 "{query}" 的任務。
 
 ### 可能的原因:
-{{#if isId}}
 - 您提供的任務ID不存在或格式不正確
 - 任務可能已被刪除
-{{else}}
+
+您可以使用 \`list_tasks\` 命令查看所有現有任務。
+`;
+
+/**
+ * 沒有結果時的模板 - 關鍵字查詢
+ */
+export const noResultsKeywordTemplate = `
+## 無符合結果
+沒有找到符合 "{query}" 的任務。
+
+### 可能的原因:
 - 關鍵字拼寫可能有誤
 - 請嘗試使用更簡短或相近的關鍵詞
 - 任務清單可能為空
-{{/if}}
 
 您可以使用 \`list_tasks\` 命令查看所有現有任務。
 `;
@@ -53,9 +91,9 @@ export const resultListHeaderTemplate = `
  */
 export const paginationInfoTemplate = `
 ## 分頁資訊
-- 當前頁: {{page}} / {{totalPages}}
-- 每頁顯示: {{pageSize}} 筆
-- 總計結果: {{totalTasks}} 筆
+- 當前頁: {page} / {totalPages}
+- 每頁顯示: {pageSize} 筆
+- 總計結果: {totalTasks} 筆
 
 您可以指定 page 參數查看更多結果。
 `;
@@ -64,11 +102,11 @@ export const paginationInfoTemplate = `
  * 任務摘要模板
  */
 export const taskSummaryTemplate = `
-### {{taskName}} (ID: {{taskId}})
-- 狀態: {{taskStatus}}
-- 描述: {{taskDescription}}
-- 建立時間: {{createdAt}}
-- 完成時間: {{completedAt}}
+### {taskName} (ID: {taskId})
+- 狀態: {taskStatus}
+- 描述: {taskDescription}
+- 建立時間: {createdAt}
+- 完成時間: {completedAt}
 `;
 
 /**

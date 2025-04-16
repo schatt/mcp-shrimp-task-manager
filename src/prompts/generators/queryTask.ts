@@ -31,16 +31,18 @@ export function getQueryTaskPrompt(params: QueryTaskPromptParams): string {
   // 初始化基本 prompt
   let basePrompt = generatePrompt(templates.searchHeaderTemplate, {
     query,
-    isId,
+    searchMode: isId
+      ? templates.searchModeIdTemplate
+      : templates.searchModeKeywordTemplate,
     totalTasks,
   });
 
   // 如果沒有找到任務
   if (tasks.length === 0) {
-    basePrompt += generatePrompt(templates.noResultsTemplate, {
-      query,
-      isId,
-    });
+    basePrompt += generatePrompt(
+      isId ? templates.noResultsIdTemplate : templates.noResultsKeywordTemplate,
+      { query }
+    );
     return loadPrompt(basePrompt, "QUERY_TASK");
   }
 
