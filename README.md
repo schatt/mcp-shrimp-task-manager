@@ -116,7 +116,7 @@ or
   "mcpServers": {
     "shrimp-task-manager": {
       "command": "npx",
-      "args": ["@siage/shrimp-task-manager"],
+      "args": ["mcp-shrimp-task-manager"],
       "env": {
         "DATA_DIR": "/mcp-shrimp-task-manager/data"
       }
@@ -154,7 +154,7 @@ or
   "mcpServers": {
     "shrimp-task-manager": {
       "command": "npx",
-      "args": ["@siage/shrimp-task-manager"],
+      "args": ["mcp-shrimp-task-manager"],
       "env": {
         "DATA_DIR": "/path/to/project/data" // 必須使用絕對路徑
       }
