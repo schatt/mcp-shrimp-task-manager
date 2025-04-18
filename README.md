@@ -22,6 +22,8 @@ Shrimp Task Manager guides Agents through structured workflows for systematic pr
 - **Task Complexity Assessment**: Automatically evaluate task complexity and provide optimal handling suggestions
 - **Automatic Task Summary Updates**: Automatically generate summaries upon task completion, optimizing memory performance
 - **Task Memory Function**: Automatically backup task history, providing long-term memory and reference capabilities
+- **Thought Chain Process**: Step-by-step reasoning to analyze complex problems systematically
+- **Project Rules Initialization**: Define project standards and rules to maintain consistency across large projects
 
 ## 🔄 Task Management Workflow
 
@@ -38,6 +40,8 @@ The system provides a complete task management lifecycle:
 9. **Task Management** `delete_task`: Manage incomplete tasks (completed tasks remain in the system)
 10. **Query Tasks** `query_task`: Search for related tasks in past memories using keywords
 11. **Display Task** `get_task_detail`: Display complete task guidance
+12. **Process Thought** `process_thought`: Conduct step-by-step reasoning for complex problem analysis
+13. **Initialize Project Rules** `init_project_rules`: Set up and maintain project standards and conventions
 
 ## 🧠 Task Memory Function
 
@@ -57,6 +61,43 @@ Shrimp Task Manager has long-term memory capabilities, automatically saving task
 - **Knowledge Accumulation**: Form a continuously expanding knowledge base as system usage increases
 
 Through effective use of the task memory function, the system can continuously accumulate experience, with intelligence level and work efficiency continuously improving.
+
+## 🤔 Thought Chain Process
+
+The Thought Chain feature enhances problem-solving through structured thinking:
+
+- **Systematic Reasoning**: Break down complex problems into logical steps
+- **Assumption Testing**: Challenge assumptions to validate solution approaches
+- **Critical Analysis**: Evaluate solution options with rigorous criteria
+- **Improved Decision Making**: Reach more reliable conclusions through deliberate thinking
+
+When enabled (default setting), the system guides the Agent through step-by-step reasoning using the `process_thought` tool, ensuring thorough problem analysis before implementation.
+
+## 📋 Project Rules Initialization
+
+The Project Rules feature helps maintain consistency across your codebase:
+
+- **Standardize Development**: Establish consistent coding patterns and practices
+- **Onboard New Developers**: Provide clear guidelines for project contributions
+- **Maintain Quality**: Ensure all code meets established project standards
+
+> **⚠️ Recommendation**: Initialize project rules when your project grows larger or undergoes significant changes. This helps maintain consistency and quality as complexity increases.
+
+Use the `init_project_rules` tool to set up or update project standards when:
+
+- Starting a new large-scale project
+- Onboarding new team members
+- Implementing major architectural changes
+- Adopting new development conventions
+
+### Usage Examples
+
+You can easily access this feature with simple natural language commands:
+
+- **For initial setup**: Simply tell the Agent "init rules" or "init project rules"
+- **For updates**: When your project evolves, tell the Agent "Update rules" or "Update project rules"
+
+This tool is particularly valuable when your codebase expands or undergoes significant structural changes, helping maintain consistent development practices throughout the project lifecycle.
 
 ## 📚 Documentation Resources
 
@@ -247,19 +288,21 @@ If your tool doesn't support Custom modes, you can:
 
 After configuration, you can use the following tools:
 
-| Category                | Tool Name         | Description                            |
-| ----------------------- | ----------------- | -------------------------------------- |
-| **Task Planning**       | `plan_task`       | Start planning tasks                   |
-| **Task Analysis**       | `analyze_task`    | In-depth analysis of task requirements |
-| **Solution Assessment** | `reflect_task`    | Reflect and improve solution concepts  |
-| **Task Management**     | `split_tasks`     | Break tasks into subtasks              |
-|                         | `list_tasks`      | Display all tasks and status           |
-|                         | `query_task`      | Search and list tasks                  |
-|                         | `get_task_detail` | Display complete task details          |
-|                         | `delete_task`     | Delete incomplete tasks                |
-| **Task Execution**      | `execute_task`    | Execute specific tasks                 |
-|                         | `verify_task`     | Verify task completion                 |
-|                         | `complete_task`   | Mark tasks as completed                |
+| Category                | Tool Name            | Description                                      |
+| ----------------------- | -------------------- | ------------------------------------------------ |
+| **Task Planning**       | `plan_task`          | Start planning tasks                             |
+| **Task Analysis**       | `analyze_task`       | In-depth analysis of task requirements           |
+|                         | `process_thought`    | Step-by-step reasoning for complex problems      |
+| **Solution Assessment** | `reflect_task`       | Reflect and improve solution concepts            |
+| **Project Management**  | `init_project_rules` | Initialize or update project standards and rules |
+| **Task Management**     | `split_tasks`        | Break tasks into subtasks                        |
+|                         | `list_tasks`         | Display all tasks and status                     |
+|                         | `query_task`         | Search and list tasks                            |
+|                         | `get_task_detail`    | Display complete task details                    |
+|                         | `delete_task`        | Delete incomplete tasks                          |
+| **Task Execution**      | `execute_task`       | Execute specific tasks                           |
+|                         | `verify_task`        | Verify task completion                           |
+|                         | `complete_task`      | Mark tasks as completed                          |
 
 ## 🔧 Technical Implementation
 
