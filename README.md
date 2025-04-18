@@ -99,6 +99,21 @@ Shrimp Task Manager offers two configuration methods: global configuration and p
       "command": "node",
       "args": ["/mcp-shrimp-task-manager/dist/index.js"],
       "env": {
+        "DATA_DIR": "/path/to/project/data" // 必須使用絕對路徑
+      }
+    }
+  }
+}
+
+
+or
+
+{
+  "mcpServers": {
+    "shrimp-task-manager": {
+      "command": "npx",
+      "args": ["@siage/shrimp-task-manager"],
+      "env": {
         "DATA_DIR": "/mcp-shrimp-task-manager/data"
       }
     }
@@ -123,6 +138,21 @@ You can also set up dedicated configurations for each project to use independent
       "args": ["/path/to/mcp-shrimp-task-manager/dist/index.js"],
       "env": {
         "DATA_DIR": "/path/to/project/data" // Must use absolute path
+      }
+    }
+  }
+}
+
+
+or
+
+{
+  "mcpServers": {
+    "shrimp-task-manager": {
+      "command": "npx",
+      "args": ["@siage/shrimp-task-manager"],
+      "env": {
+        "DATA_DIR": "/path/to/project/data" // 必須使用絕對路徑
       }
     }
   }

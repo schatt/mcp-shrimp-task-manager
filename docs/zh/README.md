@@ -104,6 +104,20 @@ npm run build
     }
   }
 }
+
+or
+
+{
+  "mcpServers": {
+    "shrimp-task-manager": {
+      "command": "npx",
+      "args": ["@siage/shrimp-task-manager"],
+      "env": {
+        "DATA_DIR": "/mcp-shrimp-task-manager/data"
+      }
+    }
+  }
+}
 ```
 
 > ⚠️ 請將 `/mcp-shrimp-task-manager` 替換為您的實際路徑。
@@ -121,6 +135,20 @@ npm run build
     "shrimp-task-manager": {
       "command": "node",
       "args": ["/path/to/mcp-shrimp-task-manager/dist/index.js"],
+      "env": {
+        "DATA_DIR": "/path/to/project/data" // 必須使用絕對路徑
+      }
+    }
+  }
+}
+
+or
+
+{
+  "mcpServers": {
+    "shrimp-task-manager": {
+      "command": "npx",
+      "args": ["@siage/shrimp-task-manager"],
       "env": {
         "DATA_DIR": "/path/to/project/data" // 必須使用絕對路徑
       }
