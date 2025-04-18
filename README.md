@@ -103,6 +103,7 @@ This tool is particularly valuable when your codebase expands or undergoes signi
 
 - [System Architecture](docs/en/architecture.md): Detailed system design and data flow explanation
 - [Prompt Customization Guide](docs/en/prompt-customization.md): Instructions for customizing tool prompts via environment variables
+- [Changelog](CHANGELOG.md): Record of all notable changes to this project
 
 ## 🔧 Installation and Usage
 

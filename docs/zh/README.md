@@ -99,6 +99,7 @@
 
 - [系統架構](architecture.md)：詳細的系統設計與數據流說明
 - [提示詞自定義指南](prompt-customization.md)：透過環境變數自定義工具提示詞的說明
+- [更新日誌](CHANGELOG.md)：記錄此專案的所有重要變更
 
 ## 🔧 安裝與使用
 
