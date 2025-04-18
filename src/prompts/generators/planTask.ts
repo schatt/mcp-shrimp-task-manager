@@ -5,7 +5,8 @@
 
 import { loadPrompt, generatePrompt } from "../loader.js";
 import * as templates from "../templates/planTask.js";
-import { TaskStatus, Task, TaskDependency } from "../../types/index.js";
+import { getRulesFilePath } from "../../utils/pathUtils.js";
+import { Task, TaskDependency } from "../../types/index.js";
 
 /**
  * planTask prompt 參數介面
@@ -178,8 +179,11 @@ export function getPlanTaskPrompt(params: PlanTaskPromptParams): string {
   basePrompt += templates.infoCollectionGuideItems2;
   basePrompt += templates.infoCollectionGuideItems3;
 
+  const rulesPath = getRulesFilePath();
   // 添加下一步指導
-  basePrompt += templates.nextStepsTemplate;
+  basePrompt += generatePrompt(templates.nextStepsTemplate, {
+    rulesPath,
+  });
   basePrompt += templates.nextStepsContent1;
   basePrompt += templates.nextStepsContent1Detail;
 

@@ -87,7 +87,7 @@ export const infoCollectionGuideItems2 = `2. **查詢記憶** - 使用「query_t
 export const infoCollectionGuideItems3 = `3. **網路搜索** - 當出現你不理解的名詞或概念時，使用網路搜尋工具找尋答案\n\n`;
 
 // 下一步模板
-export const nextStepsTemplate = `## 下一步\n\n`;
+export const nextStepsTemplate = `## 下一步\n\n⚠️ 重要：請先閱讀 {rulesPath} 規則再進行任何分析或設計 ⚠️\n\n`;
 export const nextStepsContent1 = `**第一步：根據任務描述決定是否查詢記憶**\n`;
 export const nextStepsContent1Detail = `- 判斷任務是否屬於必查情境，若是，請先使用「query_task」查詢過往記錄；否則，可直接進行分析。\n\n`;
 export const nextStepsContent2 = `**第二步：使用 analyze_task 提交分析結果**\n`;

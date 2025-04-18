@@ -1,8 +1,6 @@
 import "dotenv/config";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
-import { z } from "zod";
-import { RelatedFileType } from "./types/index.js";
 
 // 導入工具函數
 import {
@@ -41,6 +39,12 @@ import {
   processThought,
   processThoughtSchema,
 } from "./tools/thoughtChainTools.js";
+
+// 導入專案工具
+import {
+  initProjectRules,
+  initProjectRulesSchema,
+} from "./tools/projectTools.js";
 
 async function main() {
   try {
@@ -187,10 +191,20 @@ async function main() {
     // 註冊思維鏈工具
     server.tool(
       "process_thought",
-      "你可以透過靈活的、可適應和發展的思考過程來分析問題，隨著理解的加深，每個想法都可以建立、質疑或修改先前的見解。你可以質疑想法、假設想法、驗證想法，並且可以建立新的想法。你將重複這個過程，直到你對問題有足夠的理解，並且能夠提出有效的解決方案。如果你覺得思考已經充分可以把 nextThoughtNeeded 設為 false 並且停止思考。",
+      "任何需要思考或分析的時候，透過該工具進行靈活的、可適應和發展的思考過程來分析問題，隨著理解的加深，每個想法都可以建立、質疑或修改先前的見解。你可以質疑想法、假設想法、驗證想法，並且可以建立新的想法。你將重複這個過程，直到你對問題有足夠的理解，並且能夠提出有效的解決方案。如果你覺得思考已經充分可以把 nextThoughtNeeded 設為 false 並且停止思考，如果你覺得需要更多的思考你可以隨時變更 total_thoughts 來增加步驟。",
       processThoughtSchema.shape,
       async (args) => {
         return await processThought(args);
+      }
+    );
+
+    // 註冊初始化專案規範工具
+    server.tool(
+      "init_project_rules",
+      "初始化專案規範，當用戶要求產生或初始化專案規範文件時呼叫該工具，如果用戶要求變更或更新專案規範也呼叫該工具",
+      initProjectRulesSchema.shape,
+      async () => {
+        return await initProjectRules();
       }
     );
 

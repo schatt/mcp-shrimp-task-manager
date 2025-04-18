@@ -18,4 +18,8 @@ export { getCompleteTaskPrompt } from "./generators/completeTask.js";
 export { getListTasksPrompt } from "./generators/listTasks.js";
 export { getQueryTaskPrompt } from "./generators/queryTask.js";
 export { getGetTaskDetailPrompt } from "./generators/getTaskDetail.js";
+export { getInitProjectRulesPrompt } from "./generators/initProjectRules.js";
 // 等等
+
+// 導入初始化專案規範模板
+export { initProjectRulesTemplate } from "./templates/initProjectRules.js";

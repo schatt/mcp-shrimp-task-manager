@@ -75,7 +75,7 @@ export const processThoughtSchema = z.object({
     .positive({
       message: "總思維數必須是正整數",
     })
-    .describe("預計總思維數量"),
+    .describe("預計總思維數量，如果需要更多的思考可以隨時變更"),
   next_thought_needed: z.boolean().describe("是否需要下一步思維"),
   stage: z
     .string()
