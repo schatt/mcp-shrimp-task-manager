@@ -46,7 +46,8 @@ export const knowledgeTransferTemplate = `## 知識傳遞機制
 // 任務過多處理模板
 export const taskOverflowTemplate = `## split_tasks 任務太多或內容過長導致「split_tasks」工具無法正常運作時
 - 請使用多次使用「split_tasks」工具，每次只提交一小部分任務
-- 如果每次只新增一個任務還是無法正常運作，請考慮再次拆分任務，或者簡化任務但必須保留核心內容`;
+- 如果每次只新增一個任務還是無法正常運作，請考慮再次拆分任務，或者簡化任務但必須保留核心內容
+- **嚴重警告** 你每次呼叫 split_tasks 傳遞的參數不能超過8000個字，如果超出 8000 個字請多次呼叫工具完成`;
 
 // 結尾提醒模板
 export const conclusionTemplate = `請嚴格審查方案，確保解決方案質量。`;

@@ -43,4 +43,4 @@ export const dependencyManagementContent4 = `- 平衡關鍵路徑，優化並行
 // 決策點模板
 export const decisionPointsTemplate = `## 決策點\n\n`;
 export const decisionPointContent1 = `- 發現任務拆分不合理：重新呼叫「split_tasks」調整\n`;
-export const decisionPointContent2 = `- 確認任務拆分完善：生成執行計劃，確定優先順序\n`;
+export const decisionPointContent2 = `- 確認任務拆分完善：生成執行計劃，確定優先順序\n- **嚴重警告** 你每次呼叫 split_tasks 傳遞的參數不能超過8000個字，如果超出 8000 個字請多次呼叫工具完成`;
