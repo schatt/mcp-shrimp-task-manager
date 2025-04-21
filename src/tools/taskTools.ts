@@ -1473,9 +1473,12 @@ export async function getTaskDetail({
   taskId,
 }: z.infer<typeof getTaskDetailSchema>) {
   try {
-    // 檢查任務是否存在
-    const task = await getTaskById(taskId);
-    if (!task) {
+    // 使用 searchTasksWithCommand 替代 getTaskById，實現記憶區任務搜索
+    // 設置 isId 為 true，表示按 ID 搜索；頁碼為 1，每頁大小為 1
+    const result = await searchTasksWithCommand(taskId, true, 1, 1);
+
+    // 檢查是否找到任務
+    if (result.tasks.length === 0) {
       return {
         content: [
           {
@@ -1486,6 +1489,9 @@ export async function getTaskDetail({
         isError: true,
       };
     }
+
+    // 獲取找到的任務（第一個也是唯一的一個）
+    const task = result.tasks[0];
 
     // 使用prompt生成器獲取最終prompt
     const prompt = getGetTaskDetailPrompt({
