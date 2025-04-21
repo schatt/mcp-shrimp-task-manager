@@ -7,7 +7,8 @@
 export const reflectTaskTemplate = `## 方案評估\n\n### 任務摘要\n\`\`\`\n{summary}\n\`\`\`\n\n### 分析結果\n\`\`\`\n{analysis}\n\`\`\`\n\n`;
 
 // 評估要點模板
-export const evaluationPointsTemplate = `## 評估要點\n\n### 1. 技術完整性
+export const evaluationPointsTemplate = `## 評估要點
+### 1. 技術完整性
 - 檢查方案技術缺陷和邏輯漏洞
 - 驗證邊緣情況和異常處理
 - 確認數據流和控制流完整性
@@ -26,28 +27,34 @@ export const evaluationPointsTemplate = `## 評估要點\n\n### 1. 技術完整�
 - 評估用戶體驗和業務流程整合`;
 
 // 決策點模板
-export const decisionPointsTemplate = `## 決策點\n\n根據評估結果選擇後續行動：\n\n- **發現關鍵問題**：使用「analyze_task」重新提交改進方案
+export const decisionPointsTemplate = `## 決策點
+根據評估結果選擇後續行動：
+- **發現關鍵問題**：使用「analyze_task」重新提交改進方案
 - **輕微調整**：在下一步執行中應用這些小的改進
-- **方案完善**：使用「split_tasks」將解決方案分解為可執行子任務，如果任務太多或內容過長，請使用多次使用「split_tasks」工具，每次只提交一小部分任務`;
+- **方案完善**：使用「split_tasks」將解決方案分解為可執行子任務，如果任務太多或內容過長，請使用多次使用「split_tasks」工具，每次只提交一小部分任務\n\n`;
 
 // 更新模式選擇模板
 export const updateModesTemplate = `## split_tasks 更新模式選擇
 - **append** - 保留所有現有任務並添加新任務
 - **overwrite** - 清除未完成任務，保留已完成任務
 - **selective** - 選擇性更新特定任務，保留其他任務
-- **clearAllTasks** - 清除所有任務並創建備份`;
+- **clearAllTasks** - 清除所有任務並創建備份\n\n`;
 
 // 知識傳遞機制模板
 export const knowledgeTransferTemplate = `## 知識傳遞機制
 1. **全局分析結果** - 關聯完整分析文檔
 2. **任務專屬實現指南** - 每個任務保存具體實現方法
-3. **任務專屬驗證標準** - 設置明確驗證要求`;
+3. **任務專屬驗證標準** - 設置明確驗證要求\n\n`;
 
 // 任務過多處理模板
-export const taskOverflowTemplate = `## split_tasks 任務太多或內容過長導致「split_tasks」工具無法正常運作時
-- 請使用多次使用「split_tasks」工具，每次只提交一小部分任務
-- 如果每次只新增一個任務還是無法正常運作，請考慮再次拆分任務，或者簡化任務但必須保留核心內容
-- **嚴重警告** 你每次呼叫 split_tasks 傳遞的參數不能超過8000個字，如果超出 8000 個字請多次呼叫工具完成`;
+export const taskOverflowTemplate = `## 任務拆分指南(請嚴格遵守以下規則)
+- **原子性**：每個子任務應該可獨立運作或測試
+- **依賴性**：如果任務依賴於其他任務請標註 「dependencies」 字段
+- **適度拆分**：避免過度細化（粒度過小）或過度合併（粒度過大）
+- **必要時整合**：修改的內容不多或不複雜，可以適當於其他任務整合，避免任務過於簡單造成任務過多
+- **重複調用**：如果任務太多或內容過長導致「split_tasks」工具無法正常運作時，請使用多次使用「split_tasks」工具，每次只提交一小部分任務
+- **簡化任務**：如果每次只新增一個任務還是無法正常運作，請考慮再次拆分任務，或者簡化任務但必須保留核心內容
+- **嚴重警告** 你每次呼叫 split_tasks 傳遞的參數不能超過8000個字，如果超出 8000 個字請多次呼叫工具完成\n\n`;
 
 // 結尾提醒模板
 export const conclusionTemplate = `請嚴格審查方案，確保解決方案質量。`;

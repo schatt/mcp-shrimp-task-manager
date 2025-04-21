@@ -84,19 +84,28 @@ async function main() {
           {
             name: "analyze_task",
             description:
-              "深入分析任務需求並系統性檢查代碼庫，評估技術可行性與潛在風險，如果需要提供程式碼請使用 pseudocode 格式且盡量精簡只保留核心實現部分",
+              "深入分析任務需求並系統性檢查代碼庫，評估技術可行性與潛在風險，如果需要提供程式碼請使用 pseudocode 格式且僅提供高級邏輯流程和關鍵步驟避免完整代碼",
             inputSchema: zodToJsonSchema(analyzeTaskSchema),
           },
           {
             name: "reflect_task",
             description:
-              "批判性審查分析結果，評估方案完整性並識別優化機會，確保解決方案符合最佳實踐，如果需要提供程式碼請使用 pseudocode 格式且盡量精簡只保留核心實現部分",
+              "批判性審查分析結果，評估方案完整性並識別優化機會，確保解決方案符合最佳實踐，如果需要提供程式碼請使用 pseudocode 格式且僅提供高級邏輯流程和關鍵步驟避免完整代碼",
             inputSchema: zodToJsonSchema(reflectTaskSchema),
           },
           {
             name: "split_tasks",
-            description:
-              "將複雜任務分解為獨立且可追蹤的子任務，建立明確的依賴關係和優先順序。支援四種任務更新模式：追加(append)、覆蓋(overwrite)、選擇性更新(selective)和清除所有任務(clearAllTasks)，其中覆蓋模式只會刪除未完成的任務並保留已完成任務，選擇性更新模式可根據任務名稱智能匹配更新現有任務，同時保留其他任務，如果你需要規劃全新的任務請使用清除所有任務模式會清除所有任務並創建備份。請優先使用清除所有任務模式，只有用戶要求變更或修改計畫內容才使用其他模式。\n\n**請參考之前的分析結果提供 pseudocode\n\n**如果任務太多或內容過長，請分批使用「split_tasks」工具，每次只提交一小部分任務，**嚴重警告**你每次呼叫 split_tasks 傳遞的參數不能超過8000個字，如果超出 8000 個字請多次呼叫工具完成",
+            description: `將複雜任務分解為獨立子任務，建立依賴關係和優先順序。
+## updateMode
+- **append**：保留現有任務並添加新任務
+- **overwrite**：刪除未完成任務，保留已完成任務
+- **selective**：根據任務名稱智能匹配更新現有任務
+- **clearAllTasks**：清除所有任務並創建備份（優先使用此模式）
+
+## 關鍵要求
+- **提供精簡pseudocode**：僅提供高級邏輯流程和關鍵步驟避免完整代碼
+- **必要時整合**：簡單修改可與其他任務整合，避免任務過多
+- **分批提交**：任務過多時使用「split_tasks」工具，參數不超過8000字`,
             inputSchema: zodToJsonSchema(splitTasksSchema),
           },
           {

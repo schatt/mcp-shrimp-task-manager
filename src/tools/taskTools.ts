@@ -160,7 +160,7 @@ export const analyzeTaskSchema = z.object({
         "初步解答構想不能少於50個字符，請提供更詳細的內容確保技術方案清晰",
     })
     .describe(
-      "初步解答構想，包含技術方案、架構設計和實施策略，如果需要提供程式碼請使用 pseudocode 格式且盡量精簡只保留核心實現部分，最少50個字符"
+      "最少50個字符的初步解答構想，包含技術方案、架構設計和實施策略，如果需要提供程式碼請使用 pseudocode 格式且僅提供高級邏輯流程和關鍵步驟避免完整代碼"
     ),
   previousAnalysis: z
     .string()
@@ -204,7 +204,7 @@ export const reflectTaskSchema = z.object({
       message: "技術分析內容不夠詳盡，請提供完整的技術分析和實施方案",
     })
     .describe(
-      "完整詳盡的技術分析結果，包括所有技術細節、依賴組件和實施方案，如果需要提供程式碼請使用 pseudocode 格式且盡量精簡只保留核心實現部分"
+      "完整詳盡的技術分析結果，包括所有技術細節、依賴組件和實施方案，如果需要提供程式碼請使用 pseudocode 格式且僅提供高級邏輯流程和關鍵步驟避免完整代碼"
     ),
 });
 
@@ -253,7 +253,7 @@ export const splitTasksSchema = z.object({
         implementationGuide: z
           .string()
           .describe(
-            "此特定任務的具體實現方法和步驟，請參考之前的分析結果提供 pseudocode"
+            "此特定任務的具體實現方法和步驟，請參考之前的分析結果提供精簡pseudocode"
           ),
         dependencies: z
           .array(z.string())
@@ -310,7 +310,9 @@ export const splitTasksSchema = z.object({
     .min(1, {
       message: "請至少提供一個任務",
     })
-    .describe("結構化的任務清單，每個任務應保持原子性且有明確的完成標準"),
+    .describe(
+      "結構化的任務清單，每個任務應保持原子性且有明確的完成標準，避免過於簡單的任務，簡單修改可與其他任務整合，避免任務過多"
+    ),
   globalAnalysisResult: z
     .string()
     .optional()
