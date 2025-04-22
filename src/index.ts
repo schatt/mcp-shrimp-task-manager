@@ -147,15 +147,15 @@ async function main() {
           {
             name: "update_task",
             description:
-              "更新任務內容，包括名稱、描述和注記，但不允許修改已完成的任務",
+              "更新任務內容，包括名稱、描述和注記、依賴任務、相關文件、實現指南和驗證標準，已完成的任務僅允許更新摘要和相關文件",
             inputSchema: zodToJsonSchema(updateTaskContentSchema),
           },
-          {
-            name: "update_task_files",
-            description:
-              "更新任務相關文件列表，用於記錄與任務相關的代碼文件、參考資料等",
-            inputSchema: zodToJsonSchema(updateTaskRelatedFilesSchema),
-          },
+          // {
+          //   name: "update_task_files",
+          //   description:
+          //     "更新任務相關文件列表，用於記錄與任務相關的代碼文件、參考資料等",
+          //   inputSchema: zodToJsonSchema(updateTaskRelatedFilesSchema),
+          // },
           {
             name: "query_task",
             description: "根據關鍵字或ID搜尋任務，顯示省略版的任務資訊",
@@ -170,7 +170,7 @@ async function main() {
           {
             name: "process_thought",
             description:
-              "任何需要思考或分析的時候，透過該工具進行靈活的、可適應和發展的思考過程來分析問題，隨著理解的加深，每個想法都可以建立、質疑或修改先前的見解。你可以質疑想法、假設想法、驗證想法，並且可以建立新的想法。你將重複這個過程，直到你對問題有足夠的理解，並且能夠提出有效的解決方案。如果你覺得思考已經充分可以把 nextThoughtNeeded 設為 false 並且停止思考，如果你覺得需要更多的思考你可以隨時變更 total_thoughts 來增加步驟。",
+              "進行靈活且可演化的思考流程，透過建立、質疑、驗證與修正想法，逐步深化理解並產生有效解法。遇到需收集資料或分析或研究的情境時，應優先查看專案相關程式；如相關程式不存在，可查詢網路而非臆測。思考充分時設 nextThoughtNeeded 為 false，否則調整 total_thoughts 延長流程",
             inputSchema: zodToJsonSchema(processThoughtSchema),
           },
           {
@@ -303,16 +303,16 @@ async function main() {
                 );
               }
               return await updateTaskContent(parsedArgs.data);
-            case "update_task_files":
-              parsedArgs = await updateTaskRelatedFilesSchema.safeParseAsync(
-                request.params.arguments
-              );
-              if (!parsedArgs.success) {
-                throw new Error(
-                  `Invalid arguments for tool ${request.params.name}: ${parsedArgs.error.message}`
-                );
-              }
-              return await updateTaskRelatedFiles(parsedArgs.data);
+            // case "update_task_files":
+            //   parsedArgs = await updateTaskRelatedFilesSchema.safeParseAsync(
+            //     request.params.arguments
+            //   );
+            //   if (!parsedArgs.success) {
+            //     throw new Error(
+            //       `Invalid arguments for tool ${request.params.name}: ${parsedArgs.error.message}`
+            //     );
+            //   }
+            //   return await updateTaskRelatedFiles(parsedArgs.data);
             case "query_task":
               parsedArgs = await queryTaskSchema.safeParseAsync(
                 request.params.arguments

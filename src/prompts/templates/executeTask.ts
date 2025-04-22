@@ -19,10 +19,10 @@ export const analysisResultTemplate = `\n## 分析背景\n\n{analysisResult}\n\n
 export const relatedFilesSummaryTemplate = `## 相關文件\n\n{relatedFilesSummary}\n\n`;
 
 // 相關文件未指定模板
-export const noRelatedFilesTemplate = `## 相關文件\n\n當前任務沒有關聯的文件。可以使用 \`update_task_files\` 工具添加相關文件，以便在執行任務時提供上下文。`;
+export const noRelatedFilesTemplate = `## 相關文件\n\n當前任務沒有關聯的文件。可以使用 \`update_task\` 工具添加相關文件，以便在執行任務時提供上下文。`;
 
 // 推薦相關文件模板
-export const recommendedFilesTemplate = `\n\n### 推薦操作\n基於任務描述，您可能需要查看以下相關文件：\n{potentialFiles}\n使用 update_task_files 工具關聯相關文件，以獲得更好的上下文記憶支持。`;
+export const recommendedFilesTemplate = `\n\n### 推薦操作\n基於任務描述，您可能需要查看以下相關文件：\n{potentialFiles}\n使用 update_task 工具關聯相關文件，以獲得更好的上下文記憶支持。`;
 
 // 依賴任務完成摘要模板
 export const dependencyTaskSummaryTemplate = `\n## 依賴任務完成摘要\n\n`;

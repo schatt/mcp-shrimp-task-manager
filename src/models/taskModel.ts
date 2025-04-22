@@ -119,8 +119,8 @@ export async function updateTask(
 
   // 檢查任務是否已完成，已完成的任務不允許更新（除非是明確允許的欄位）
   if (tasks[taskIndex].status === TaskStatus.COMPLETED) {
-    // 僅允許更新 summary 欄位（任務摘要）
-    const allowedFields = ["summary"];
+    // 僅允許更新 summary 欄位（任務摘要）和 relatedFiles 欄位
+    const allowedFields = ["summary", "relatedFiles"];
     const attemptedFields = Object.keys(updates);
 
     const disallowedFields = attemptedFields.filter(
