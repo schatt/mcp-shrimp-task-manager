@@ -342,4 +342,8 @@ After configuration, you can use the following tools:
 
 ## 📄 <a id="license"></a>License
 
-This project is released under the MIT License
+[This project is released under the MIT License](./LICENSE)
+
+## Star History
+
+[![Star History Chart](https://api.star-history.com/svg?repos=cjo4m06/mcp-shrimp-task-manager&type=Timeline)](https://www.star-history.com/#cjo4m06/mcp-shrimp-task-manager&Timeline)

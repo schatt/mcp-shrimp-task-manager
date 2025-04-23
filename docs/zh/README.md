@@ -329,4 +329,8 @@ or
 
 ## 📄 <a id="許可協議"></a>許可協議
 
-本專案採用 MIT 許可協議發布
+[本專案採用 MIT 許可協議發布](../../LICENSE)
+
+## Star History
+
+[![Star History Chart](https://api.star-history.com/svg?repos=cjo4m06/mcp-shrimp-task-manager&type=Timeline)](https://www.star-history.com/#cjo4m06/mcp-shrimp-task-manager&Timeline)
