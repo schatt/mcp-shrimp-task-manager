@@ -1,5 +1,19 @@
 [English](README.md) | [中文](docs/zh/README.md)
 
+## 目錄
+
+- [✨ Features](#features1)
+- [🧭 Usage Guide](#usage-guide)
+- [🧠 Task Memory Function](#task-memory-function)
+- [🤔 Thought Chain Process](#thought-chain)
+- [📋 Project Rules Initialization](#project-rules)
+- [📚 Documentation Resources](#documentation)
+- [🔧 Installation and Usage](#installation)
+- [🔌 Using with MCP-Compatible Clients](#clients)
+- [💡 System Prompt Guidance](#prompt)
+- [🛠️ Available Tools Overview](#tools)
+- [📄 License](#license)
+
 # MCP Shrimp Task Manager
 
 [![smithery badge](https://smithery.ai/badge/@cjo4m06/mcp-shrimp-task-manager)](https://smithery.ai/server/@cjo4m06/mcp-shrimp-task-manager)
@@ -12,7 +26,7 @@
 
 Shrimp Task Manager guides Agents through structured workflows for systematic programming, enhancing task memory management mechanisms, and effectively avoiding redundant and repetitive coding work.
 
-## ✨ Features
+## ✨ <a id="features1"></a>Features
 
 - **Task Planning and Analysis**: Deep understanding and analysis of complex task requirements
 - **Intelligent Task Decomposition**: Automatically break down large tasks into manageable smaller tasks
@@ -25,25 +39,39 @@ Shrimp Task Manager guides Agents through structured workflows for systematic pr
 - **Thought Chain Process**: Step-by-step reasoning to analyze complex problems systematically
 - **Project Rules Initialization**: Define project standards and rules to maintain consistency across large projects
 
-## 🔄 Task Management Workflow
+## 🧭 <a id="usage-guide"></a>Usage Guide
 
-The system provides a complete task management lifecycle:
+Shrimp Task Manager offers a structured approach to AI-assisted programming through guided workflows and systematic task management.
 
-1. **Start Planning** `plan_task`: Analyze task problems, determine requirement scope
-2. **In-depth Analysis** `analyze_task`: Check existing codebase to avoid duplicate work
-3. **Solution Reflection** `reflect_task`: Critically review analysis results, ensure comprehensive solutions
-4. **Task Decomposition** `split_tasks`: Break down complex tasks into smaller ones, establish clear dependencies
-5. **Task List** `list_tasks`: View all tasks and their execution status
-6. **Execute Task** `execute_task`: Execute specific tasks while assessing complexity
-7. **Result Verification** `verify_task`: Comprehensively check task completion
-8. **Task Completion** `complete_task`: Mark tasks as complete and generate reports, automatically update summaries
-9. **Task Management** `delete_task`: Manage incomplete tasks (completed tasks remain in the system)
-10. **Query Tasks** `query_task`: Search for related tasks in past memories using keywords
-11. **Display Task** `get_task_detail`: Display complete task guidance
-12. **Process Thought** `process_thought`: Conduct step-by-step reasoning for complex problem analysis
-13. **Initialize Project Rules** `init_project_rules`: Set up and maintain project standards and conventions
+### What is Shrimp?
 
-## 🧠 Task Memory Function
+Shrimp is essentially a prompt template that guides AI Agents to better understand and work with your project. It uses a series of prompts to ensure the Agent aligns closely with your project's specific needs and conventions.
+
+### First-Time Setup
+
+When working with a new project, simply tell the Agent "init project rules". This will guide the Agent to generate a set of rules tailored to your project's specific requirements and structure.
+
+### Task Planning Process
+
+To develop or update features, use the command "plan task [your description]". The system will reference the previously established rules, attempt to understand your project, search for relevant code sections, and propose a comprehensive plan based on the current state of your project.
+
+### Feedback Mechanism
+
+During the planning process, Shrimp guides the Agent through multiple steps of thinking. You can review this process and provide feedback if you feel it's heading in the wrong direction. Simply interrupt and share your perspective - the Agent will incorporate your feedback and continue the planning process.
+
+### Task Execution
+
+When you're satisfied with the plan, use "execute task [task name or ID]" to implement it. If you don't specify a task name or ID, the system will automatically identify and execute the highest priority task.
+
+### Continuous Mode
+
+If you prefer to execute all tasks in sequence without manual intervention for each task, use "continuous mode" to automatically process the entire task queue.
+
+### Token Limitation Note
+
+Due to LLM token limits, context may be lost during lengthy conversations. If this occurs, simply open a new chat session and ask the Agent to continue execution. The system will pick up where it left off without requiring you to repeat the task details or context.
+
+## 🧠 <a id="task-memory-function"></a>Task Memory Function
 
 Shrimp Task Manager has long-term memory capabilities, automatically saving task execution history and providing reference experiences when planning new tasks.
 
@@ -62,7 +90,7 @@ Shrimp Task Manager has long-term memory capabilities, automatically saving task
 
 Through effective use of the task memory function, the system can continuously accumulate experience, with intelligence level and work efficiency continuously improving.
 
-## 🤔 Thought Chain Process
+## 🤔 <a id="thought-chain"></a>Thought Chain Process
 
 The Thought Chain feature enhances problem-solving through structured thinking:
 
@@ -73,7 +101,7 @@ The Thought Chain feature enhances problem-solving through structured thinking:
 
 When enabled (default setting), the system guides the Agent through step-by-step reasoning using the `process_thought` tool, ensuring thorough problem analysis before implementation.
 
-## 📋 Project Rules Initialization
+## 📋 <a id="project-rules"></a>Project Rules Initialization
 
 The Project Rules feature helps maintain consistency across your codebase:
 
@@ -99,13 +127,13 @@ You can easily access this feature with simple natural language commands:
 
 This tool is particularly valuable when your codebase expands or undergoes significant structural changes, helping maintain consistent development practices throughout the project lifecycle.
 
-## 📚 Documentation Resources
+## 📚 <a id="documentation"></a>Documentation Resources
 
 - [System Architecture](docs/en/architecture.md): Detailed system design and data flow explanation
 - [Prompt Customization Guide](docs/en/prompt-customization.md): Instructions for customizing tool prompts via environment variables
 - [Changelog](CHANGELOG.md): Record of all notable changes to this project
 
-## 🔧 Installation and Usage
+## 🔧 <a id="installation"></a>Installation and Usage
 
 ### Installing via Smithery
 
@@ -125,7 +153,7 @@ npm install
 npm run build
 ```
 
-## 🔌 Using with MCP-Compatible Clients
+## 🔌 <a id="clients"></a>Using with MCP-Compatible Clients
 
 Shrimp Task Manager can be used with any client that supports the Model Context Protocol, such as Cursor IDE.
 
@@ -158,7 +186,7 @@ or
   "mcpServers": {
     "shrimp-task-manager": {
       "command": "npx",
-      "args": ["mcp-shrimp-task-manager"],
+      "args": ["-y", "mcp-shrimp-task-manager"],
       "env": {
         "DATA_DIR": "/mcp-shrimp-task-manager/data"
       }
@@ -196,7 +224,7 @@ or
   "mcpServers": {
     "shrimp-task-manager": {
       "command": "npx",
-      "args": ["mcp-shrimp-task-manager"],
+      "args": ["-y", "mcp-shrimp-task-manager"],
       "env": {
         "DATA_DIR": "/path/to/project/data" // 必須使用絕對路徑
       }
@@ -249,7 +277,7 @@ Additionally, there are other system configuration variables:
 
 For detailed instructions on customizing prompts, including supported parameters and examples, see the [Prompt Customization Guide](docs/en/prompt-customization.md).
 
-## 💡 System Prompt Guidance
+## 💡 <a id="prompt"></a>System Prompt Guidance
 
 ### Cursor IDE Configuration
 
@@ -285,7 +313,7 @@ If your tool doesn't support Custom modes, you can:
 - Manually paste the appropriate prompts at different stages
 - Or directly use simple commands like `Please plan the following task: ......` or `Please start executing the task...`
 
-## 🛠️ Available Tools Overview
+## 🛠️ <a id="tools"></a>Available Tools Overview
 
 After configuration, you can use the following tools:
 
@@ -312,6 +340,6 @@ After configuration, you can use the following tools:
 - **MCP SDK**: Interface for seamless interaction with large language models
 - **UUID**: Generate unique and reliable task identifiers
 
-## 📄 License
+## 📄 <a id="license"></a>License
 
 This project is released under the MIT License
