@@ -13,11 +13,11 @@ export interface TaskDependency {
 
 // 相關文件類型：定義文件與任務的關係類型
 export enum RelatedFileType {
-  TO_MODIFY = "待修改", // 需要在任務中修改的文件
-  REFERENCE = "參考資料", // 任務的參考資料或相關文檔
-  CREATE = "待建立", // 需要在任務中建立的文件
-  DEPENDENCY = "依賴文件", // 任務依賴的組件或庫文件
-  OTHER = "其他", // 其他類型的相關文件
+  TO_MODIFY = "TO_MODIFY", // 需要在任務中修改的文件
+  REFERENCE = "REFERENCE", // 任務的參考資料或相關文檔
+  CREATE = "CREATE", // 需要在任務中建立的文件
+  DEPENDENCY = "DEPENDENCY", // 任務依賴的組件或庫文件
+  OTHER = "OTHER", // 其他類型的相關文件
 }
 
 // 相關文件：定義任務相關的文件信息

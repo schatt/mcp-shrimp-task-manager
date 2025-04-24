@@ -275,8 +275,10 @@ export const splitTasksSchema = z.object({
                 })
                 .describe("文件路徑，可以是相對於項目根目錄的路徑或絕對路徑"),
               type: z
-                .enum(["待修改", "參考資料", "待建立", "依賴文件", "其他"])
-                .describe("文件類型，用於區分不同類型的文件"),
+                .nativeEnum(RelatedFileType)
+                .describe(
+                  "文件類型 (TO_MODIFY: 待修改, REFERENCE: 參考資料, CREATE: 待建立, DEPENDENCY: 依賴文件, OTHER: 其他)"
+                ),
               description: z
                 .string()
                 .min(1, {
@@ -974,7 +976,11 @@ export const updateTaskContentSchema = z.object({
           .string()
           .min(1, { message: "文件路徑不能為空，請提供有效的文件路徑" })
           .describe("文件路徑，可以是相對於項目根目錄的路徑或絕對路徑"),
-        type: z.nativeEnum(RelatedFileType).describe("文件與任務的關係類型"),
+        type: z
+          .nativeEnum(RelatedFileType)
+          .describe(
+            "文件與任務的關係類型 (TO_MODIFY, REFERENCE, CREATE, DEPENDENCY, OTHER)"
+          ),
         description: z.string().optional().describe("文件的補充描述（選填）"),
         lineStart: z
           .number()
@@ -1162,14 +1168,10 @@ export const updateTaskRelatedFilesSchema = z.object({
           .min(1, { message: "文件路徑不能為空，請提供有效的文件路徑" })
           .describe("文件路徑，可以是相對於項目根目錄的路徑或絕對路徑"),
         type: z
-          .enum([
-            RelatedFileType.TO_MODIFY,
-            RelatedFileType.REFERENCE,
-            RelatedFileType.CREATE,
-            RelatedFileType.DEPENDENCY,
-            RelatedFileType.OTHER,
-          ])
-          .describe("文件與任務的關係類型"),
+          .nativeEnum(RelatedFileType)
+          .describe(
+            "文件與任務的關係類型 (TO_MODIFY, REFERENCE, CREATE, DEPENDENCY, OTHER)"
+          ),
         description: z.string().optional().describe("文件的補充描述（選填）"),
         lineStart: z
           .number()
