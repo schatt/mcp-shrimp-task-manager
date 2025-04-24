@@ -13,6 +13,7 @@
 - [💡 System Prompt Guidance](#prompt)
 - [🛠️ Available Tools Overview](#tools)
 - [📄 License](#license)
+- [🤖 Recommended Models](#recommended)
 
 # MCP Shrimp Task Manager
 
@@ -342,7 +343,16 @@ After configuration, you can use the following tools:
 
 ## 📄 <a id="license"></a>License
 
-[This project is released under the MIT License](./LICENSE)
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## <a id="recommended"></a>Recommended Models
+
+For the best experience, we recommend using the following models:
+
+- **Claude 3.7**: Offers strong understanding and generation capabilities.
+- **Gemini 2.5**: Google's latest model, performs excellently.
+
+Due to differences in training methods and understanding capabilities across models, using other models might lead to varying results for the same prompts. This project has been optimized for Claude 3.7 and Gemini 2.5.
 
 ## Star History
 
