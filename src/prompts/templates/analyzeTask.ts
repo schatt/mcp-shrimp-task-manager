@@ -4,7 +4,7 @@
  */
 
 // 基本任務分析模板
-export const analyzeTaskTemplate = `## 代碼庫分析\n\n### 任務摘要\n\`\`\`\n{summary}\n\`\`\`\n\n已收到初步解答構想：\n\n\`\`\`\n{initialConcept}\n\`\`\`\n\n`;
+export const analyzeTaskTemplate = `**請嚴格遵守以下指導**\n## 代碼庫分析\n\n### 任務摘要\n\`\`\`\n{summary}\n\`\`\`\n\n已收到初步解答構想：\n\n\`\`\`\n{initialConcept}\n\`\`\`\n\n`;
 
 // 技術審核要點模板
 export const technicalReviewTemplate = `## 技術審核要點\n\n### 1. 代碼庫分析

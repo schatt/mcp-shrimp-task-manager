@@ -4,7 +4,7 @@
  */
 
 // 基本任務執行模板
-export const executeTaskTemplate = `## 任務執行\n\n**名稱:** {name}\n**ID:** \`{id}\`\n**描述:** {description}\n{notes}\n`;
+export const executeTaskTemplate = `**請嚴格遵守以下指導**\n## 任務執行\n\n**名稱:** {name}\n**ID:** \`{id}\`\n**描述:** {description}\n{notes}\n`;
 
 // 實現指南模板
 export const implementationGuideTemplate = `\n## 實現指南\n\n{implementationGuide}\n\n`;
@@ -60,4 +60,4 @@ export const qualityRequirement2 = `- **代碼質量** - 符合編碼標準，�
 export const qualityRequirement3 = `- **效能考量** - 注意算法效率和資源使用\n\n`;
 
 // 完成提示模板
-export const completionReminderTemplate = `完成後使用「verify_task」工具進行驗證。`;
+export const completionReminderTemplate = `開始根據指示執行任務，執行完成後請直接使用「verify_task」工具進行驗證。`;

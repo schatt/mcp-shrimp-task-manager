@@ -4,7 +4,7 @@
  */
 
 // 基本方案評估模板
-export const reflectTaskTemplate = `## 方案評估\n\n### 任務摘要\n\`\`\`\n{summary}\n\`\`\`\n\n### 分析結果\n\`\`\`\n{analysis}\n\`\`\`\n\n`;
+export const reflectTaskTemplate = `**請嚴格遵守以下指導**\n## 方案評估\n\n### 任務摘要\n\`\`\`\n{summary}\n\`\`\`\n\n### 分析結果\n\`\`\`\n{analysis}\n\`\`\`\n\n`;
 
 // 評估要點模板
 export const evaluationPointsTemplate = `## 評估要點

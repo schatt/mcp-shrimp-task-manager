@@ -4,7 +4,7 @@
  */
 
 // 基本任務驗證模板
-export const verifyTaskTemplate = `## 任務驗證\n\n**名稱:** {name}\n**ID:** \`{id}\`\n**描述:** {description}\n{notes}\n`;
+export const verifyTaskTemplate = `**請嚴格遵守以下指導**\n## 任務驗證\n\n**名稱:** {name}\n**ID:** \`{id}\`\n**描述:** {description}\n{notes}\n`;
 
 // 驗證標準模板
 export const verificationCriteriaTemplate = `\n## 驗證標準\n\n{verificationCriteria}\n\n`;
@@ -22,7 +22,7 @@ export const standardVerificationCriteriaTemplate = `## 驗證標準\n\n1. **需
 export const reportRequirementsTemplate = `## 報告要求\n\n提供整體評分和評級，各項標準評估，問題與建議，及最終結論。\n\n`;
 
 // 決策點模板
-export const decisionPointsTemplate = `## 決策點\n\n根據驗證結果選擇：\n`;
-export const decisionPoint1 = `- **嚴重錯誤**：使用「plan_task」工具重新規劃任務\n`;
+export const decisionPointsTemplate = `## 下一步\n\n**根據驗證結果選擇你的下一步行動：**\n`;
+export const decisionPoint1 = `- **嚴重錯誤**：直接使用「plan_task」工具重新規劃任務\n`;
 export const decisionPoint2 = `- **輕微錯誤**：直接修復問題\n`;
-export const decisionPoint3 = `- **無錯誤**：使用「complete_task」工具標記完成\n`;
+export const decisionPoint3 = `- **無錯誤**：直接使用「complete_task」工具標記完成\n`;

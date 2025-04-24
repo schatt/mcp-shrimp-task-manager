@@ -4,7 +4,7 @@
  */
 
 // 基本任務分析模板
-export const planTaskTemplate = `## 任務分析\n\n{description}\n\n`;
+export const planTaskTemplate = `**請嚴格遵守以下指導**\n## 任務分析\n\n{description}\n\n`;
 
 // 要求與限制模板
 export const requirementsTemplate = `## 要求與限制\n\n{requirements}\n\n`;
