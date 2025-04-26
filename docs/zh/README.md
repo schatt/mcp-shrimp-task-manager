@@ -253,7 +253,8 @@ or
         "DATA_DIR": "/path/to/project/data",
         "MCP_PROMPT_PLAN_TASK": "自定義規劃指導...",
         "MCP_PROMPT_EXECUTE_TASK_APPEND": "附加執行說明...",
-        "ENABLE_THOUGHT_CHAIN": "true"
+        "ENABLE_THOUGHT_CHAIN": "true",
+        "TEMPLATES_USE": "en"
       }
     }
   }
@@ -269,6 +270,7 @@ or
 
 - **DATA_DIR**：指定任務數據存儲的目錄
 - **ENABLE_THOUGHT_CHAIN**：控制任務規劃工作流中的思考模式。當設置為 `true`（預設值）時，系統引導用戶使用 `process_thought` 工具進行逐步推理。當設置為 `false` 時，系統直接使用 `analyze_task` 提交分析結果，跳過詳細的思考過程。
+- **TEMPLATES_USE**：指定提示詞使用的模板集。預設為 `en`。目前可用的選項有 `en` 和 `zh`。若要使用自定義模板，請將 `src/prompts/templates_en` 目錄複製到 `DATA_DIR` 指定的位置，重新命名複製的目錄（例如，`my_templates`），並將 `TEMPLATES_USE` 設置為新的目錄名稱（例如，`my_templates`）。
 
 有關自定義提示詞的詳細說明，包括支援的參數和範例，請參閱[提示詞自定義指南](prompt-customization.md)。
 

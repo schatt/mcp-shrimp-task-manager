@@ -259,7 +259,8 @@ Shrimp Task Manager supports customizing prompt behavior through environment var
         "DATA_DIR": "/path/to/project/data",
         "MCP_PROMPT_PLAN_TASK": "Custom planning guidance...",
         "MCP_PROMPT_EXECUTE_TASK_APPEND": "Additional execution instructions...",
-        "ENABLE_THOUGHT_CHAIN": "true"
+        "ENABLE_THOUGHT_CHAIN": "true",
+        "TEMPLATES_USE": "en"
       }
     }
   }
@@ -275,6 +276,7 @@ Additionally, there are other system configuration variables:
 
 - **DATA_DIR**: Specifies the directory where task data is stored
 - **ENABLE_THOUGHT_CHAIN**: Controls the thinking model in task planning workflow. When set to `true` (default), the system guides users to use the `process_thought` tool for step-by-step reasoning. When set to `false`, the system directly uses `analyze_task` to submit analysis results, skipping the detailed thinking process.
+- **TEMPLATES_USE**: Specifies the template set to use for prompts. Defaults to `en`. Currently available options are `en` and `zh`. To use custom templates, copy the `src/prompts/templates_en` directory to the location specified by `DATA_DIR`, rename the copied directory (e.g., to `my_templates`), and set `TEMPLATES_USE` to the new directory name (e.g., `my_templates`).
 
 For detailed instructions on customizing prompts, including supported parameters and examples, see the [Prompt Customization Guide](docs/en/prompt-customization.md).
 
