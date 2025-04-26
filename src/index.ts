@@ -105,7 +105,7 @@ async function main() {
 ## 關鍵要求
 - **提供精簡pseudocode**：僅提供高級邏輯流程和關鍵步驟避免完整代碼
 - **必要時整合**：簡單修改可與其他任務整合，避免任務過多
-- **分批提交**：任務過多時使用「split_tasks」工具，參數不超過8000字`,
+- **分批提交**：任務過多時使用「split_tasks」工具，參數不超過5000字`,
             inputSchema: zodToJsonSchema(splitTasksSchema),
           },
           {
