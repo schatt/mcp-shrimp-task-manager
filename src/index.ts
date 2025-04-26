@@ -32,8 +32,6 @@ import {
   clearAllTasksSchema,
   updateTaskContent,
   updateTaskContentSchema,
-  updateTaskRelatedFiles,
-  updateTaskRelatedFilesSchema,
   queryTask,
   queryTaskSchema,
   getTaskDetail,
@@ -150,12 +148,6 @@ async function main() {
               "更新任務內容，包括名稱、描述和注記、依賴任務、相關文件、實現指南和驗證標準，已完成的任務僅允許更新摘要和相關文件",
             inputSchema: zodToJsonSchema(updateTaskContentSchema),
           },
-          // {
-          //   name: "update_task_files",
-          //   description:
-          //     "更新任務相關文件列表，用於記錄與任務相關的代碼文件、參考資料等",
-          //   inputSchema: zodToJsonSchema(updateTaskRelatedFilesSchema),
-          // },
           {
             name: "query_task",
             description: "根據關鍵字或ID搜尋任務，顯示省略版的任務資訊",
