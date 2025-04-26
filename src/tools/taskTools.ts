@@ -40,6 +40,9 @@ import {
   getListTasksPrompt,
   getQueryTaskPrompt,
   getGetTaskDetailPrompt,
+  getDeleteTaskPrompt,
+  getClearAllTasksPrompt,
+  getUpdateTaskContentPrompt,
 } from "../prompts/index.js";
 
 /**
@@ -832,7 +835,7 @@ export async function deleteTask({ taskId }: z.infer<typeof deleteTaskSchema>) {
       content: [
         {
           type: "text" as const,
-          text: `## 系統錯誤\n\n找不到ID為 \`${taskId}\` 的任務。請使用「list_tasks」工具確認有效的任務ID後再試。`,
+          text: getDeleteTaskPrompt({ taskId }),
         },
       ],
       isError: true,
@@ -844,7 +847,7 @@ export async function deleteTask({ taskId }: z.infer<typeof deleteTaskSchema>) {
       content: [
         {
           type: "text" as const,
-          text: `## 操作被拒絕\n\n任務 "${task.name}" (ID: \`${task.id}\`) 已完成，不允許刪除已完成的任務。`,
+          text: getDeleteTaskPrompt({ taskId, task, isTaskCompleted: true }),
         },
       ],
       isError: true,
@@ -857,9 +860,12 @@ export async function deleteTask({ taskId }: z.infer<typeof deleteTaskSchema>) {
     content: [
       {
         type: "text" as const,
-        text: `## ${result.success ? "操作成功" : "操作失敗"}\n\n${
-          result.message
-        }`,
+        text: getDeleteTaskPrompt({
+          taskId,
+          task,
+          success: result.success,
+          message: result.message,
+        }),
       },
     ],
     isError: !result.success,
@@ -886,7 +892,7 @@ export async function clearAllTasks({
       content: [
         {
           type: "text" as const,
-          text: `## 操作取消\n\n未確認清除操作。如要清除所有任務，請將 confirm 參數設為 true。\n\n⚠️ 此操作將刪除所有未完成的任務且無法恢復。`,
+          text: getClearAllTasksPrompt({ confirm: false }),
         },
       ],
     };
@@ -899,7 +905,7 @@ export async function clearAllTasks({
       content: [
         {
           type: "text" as const,
-          text: `## 操作提示\n\n系統中沒有任何任務需要清除。`,
+          text: getClearAllTasksPrompt({ isEmpty: true }),
         },
       ],
     };
@@ -912,13 +918,11 @@ export async function clearAllTasks({
     content: [
       {
         type: "text" as const,
-        text: `## ${result.success ? "操作成功" : "操作失敗"}\n\n${
-          result.message
-        }${
-          result.backupFile
-            ? `\n\n已自動創建備份: \`${result.backupFile}\``
-            : ""
-        }`,
+        text: getClearAllTasksPrompt({
+          success: result.success,
+          message: result.message,
+          backupFile: result.backupFile,
+        }),
       },
     ],
     isError: !result.success,
@@ -1000,7 +1004,11 @@ export async function updateTaskContent({
           content: [
             {
               type: "text" as const,
-              text: `## 操作失敗\n\n行號設置無效：必須同時設置起始行和結束行，且起始行必須小於結束行`,
+              text: getUpdateTaskContentPrompt({
+                taskId,
+                validationError:
+                  "行號設置無效：必須同時設置起始行和結束行，且起始行必須小於結束行",
+              }),
             },
           ],
         };
@@ -1023,7 +1031,10 @@ export async function updateTaskContent({
       content: [
         {
           type: "text" as const,
-          text: `## 操作失敗\n\n至少需要更新一個字段（名稱、描述、注記或相關文件）`,
+          text: getUpdateTaskContentPrompt({
+            taskId,
+            emptyUpdate: true,
+          }),
         },
       ],
     };
@@ -1037,7 +1048,9 @@ export async function updateTaskContent({
       content: [
         {
           type: "text" as const,
-          text: `## 系統錯誤\n\n找不到ID為 \`${taskId}\` 的任務。請使用「list_tasks」工具確認有效的任務ID後再試。`,
+          text: getUpdateTaskContentPrompt({
+            taskId,
+          }),
         },
       ],
       isError: true,
@@ -1067,56 +1080,17 @@ export async function updateTaskContent({
     verificationCriteria,
   });
 
-  // 構建響應消息
-  const responseTitle = result.success ? "操作成功" : "操作失敗";
-  let responseMessage = result.message;
-
-  if (result.success && result.task) {
-    // 顯示更新後的任務詳情
-    responseMessage += "\n\n### 更新後的任務詳情\n";
-    responseMessage += `- **名稱:** ${result.task.name}\n`;
-    responseMessage += `- **描述:** ${result.task.description.substring(
-      0,
-      100
-    )}${result.task.description.length > 100 ? "..." : ""}\n`;
-
-    if (result.task.notes) {
-      responseMessage += `- **注記:** ${result.task.notes.substring(0, 100)}${
-        result.task.notes.length > 100 ? "..." : ""
-      }\n`;
-    }
-
-    responseMessage += `- **狀態:** ${result.task.status}\n`;
-    responseMessage += `- **更新時間:** ${new Date(
-      result.task.updatedAt
-    ).toISOString()}\n`;
-
-    // 顯示相關文件信息
-    if (result.task.relatedFiles && result.task.relatedFiles.length > 0) {
-      responseMessage += `- **相關文件:** ${result.task.relatedFiles.length} 個\n`;
-
-      // 按文件類型分組
-      const filesByType = result.task.relatedFiles.reduce((acc, file) => {
-        if (!acc[file.type]) {
-          acc[file.type] = [];
-        }
-        acc[file.type].push(file);
-        return acc;
-      }, {} as Record<string, RelatedFile[]>);
-
-      for (const [type, files] of Object.entries(filesByType)) {
-        responseMessage += `  - ${type} (${files.length} 個): `;
-        responseMessage += files.map((file) => `\`${file.path}\``).join(", ");
-        responseMessage += "\n";
-      }
-    }
-  }
-
   return {
     content: [
       {
         type: "text" as const,
-        text: `## ${responseTitle}\n\n${responseMessage}`,
+        text: getUpdateTaskContentPrompt({
+          taskId,
+          task,
+          success: result.success,
+          message: result.message,
+          updatedTask: result.task,
+        }),
       },
     ],
     isError: !result.success,
@@ -1197,52 +1171,6 @@ export async function queryTask({
       isError: true,
     };
   }
-}
-
-// 格式化任務顯示內容的輔助函數
-function formatTaskForDisplay(task: Task): string {
-  let taskInfo = `### ${task.name}\n**ID:** \`${task.id}\`\n**狀態:** ${task.status}\n**描述:** ${task.description}\n`;
-
-  if (task.notes) {
-    taskInfo += `**注記:** ${task.notes}\n`;
-  }
-
-  if (task.implementationGuide) {
-    taskInfo += `**實現指南:** ${
-      task.implementationGuide.length > 300
-        ? task.implementationGuide.substring(0, 300) + "..."
-        : task.implementationGuide
-    }\n`;
-  }
-
-  if (task.verificationCriteria) {
-    taskInfo += `**驗證標準:** ${
-      task.verificationCriteria.length > 300
-        ? task.verificationCriteria.substring(0, 300) + "..."
-        : task.verificationCriteria
-    }\n`;
-  }
-
-  if (task.summary) {
-    taskInfo += `**完成摘要:** ${task.summary}\n`;
-  }
-
-  taskInfo += `**創建時間:** ${new Date(task.createdAt).toLocaleString(
-    "zh-TW"
-  )}\n`;
-  taskInfo += `**更新時間:** ${new Date(task.updatedAt).toLocaleString(
-    "zh-TW"
-  )}\n`;
-
-  if (task.completedAt) {
-    taskInfo += `**完成時間:** ${new Date(task.completedAt).toLocaleString(
-      "zh-TW"
-    )}\n`;
-  }
-
-  taskInfo += `**詳細內容:** 請使用「get_task_detail」工具查看 ${task.id} 完整任務詳情`;
-
-  return taskInfo;
 }
 
 // 取得完整任務詳情的參數

@@ -19,3 +19,6 @@ export { getListTasksPrompt } from "./generators/listTasks.js";
 export { getQueryTaskPrompt } from "./generators/queryTask.js";
 export { getGetTaskDetailPrompt } from "./generators/getTaskDetail.js";
 export { getInitProjectRulesPrompt } from "./generators/initProjectRules.js";
+export { getDeleteTaskPrompt } from "./generators/deleteTask.js";
+export { getClearAllTasksPrompt } from "./generators/clearAllTasks.js";
+export { getUpdateTaskContentPrompt } from "./generators/updateTaskContent.js";
