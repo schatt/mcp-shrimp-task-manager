@@ -48,3 +48,4 @@ After completing the analysis, use the "reflect_task" tool to submit the final a
 2. **Complete Analysis Results** - Technical details, interface dependencies, implementation strategy, acceptance criteria
 
 Your analysis will determine the quality of the solution. Please comprehensively consider various technical factors and business constraints.
+**Using tools is strictly required.**

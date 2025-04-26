@@ -65,4 +65,5 @@ Choose subsequent actions based on the evaluation results:
 
 **Serious Warning**: The parameters you pass each time you call split_tasks cannot exceed 5000 characters. If it exceeds 5000 characters, please call the tool multiple times to complete.
 
-**Now start calling the "split_tasks" tool**
+**Now start calling the `split_tasks` or `analyze_task` tool**
+**Using tools is strictly required.**
