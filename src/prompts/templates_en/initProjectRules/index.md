@@ -20,6 +20,7 @@ Please use the "process_thought" tool to consider the following questions
 - Use imperative language to define rules, avoiding explanatory content
 - Do not explain project functionality, but rather how to modify or add features
 - Provide examples of what can and cannot be done
+- Must **recursively** check all folders and files
 
 **Strictly Prohibited:**
 
@@ -66,9 +67,15 @@ The specification file should include, but is not limited to, the following cont
 6. **Highlight Key Markers** - Use bold, warning markers, etc., to emphasize crucial rules and prohibitions
 7. **Remove General Knowledge** - Prohibit including general development knowledge known to the LLM, only include project-specific rules
 
+## Update Mode Guide
+
+1. **Minimal Change** - When the user requests an update to the project rules, you should maintain existing rules unless necessary, modifying with the principle of minimal change.
+2. **Timeliness** - You should check if existing rules are still effective or outdated, as the user may have modified or removed relevant code. You must correct or remove corresponding rules.
+3. **Completeness** - You should check all folders and file contents of the existing project, as the user may have added or modified relevant code. You must supplement corresponding rules.
+4. **Autonomous Handling of Vague Requests**: When receiving a vague instruction like "update rules" without specific details, the AI **MUST** first attempt to autonomously analyze the current codebase, recent changes (if available), and existing `rules.md` content to infer potential update points. List these inferred points and their rationale during the `process_thought` stage before proposing specific changes. **Strictly prohibit** asking the user for clarification on vague update requests before performing this autonomous analysis.
+
 Please create a file named rules.md based on the guidelines above and store it at: {rulesPath}
 
-**Now start calling the "process_thought" tool to think about how to write the specification file to guide the Coding Agent**
-**After thinking, immediately edit the rules.md file. Calling the "analyze_task" tool is prohibited**
-**If the file already exists or the user requests an update, consider if the rules are outdated and need supplementation or updates**
-**In update mode, you should maintain existing rules unless necessary, modifying with the principle of minimal change**
+**[AI Agent Action]** Now start calling the "process_thought" tool to think about how to write the specification file to guide the Coding Agent
+**[AI Agent Action]** After thinking, immediately edit the rules.md file. Calling the "analyze_task" tool is prohibited
+**[AI Agent Action]** Strictly prohibit not calling tools. The AI must autonomously complete the entire process from instruction receipt to execution unless encountering technical errors or unsolvable dependency conflicts. Do not interrupt the flow to seek user input unnecessarily.
