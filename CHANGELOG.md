@@ -2,19 +2,26 @@
 
 # Changelog
 
-## [Unreleased]
+## [1.0.10]
 
 ### Changed
 
-- Updated README and docs, added 'Recommended Models' section, provided suggestions for optimal models, and highlighted differences in understanding capabilities between models. (5c61b3e)
-- Updated task templates, added 'Please strictly follow the instructions below' prompt, enhanced guidance for task execution, analysis, completion, and verification, and adjusted decision point descriptions to improve user experience. (f0283ff)
-- Updated README and docs, linked the MIT license, and added a Star History section to display the project's star history. (0bad188)
-- Updated README and docs, added table of contents and tags for various functional sections, enhanced descriptions of usage guides and task management processes, and adjusted related content to improve readability and structure. (31065fa)
-- Updated task content description, allowing completed tasks to update related file summaries; removed the no-longer-used update task related files tool, and adjusted thought process description to enhance guidance on understanding and solution generation. (b07672c)
+- Added guidelines for project rule update modes, emphasizing recursive checks and autonomous handling of ambiguous requests. (989af20)
+- Added prompt language and customization instructions, updated README and docs. (d0c3bfa)
+- Added `TEMPLATES_USE` config option for custom prompt templates, updated README and docs. (76315fe)
+- Added multilingual task templates (English/Chinese). (291c5ee)
+- Added prompt generators and templates for various task operations (delete, clear, update). (a51110f, 52994d5, 304e0cd)
+- Changed task templates to Markdown format for better multilingual support and modification. (5513235)
+- Adjusted the "batch submission" parameter limit for the `split_tasks` tool from 8000 to 5000 characters. (a395686)
+- Removed the unused tool for updating task-related files. (fc1a5c8)
+- Updated README and docs: added 'Recommended Models', linked MIT license, added Star History, added TOC and tags, enhanced usage guides. (5c61b3e, f0283ff, 0bad188, 31065fa)
+- Updated task content description: allow completed tasks to update related file summaries, adjusted thought process description. (b07672c)
+- Updated task templates: added 'Please strictly follow the instructions below' prompt, enhanced guidance. (f0283ff)
 
 ### Fixed
 
-- Fix #6: Corrected an issue where simplified/traditional Chinese caused Enum parameter validation errors (dae3756)
+- Fixed an issue where some models might not follow the process correctly. (ffd6349)
+- Fix #6: Corrected an issue where simplified/traditional Chinese caused Enum parameter validation errors. (dae3756)
 
 ## [1.0.8]
 
