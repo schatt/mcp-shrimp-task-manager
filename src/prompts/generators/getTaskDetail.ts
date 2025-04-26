@@ -3,9 +3,12 @@
  * 負責將模板和參數組合成最終的 prompt
  */
 
-import { loadPrompt, generatePrompt } from "../loader.js";
-import * as templates from "../templates/getTaskDetail.js";
-import { Task, RelatedFile } from "../../types/index.js";
+import {
+  loadPrompt,
+  generatePrompt,
+  loadPromptFromTemplate,
+} from "../loader.js";
+import { Task } from "../../types/index.js";
 
 /**
  * getTaskDetail prompt 參數介面
@@ -28,96 +31,108 @@ export function getGetTaskDetailPrompt(
 
   // 如果有錯誤，顯示錯誤訊息
   if (error) {
-    return generatePrompt(templates.errorTemplate, {
+    const errorTemplate = loadPromptFromTemplate("getTaskDetail/error.md");
+    return generatePrompt(errorTemplate, {
       errorMessage: error,
     });
   }
 
   // 如果找不到任務，顯示找不到任務的訊息
   if (!task) {
-    return generatePrompt(templates.taskNotFoundTemplate, {
+    const notFoundTemplate = loadPromptFromTemplate(
+      "getTaskDetail/notFound.md"
+    );
+    return generatePrompt(notFoundTemplate, {
       taskId,
     });
   }
 
-  // 開始構建基本 prompt
-  let basePrompt = templates.taskDetailTitleTemplate;
-
-  // 添加任務基本信息
-  basePrompt += generatePrompt(templates.taskBasicInfoTemplate, {
-    name: task.name,
-    id: task.id,
-    status: task.status,
-    description: task.description,
-  });
-
-  // 添加注記（如果有）
+  let notesPrompt = "";
   if (task.notes) {
-    basePrompt += generatePrompt(templates.taskNotesTemplate, {
+    const notesTemplate = loadPromptFromTemplate("getTaskDetail/notes.md");
+    notesPrompt = generatePrompt(notesTemplate, {
       notes: task.notes,
     });
   }
 
-  // 添加依賴任務（如果有）
+  let dependenciesPrompt = "";
   if (task.dependencies && task.dependencies.length > 0) {
-    basePrompt += generatePrompt(templates.taskDependenciesTemplate, {
+    const dependenciesTemplate = loadPromptFromTemplate(
+      "getTaskDetail/dependencies.md"
+    );
+    dependenciesPrompt = generatePrompt(dependenciesTemplate, {
       dependencies: task.dependencies
         .map((dep) => `\`${dep.taskId}\``)
         .join(", "),
     });
   }
 
-  // 添加實現指南（如果有）
+  let implementationGuidePrompt = "";
   if (task.implementationGuide) {
-    basePrompt += generatePrompt(templates.taskImplementationGuideTemplate, {
+    const implementationGuideTemplate = loadPromptFromTemplate(
+      "getTaskDetail/implementationGuide.md"
+    );
+    implementationGuidePrompt = generatePrompt(implementationGuideTemplate, {
       implementationGuide: task.implementationGuide,
     });
   }
 
-  // 添加驗證標準（如果有）
+  let verificationCriteriaPrompt = "";
   if (task.verificationCriteria) {
-    basePrompt += generatePrompt(templates.taskVerificationCriteriaTemplate, {
+    const verificationCriteriaTemplate = loadPromptFromTemplate(
+      "getTaskDetail/verificationCriteria.md"
+    );
+    verificationCriteriaPrompt = generatePrompt(verificationCriteriaTemplate, {
       verificationCriteria: task.verificationCriteria,
     });
   }
 
-  // 添加相關文件（如果有）
+  let relatedFilesPrompt = "";
   if (task.relatedFiles && task.relatedFiles.length > 0) {
-    const fileItems = task.relatedFiles
-      .map((file) =>
-        generatePrompt(templates.taskRelatedFileItemTemplate, {
-          path: file.path,
-          type: file.type,
-          description: file.description ? `: ${file.description}` : "",
-        })
-      )
-      .join("\n");
-
-    basePrompt += generatePrompt(templates.taskRelatedFilesTemplate, {
-      files: fileItems,
+    const relatedFilesTemplate = loadPromptFromTemplate(
+      "getTaskDetail/relatedFiles.md"
+    );
+    relatedFilesPrompt = generatePrompt(relatedFilesTemplate, {
+      files: task.relatedFiles
+        .map(
+          (file) =>
+            `- \`${file.path}\` (${file.type})${
+              file.description ? `: ${file.description}` : ""
+            }`
+        )
+        .join("\n"),
     });
   }
 
-  // 添加時間信息
-  basePrompt += generatePrompt(templates.taskTimeInfoTemplate, {
+  let complatedSummaryPrompt = "";
+  if (task.completedAt) {
+    const complatedSummaryTemplate = loadPromptFromTemplate(
+      "getTaskDetail/complatedSummary.md"
+    );
+    complatedSummaryPrompt = generatePrompt(complatedSummaryTemplate, {
+      completedTime: new Date(task.completedAt).toLocaleString("zh-TW"),
+      summary: task.summary || "*無完成摘要*",
+    });
+  }
+
+  const indexTemplate = loadPromptFromTemplate("getTaskDetail/index.md");
+
+  // 開始構建基本 prompt
+  let prompt = generatePrompt(indexTemplate, {
+    name: task.name,
+    id: task.id,
+    status: task.status,
+    description: task.description,
+    notesTemplate: notesPrompt,
+    dependenciesTemplate: dependenciesPrompt,
+    implementationGuideTemplate: implementationGuidePrompt,
+    verificationCriteriaTemplate: verificationCriteriaPrompt,
+    relatedFilesTemplate: relatedFilesPrompt,
     createdTime: new Date(task.createdAt).toLocaleString("zh-TW"),
     updatedTime: new Date(task.updatedAt).toLocaleString("zh-TW"),
+    complatedSummaryTemplate: complatedSummaryPrompt,
   });
 
-  // 添加完成時間（如果有）
-  if (task.completedAt) {
-    basePrompt += generatePrompt(templates.taskCompletedTimeTemplate, {
-      completedTime: new Date(task.completedAt).toLocaleString("zh-TW"),
-    });
-  }
-
-  // 添加完成摘要（如果有）
-  if (task.summary) {
-    basePrompt += generatePrompt(templates.taskSummaryTemplate, {
-      summary: task.summary,
-    });
-  }
-
   // 載入可能的自定義 prompt
-  return loadPrompt(basePrompt, "GET_TASK_DETAIL");
+  return loadPrompt(prompt, "GET_TASK_DETAIL");
 }

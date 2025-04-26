@@ -1,10 +1,4 @@
-/**
- * 初始化專案規範 prompt 模板
- * 包含指導如何產生專案規範文件的提示詞
- */
-
-// 基本提示詞模板
-export const initProjectRulesTemplate = `請用 「process_thought」 工具思考以下問題
+請用 「process_thought」 工具思考以下問題
 
 # 專案規範初始化指南
 
@@ -14,11 +8,13 @@ export const initProjectRulesTemplate = `請用 「process_thought」 工具思�
 **必須生成一個專屬於 AI Agent 操作使用的專案規範文件(rules.md)。**
 
 **必須專注於以下關鍵目標：**
+
 - 明確專案特定規則與限制，禁止包含通用開發知識
 - 提供 AI 執行任務時所需的專案特定資訊
 - 為 AI 決策過程提供明確指導
 
 **強制規定：**
+
 - 完成的規範必須使 AI Agent 能立即理解哪些檔案必須參考或修改
 - 明確指示多檔案連動修改要求（例如修改 README.md 時必須同步修改 /docs/zh/README.md）
 - 使用命令式語言定義規則，避免解釋性內容
@@ -26,6 +22,7 @@ export const initProjectRulesTemplate = `請用 「process_thought」 工具思�
 - 請提供範例什麼事可以做的，什麼事不可以做的
 
 **嚴重禁止：**
+
 - 禁止包含通用開發知識
 - 禁止包含 LLM 已知的通用開發知識
 - 進行專案功能解釋
@@ -34,13 +31,16 @@ export const initProjectRulesTemplate = `請用 「process_thought」 工具思�
 
 請使用以下結構建立規範文件：
 
-\`\`\`markdown
+```markdown
 # 開發守則
+
 ## 標題
+
 ### 副標題
+
 - 規則一
 - 規則二
-\`\`\`
+```
 
 ## 內容指南
 
@@ -72,4 +72,3 @@ export const initProjectRulesTemplate = `請用 「process_thought」 工具思�
 **思考完畢後請立即編輯 rules.md 文件，禁止呼叫「analyze_task」工具**
 **如果檔案已經存在或用戶要求更新，請思考規範是否已經過時，是否需要補充更新**
 **如果是更新模式，除非必要否則你應該保持現有的規範，以最小變更為原則的修改**
-`;

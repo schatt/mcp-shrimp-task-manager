@@ -3,8 +3,11 @@
  * 負責將模板和參數組合成最終的 prompt
  */
 
-import { loadPrompt, generatePrompt } from "../loader.js";
-import { initProjectRulesTemplate } from "../templates/initProjectRules.js";
+import {
+  loadPrompt,
+  generatePrompt,
+  loadPromptFromTemplate,
+} from "../loader.js";
 import { getRulesFilePath } from "../../utils/pathUtils.js";
 /**
  * initProjectRules prompt 參數介面
@@ -23,7 +26,8 @@ export function getInitProjectRulesPrompt(
 ): string {
   // 使用基本模板
   const rulesPath = getRulesFilePath();
-  const basePrompt = generatePrompt(initProjectRulesTemplate, {
+  const indexTemplate = loadPromptFromTemplate("initProjectRules/index.md");
+  const basePrompt = generatePrompt(indexTemplate, {
     rulesPath,
   });
 

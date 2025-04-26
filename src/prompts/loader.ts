@@ -3,6 +3,13 @@
  * 提供從環境變數載入自定義 prompt 的功能
  */
 
+import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 function processEnvString(input: string | undefined): string {
   if (!input) return "";
 
@@ -64,4 +71,17 @@ export function generatePrompt(
   });
 
   return result;
+}
+
+/**
+ * 從模板載入 prompt
+ * @param templatePath 模板路徑
+ * @returns 模板
+ */
+export function loadPromptFromTemplate(templatePath: string): string {
+  const template = fs.readFileSync(
+    path.join(__dirname, "templates", templatePath),
+    "utf-8"
+  );
+  return template;
 }

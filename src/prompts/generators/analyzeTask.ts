@@ -3,8 +3,11 @@
  * 負責將模板和參數組合成最終的 prompt
  */
 
-import { loadPrompt, generatePrompt } from "../loader.js";
-import * as templates from "../templates/analyzeTask.js";
+import {
+  loadPrompt,
+  generatePrompt,
+  loadPromptFromTemplate,
+} from "../loader.js";
 
 /**
  * analyzeTask prompt 參數介面
@@ -21,25 +24,23 @@ export interface AnalyzeTaskPromptParams {
  * @returns 生成的 prompt
  */
 export function getAnalyzeTaskPrompt(params: AnalyzeTaskPromptParams): string {
-  // 開始構建基本 prompt
-  let basePrompt = generatePrompt(templates.analyzeTaskTemplate, {
-    summary: params.summary,
-    initialConcept: params.initialConcept,
-  });
+  const indexTemplate = loadPromptFromTemplate("analyzeTask/index.md");
 
-  // 添加技術審核要點
-  basePrompt += templates.technicalReviewTemplate;
+  const iterationTemplate = loadPromptFromTemplate("analyzeTask/iteration.md");
 
-  // 如果有前次分析結果，添加相關模板
+  let iterationPrompt = "";
   if (params.previousAnalysis) {
-    basePrompt += generatePrompt(templates.iterationAnalysisTemplate, {
+    iterationPrompt = generatePrompt(iterationTemplate, {
       previousAnalysis: params.previousAnalysis,
     });
   }
 
-  // 添加下一步行動指導
-  basePrompt += templates.nextActionTemplate;
+  let prompt = generatePrompt(indexTemplate, {
+    summary: params.summary,
+    initialConcept: params.initialConcept,
+    iterationPrompt: iterationPrompt,
+  });
 
   // 載入可能的自定義 prompt
-  return loadPrompt(basePrompt, "ANALYZE_TASK");
+  return loadPrompt(prompt, "ANALYZE_TASK");
 }

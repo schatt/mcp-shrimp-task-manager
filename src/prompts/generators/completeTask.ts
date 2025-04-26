@@ -3,8 +3,11 @@
  * 負責將模板和參數組合成最終的 prompt
  */
 
-import { loadPrompt, generatePrompt } from "../loader.js";
-import * as templates from "../templates/completeTask.js";
+import {
+  loadPrompt,
+  generatePrompt,
+  loadPromptFromTemplate,
+} from "../loader.js";
 import { Task } from "../../types/index.js";
 
 /**
@@ -25,22 +28,15 @@ export function getCompleteTaskPrompt(
 ): string {
   const { task, completionTime } = params;
 
+  const indexTemplate = loadPromptFromTemplate("completeTask/index.md");
+
   // 開始構建基本 prompt
-  let basePrompt = generatePrompt(templates.completeTaskConfirmationTemplate, {
+  let prompt = generatePrompt(indexTemplate, {
     name: task.name,
     id: task.id,
     completionTime: completionTime,
   });
 
-  // 添加任務摘要要求
-  basePrompt += templates.taskSummaryRequirementsTemplate;
-
-  // 添加重要提示
-  basePrompt += templates.importantReminderTemplate;
-
-  // 添加連續執行模式提示
-  basePrompt += templates.continuousModeReminderTemplate;
-
   // 載入可能的自定義 prompt
-  return loadPrompt(basePrompt, "COMPLETE_TASK");
+  return loadPrompt(prompt, "COMPLETE_TASK");
 }

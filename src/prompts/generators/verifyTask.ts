@@ -3,8 +3,11 @@
  * 負責將模板和參數組合成最終的 prompt
  */
 
-import { loadPrompt, generatePrompt } from "../loader.js";
-import * as templates from "../templates/verifyTask.js";
+import {
+  loadPrompt,
+  generatePrompt,
+  loadPromptFromTemplate,
+} from "../loader.js";
 import { Task } from "../../types/index.js";
 
 /**
@@ -20,7 +23,10 @@ export interface VerifyTaskPromptParams {
  * @param maxLength 最大長度
  * @returns 提取的摘要
  */
-function extractSummary(content: string, maxLength: number): string {
+function extractSummary(
+  content: string | undefined,
+  maxLength: number
+): string {
   if (!content) return "";
 
   if (content.length <= maxLength) {
@@ -38,56 +44,21 @@ function extractSummary(content: string, maxLength: number): string {
  */
 export function getVerifyTaskPrompt(params: VerifyTaskPromptParams): string {
   const { task } = params;
-
-  // 處理注意事項
-  const notes = task.notes ? `**注意事項:** ${task.notes}\n` : "";
-
-  // 開始構建基本 prompt
-  let basePrompt = generatePrompt(templates.verifyTaskTemplate, {
+  const indexTemplate = loadPromptFromTemplate("verifyTask/index.md");
+  const prompt = generatePrompt(indexTemplate, {
     name: task.name,
     id: task.id,
     description: task.description,
-    notes: notes,
+    notes: task.notes || "no notes",
+    verificationCriteria:
+      task.verificationCriteria || "no verification criteria",
+    implementationGuideSummary:
+      extractSummary(task.implementationGuide, 200) ||
+      "no implementation guide",
+    analysisResult:
+      extractSummary(task.analysisResult, 300) || "no analysis result",
   });
 
-  // 添加任務特定的驗證標準（如果有）
-  if (task.verificationCriteria) {
-    basePrompt += generatePrompt(templates.verificationCriteriaTemplate, {
-      verificationCriteria: task.verificationCriteria,
-    });
-  }
-
-  // 添加實現指南摘要（如果有）
-  if (task.implementationGuide) {
-    const implementationGuideSummary =
-      task.implementationGuide.length > 200
-        ? task.implementationGuide.substring(0, 200) + "... (參見完整實現指南)"
-        : task.implementationGuide;
-
-    basePrompt += generatePrompt(templates.implementationGuideSummaryTemplate, {
-      implementationGuideSummary: implementationGuideSummary,
-    });
-  }
-
-  // 添加分析結果摘要（如果有）
-  if (task.analysisResult) {
-    basePrompt += generatePrompt(templates.analysisSummaryTemplate, {
-      analysisSummary: extractSummary(task.analysisResult, 300),
-    });
-  }
-
-  // 添加標準驗證標準
-  basePrompt += templates.standardVerificationCriteriaTemplate;
-
-  // 添加報告要求
-  basePrompt += templates.reportRequirementsTemplate;
-
-  // 添加決策點
-  basePrompt += templates.decisionPointsTemplate;
-  basePrompt += templates.decisionPoint1;
-  basePrompt += templates.decisionPoint2;
-  basePrompt += templates.decisionPoint3;
-
   // 載入可能的自定義 prompt
-  return loadPrompt(basePrompt, "VERIFY_TASK");
+  return loadPrompt(prompt, "VERIFY_TASK");
 }

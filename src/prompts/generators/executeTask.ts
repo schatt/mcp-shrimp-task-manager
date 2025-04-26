@@ -3,20 +3,12 @@
  * 負責將模板和參數組合成最終的 prompt
  */
 
-import { loadPrompt, generatePrompt } from "../loader.js";
-import * as templates from "../templates/executeTask.js";
+import {
+  loadPrompt,
+  generatePrompt,
+  loadPromptFromTemplate,
+} from "../loader.js";
 import { Task, TaskStatus } from "../../types/index.js";
-
-/**
- * 任務複雜度級別的介面
- */
-interface TaskComplexityLevel {
-  VERY_HIGH: string;
-  HIGH: string;
-  MEDIUM: string;
-  LOW: string;
-  VERY_LOW: string;
-}
 
 /**
  * 任務複雜度評估的介面
@@ -38,7 +30,6 @@ export interface ExecuteTaskPromptParams {
   complexityAssessment?: ComplexityAssessment;
   relatedFilesSummary?: string;
   dependencyTasks?: Task[];
-  potentialFiles?: string[];
 }
 
 /**
@@ -65,143 +56,115 @@ function getComplexityStyle(level: string): string {
  * @returns 生成的 prompt
  */
 export function getExecuteTaskPrompt(params: ExecuteTaskPromptParams): string {
-  const {
-    task,
-    complexityAssessment,
-    relatedFilesSummary,
-    dependencyTasks,
-    potentialFiles,
-  } = params;
+  const { task, complexityAssessment, relatedFilesSummary, dependencyTasks } =
+    params;
 
-  // 處理注意事項
-  const notes = task.notes ? `**注意事項:** ${task.notes}\n` : "";
+  const notesTemplate = loadPromptFromTemplate("executeTask/notes.md");
+  let notesPrompt = "";
+  if (task.notes) {
+    notesPrompt = generatePrompt(notesTemplate, {
+      notes: task.notes,
+    });
+  }
 
-  // 開始構建基本 prompt
-  let basePrompt = generatePrompt(templates.executeTaskTemplate, {
-    name: task.name,
-    id: task.id,
-    description: task.description,
-    notes: notes,
-  });
-
-  // 添加實現指南（如果有）
+  const implementationGuideTemplate = loadPromptFromTemplate(
+    "executeTask/implementationGuide.md"
+  );
+  let implementationGuidePrompt = "";
   if (task.implementationGuide) {
-    basePrompt += generatePrompt(templates.implementationGuideTemplate, {
+    implementationGuidePrompt = generatePrompt(implementationGuideTemplate, {
       implementationGuide: task.implementationGuide,
     });
   }
 
-  // 添加驗證標準（如果有）
+  const verificationCriteriaTemplate = loadPromptFromTemplate(
+    "executeTask/verificationCriteria.md"
+  );
+  let verificationCriteriaPrompt = "";
   if (task.verificationCriteria) {
-    basePrompt += generatePrompt(templates.verificationCriteriaTemplate, {
+    verificationCriteriaPrompt = generatePrompt(verificationCriteriaTemplate, {
       verificationCriteria: task.verificationCriteria,
     });
   }
 
-  // 添加分析結果（如果有）
+  const analysisResultTemplate = loadPromptFromTemplate(
+    "executeTask/analysisResult.md"
+  );
+  let analysisResultPrompt = "";
   if (task.analysisResult) {
-    basePrompt += generatePrompt(templates.analysisResultTemplate, {
+    analysisResultPrompt = generatePrompt(analysisResultTemplate, {
       analysisResult: task.analysisResult,
     });
   }
 
-  // 添加依賴任務完成摘要（如果有）
+  const dependencyTasksTemplate = loadPromptFromTemplate(
+    "executeTask/dependencyTasks.md"
+  );
+  let dependencyTasksPrompt = "";
   if (dependencyTasks && dependencyTasks.length > 0) {
     const completedDependencyTasks = dependencyTasks.filter(
       (t) => t.status === TaskStatus.COMPLETED && t.summary
     );
 
     if (completedDependencyTasks.length > 0) {
-      basePrompt += templates.dependencyTaskSummaryTemplate;
-
+      let dependencyTasksContent = "";
       for (const depTask of completedDependencyTasks) {
-        basePrompt += generatePrompt(templates.dependencyTaskItemTemplate, {
-          name: depTask.name,
-          summary: depTask.summary || "*無完成摘要*",
-        });
+        dependencyTasksContent += `### ${depTask.name}\n${
+          depTask.summary || "*無完成摘要*"
+        }\n\n`;
       }
-    }
-  }
-
-  // 添加相關文件（如果有）
-  if (relatedFilesSummary) {
-    basePrompt += generatePrompt(templates.relatedFilesSummaryTemplate, {
-      relatedFilesSummary: relatedFilesSummary,
-    });
-  } else {
-    // 無相關文件
-    basePrompt += templates.noRelatedFilesTemplate;
-
-    // 添加潛在相關文件建議（如果有）
-    if (potentialFiles && potentialFiles.length > 0) {
-      const potentialFilesStr = potentialFiles
-        .map((file) => `- 含有 "${file}" 的文件\n`)
-        .join("");
-
-      basePrompt += generatePrompt(templates.recommendedFilesTemplate, {
-        potentialFiles: potentialFilesStr,
+      dependencyTasksPrompt = generatePrompt(dependencyTasksTemplate, {
+        dependencyTasks: dependencyTasksContent,
       });
     }
   }
 
-  // 添加複雜度評估（如果有）
+  const relatedFilesSummaryTemplate = loadPromptFromTemplate(
+    "executeTask/relatedFilesSummary.md"
+  );
+  let relatedFilesSummaryPrompt = "";
+  relatedFilesSummaryPrompt = generatePrompt(relatedFilesSummaryTemplate, {
+    relatedFilesSummary: relatedFilesSummary || "當前任務沒有關聯的文件。",
+  });
+
+  const complexityTemplate = loadPromptFromTemplate(
+    "executeTask/complexity.md"
+  );
+  let complexityPrompt = "";
   if (complexityAssessment) {
-    basePrompt += generatePrompt(templates.complexityAssessmentTemplate, {
-      level: complexityAssessment.level,
-    });
-
-    // 添加複雜度警告樣式（如果需要）
     const complexityStyle = getComplexityStyle(complexityAssessment.level);
-    if (complexityStyle) {
-      basePrompt += generatePrompt(templates.complexityWarningTemplate, {
-        complexityStyle: complexityStyle,
-      });
-    }
-
-    // 添加評估指標
-    basePrompt += templates.assessmentMetricsTemplate;
-    basePrompt += generatePrompt(templates.descriptionLengthMetric, {
-      descriptionLength: complexityAssessment.metrics.descriptionLength,
-    });
-    basePrompt += generatePrompt(templates.dependenciesCountMetric, {
-      dependenciesCount: complexityAssessment.metrics.dependenciesCount,
-    });
-
-    // 添加處理建議（如果有）
+    let recommendationContent = "";
     if (
       complexityAssessment.recommendations &&
       complexityAssessment.recommendations.length > 0
     ) {
-      basePrompt += templates.handlingRecommendationsTemplate;
-      if (complexityAssessment.recommendations[0]) {
-        basePrompt += generatePrompt(templates.handlingRecommendation1, {
-          recommendation1: complexityAssessment.recommendations[0],
-        });
-      }
-      if (complexityAssessment.recommendations[1]) {
-        basePrompt += generatePrompt(templates.handlingRecommendation2, {
-          recommendation2: complexityAssessment.recommendations[1],
-        });
+      for (const recommendation of complexityAssessment.recommendations) {
+        recommendationContent += `- ${recommendation}\n`;
       }
     }
+    complexityPrompt = generatePrompt(complexityTemplate, {
+      level: complexityAssessment.level,
+      complexityStyle: complexityStyle,
+      descriptionLength: complexityAssessment.metrics.descriptionLength,
+      dependenciesCount: complexityAssessment.metrics.dependenciesCount,
+      recommendation: recommendationContent,
+    });
   }
 
-  // 添加執行步驟
-  basePrompt += templates.executionStepsTemplate;
-  basePrompt += templates.executionStep1;
-  basePrompt += templates.executionStep2;
-  basePrompt += templates.executionStep3;
-  basePrompt += templates.executionStep4;
-
-  // 添加質量要求
-  basePrompt += templates.qualityRequirementsTemplate;
-  basePrompt += templates.qualityRequirement1;
-  basePrompt += templates.qualityRequirement2;
-  basePrompt += templates.qualityRequirement3;
-
-  // 添加完成提示
-  basePrompt += templates.completionReminderTemplate;
+  const indexTemplate = loadPromptFromTemplate("executeTask/index.md");
+  let prompt = generatePrompt(indexTemplate, {
+    name: task.name,
+    id: task.id,
+    description: task.description,
+    notesTemplate: notesPrompt,
+    implementationGuideTemplate: implementationGuidePrompt,
+    verificationCriteriaTemplate: verificationCriteriaPrompt,
+    analysisResultTemplate: analysisResultPrompt,
+    dependencyTasksTemplate: dependencyTasksPrompt,
+    relatedFilesSummaryTemplate: relatedFilesSummaryPrompt,
+    complexityTemplate: complexityPrompt,
+  });
 
   // 載入可能的自定義 prompt
-  return loadPrompt(basePrompt, "EXECUTE_TASK");
+  return loadPrompt(prompt, "EXECUTE_TASK");
 }

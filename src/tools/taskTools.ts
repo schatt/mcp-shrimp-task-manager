@@ -661,43 +661,12 @@ export async function executeTask({
       }
     }
 
-    // 嘗試自動發現相關文件
-    let potentialFiles: string[] = [];
-    if (!task.relatedFiles || task.relatedFiles.length === 0) {
-      // 基於任務名稱和描述關鍵詞，嘗試推測可能相關的文件
-      const taskWords = [
-        ...task.name.split(/[\s,.;:]+/),
-        ...task.description.split(/[\s,.;:]+/),
-      ]
-        .filter((word) => word.length > 3)
-        .map((word) => word.toLowerCase());
-
-      // 從關鍵詞中提取可能的文件名或路徑片段
-      potentialFiles = taskWords.filter(
-        (word) =>
-          /^[a-z0-9]+$/i.test(word) &&
-          ![
-            "task",
-            "function",
-            "model",
-            "index",
-            "with",
-            "from",
-            "this",
-          ].includes(word.toLowerCase())
-      );
-
-      // 只保留前5個
-      potentialFiles = potentialFiles.slice(0, 5);
-    }
-
     // 使用prompt生成器獲取最終prompt
     const prompt = getExecuteTaskPrompt({
       task,
       complexityAssessment,
       relatedFilesSummary,
       dependencyTasks,
-      potentialFiles,
     });
 
     return {

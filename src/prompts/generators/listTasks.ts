@@ -3,8 +3,11 @@
  * 負責將模板和參數組合成最終的 prompt
  */
 
-import { loadPrompt, generatePrompt } from "../loader.js";
-import * as templates from "../templates/listTasks.js";
+import {
+  loadPrompt,
+  generatePrompt,
+  loadPromptFromTemplate,
+} from "../loader.js";
 import { Task, TaskStatus } from "../../types/index.js";
 
 /**
@@ -26,30 +29,20 @@ export function getListTasksPrompt(params: ListTasksPromptParams): string {
 
   // 如果沒有任務，顯示通知
   if (allTasks.length === 0) {
+    const notFoundTemplate = loadPromptFromTemplate("listTasks/notFound.md");
     const statusText = status === "all" ? "任何" : `任何 ${status} 的`;
-    return generatePrompt(templates.noTasksNoticeTemplate, {
+    return generatePrompt(notFoundTemplate, {
       statusText: statusText,
     });
   }
-
-  // 開始構建基本 prompt
-  let basePrompt = templates.dashboardTitleTemplate;
-
-  // 添加狀態概覽
-  basePrompt += templates.statusOverviewTitleTemplate;
 
   // 獲取所有狀態的計數
   const statusCounts = Object.values(TaskStatus)
     .map((statusType) => {
       const count = tasks[statusType]?.length || 0;
-      return generatePrompt(templates.statusCountTemplate, {
-        status: statusType,
-        count: count,
-      });
+      return `- **${statusType}**: ${count} 個任務`;
     })
     .join("\n");
-
-  basePrompt += `${statusCounts}\n\n`;
 
   let filterStatus = "all";
   switch (status) {
@@ -64,58 +57,43 @@ export function getListTasksPrompt(params: ListTasksPromptParams): string {
       break;
   }
 
+  let taskDetails = "";
+  let taskDetailsTemplate = loadPromptFromTemplate("listTasks/taskDetails.md");
   // 添加每個狀態下的詳細任務
   for (const statusType of Object.values(TaskStatus)) {
     const tasksWithStatus = tasks[statusType] || [];
-
     if (
       tasksWithStatus.length > 0 &&
       (filterStatus === "all" || filterStatus === statusType)
     ) {
-      basePrompt += generatePrompt(templates.statusSectionTitleTemplate, {
-        status: statusType,
-        count: tasksWithStatus.length,
-      });
-
       for (const task of tasksWithStatus) {
-        basePrompt += formatTaskDetails(task);
+        let dependencies = "沒有依賴";
+        if (task.dependencies && task.dependencies.length > 0) {
+          dependencies = task.dependencies
+            .map((d) => `\`${d.taskId}\``)
+            .join(", ");
+        }
+        taskDetails += generatePrompt(taskDetailsTemplate, {
+          name: task.name,
+          id: task.id,
+          description: task.description,
+          createAt: task.createdAt,
+          complatedSummary:
+            (task.summary || "").substring(0, 100) +
+            ((task.summary || "").length > 100 ? "..." : ""),
+          dependencies: dependencies,
+          complatedAt: task.completedAt,
+        });
       }
     }
   }
 
+  const indexTemplate = loadPromptFromTemplate("listTasks/index.md");
+  let prompt = generatePrompt(indexTemplate, {
+    statusCount: statusCounts,
+    taskDetailsTemplate: taskDetails,
+  });
+
   // 載入可能的自定義 prompt
-  return loadPrompt(basePrompt, "LIST_TASKS");
-}
-
-/**
- * 格式化任務詳情
- * @param task 任務
- * @returns 格式化後的任務詳情字串
- */
-function formatTaskDetails(task: Task): string {
-  // 此函數內容應來自原始的 formatTaskDetails 函數
-  // 根據實際需求實現詳細的任務格式化邏輯
-  let result = `### ${task.name}\n**ID:** \`${task.id}\`\n**描述:** ${task.description}\n`;
-
-  if (task.status === TaskStatus.COMPLETED && task.summary) {
-    result += `**完成摘要:** ${task.summary.substring(0, 100)}${
-      task.summary.length > 100 ? "..." : ""
-    }\n`;
-  }
-
-  if (task.dependencies && task.dependencies.length > 0) {
-    result += `**依賴:** ${task.dependencies
-      .map((d) => `\`${d.taskId}\``)
-      .join(", ")}\n`;
-  }
-
-  result += `**創建時間:** ${new Date(task.createdAt).toLocaleString()}\n`;
-
-  if (task.status === TaskStatus.COMPLETED && task.completedAt) {
-    result += `**完成時間:** ${new Date(task.completedAt).toLocaleString()}\n`;
-  }
-
-  result += "\n";
-
-  return result;
+  return loadPrompt(prompt, "LIST_TASKS");
 }
