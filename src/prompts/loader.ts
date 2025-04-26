@@ -75,13 +75,64 @@ export function generatePrompt(
 
 /**
  * 從模板載入 prompt
- * @param templatePath 模板路徑
- * @returns 模板
+ * @param templatePath 相對於模板集根目錄的模板路徑 (e.g., 'chat/basic.md')
+ * @returns 模板內容
+ * @throws Error 如果找不到模板文件
  */
 export function loadPromptFromTemplate(templatePath: string): string {
-  const template = fs.readFileSync(
-    path.join(__dirname, "templates", templatePath),
-    "utf-8"
-  );
-  return template;
+  const templateSetName = process.env.TEMPLATES_USE || "en";
+  const dataDir = process.env.DATA_DIR;
+  const builtInTemplatesBaseDir = __dirname;
+
+  let finalPath = "";
+  const checkedPaths: string[] = []; // 用於更詳細的錯誤報告
+
+  // 1. 檢查 DATA_DIR 中的自定義路徑
+  if (dataDir) {
+    // path.resolve 可以處理 templateSetName 是絕對路徑的情況
+    const customFilePath = path.resolve(dataDir, templateSetName, templatePath);
+    checkedPaths.push(`Custom: ${customFilePath}`);
+    if (fs.existsSync(customFilePath)) {
+      finalPath = customFilePath;
+    }
+  }
+
+  // 2. 如果未找到自定義路徑，檢查特定的內建模板目錄
+  if (!finalPath) {
+    // 假設 templateSetName 對於內建模板是 'en', 'zh' 等
+    const specificBuiltInFilePath = path.join(
+      builtInTemplatesBaseDir,
+      `templates_${templateSetName}`,
+      templatePath
+    );
+    checkedPaths.push(`Specific Built-in: ${specificBuiltInFilePath}`);
+    if (fs.existsSync(specificBuiltInFilePath)) {
+      finalPath = specificBuiltInFilePath;
+    }
+  }
+
+  // 3. 如果特定的內建模板也未找到，且不是 'en' (避免重複檢查)
+  if (!finalPath && templateSetName !== "en") {
+    const defaultBuiltInFilePath = path.join(
+      builtInTemplatesBaseDir,
+      "templates_en",
+      templatePath
+    );
+    checkedPaths.push(`Default Built-in ('en'): ${defaultBuiltInFilePath}`);
+    if (fs.existsSync(defaultBuiltInFilePath)) {
+      finalPath = defaultBuiltInFilePath;
+    }
+  }
+
+  // 4. 如果所有路徑都找不到模板，拋出錯誤
+  if (!finalPath) {
+    throw new Error(
+      `Template file not found: '${templatePath}' in template set '${templateSetName}'. Checked paths:\n - ${checkedPaths.join(
+        "\n - "
+      )}`
+    );
+  }
+
+  // 5. 讀取找到的文件
+  return fs.readFileSync(finalPath, "utf-8");
 }
