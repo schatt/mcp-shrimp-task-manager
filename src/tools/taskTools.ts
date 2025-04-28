@@ -93,7 +93,7 @@ export async function planTask({
         (task) => task.status !== TaskStatus.COMPLETED
       );
     } catch (error) {
-      console.error("載入現有任務時發生錯誤:", error);
+      console.error("Error loading existing tasks:", error);
     }
   }
 
@@ -402,7 +402,7 @@ export async function splitTasks({
     try {
       allTasks = await getAllTasks();
     } catch (error) {
-      console.error("獲取所有任務時發生錯誤:", error);
+      console.error("Error retrieving all tasks:", error);
       allTasks = [...createdTasks]; // 如果獲取失敗，至少使用剛創建的任務
     }
 
@@ -429,7 +429,7 @@ export async function splitTasks({
       },
     };
   } catch (error) {
-    console.error("執行任務拆分時發生錯誤:", error);
+    console.error("Error executing task split:", error);
 
     return {
       content: [
@@ -622,8 +622,9 @@ export async function executeTask({
             ? relatedFilesResult
             : relatedFilesResult.summary || "";
       } catch (error) {
-        console.error("載入相關文件時發生錯誤:", error);
-        relatedFilesSummary = "載入相關文件時發生錯誤，請手動查看文件。";
+        console.error("Error loading related files:", error);
+        relatedFilesSummary =
+          "Error loading related files, please check the files manually.";
       }
     }
 
@@ -644,7 +645,7 @@ export async function executeTask({
       ],
     };
   } catch (error) {
-    console.error("執行任務時發生錯誤:", error);
+    console.error("Error executing task:", error);
     return {
       content: [
         {
@@ -1121,7 +1122,7 @@ export async function queryTask({
       ],
     };
   } catch (error) {
-    console.error("查詢任務時發生錯誤:", error);
+    console.error("Error querying tasks:", error);
     return {
       content: [
         {
@@ -1186,7 +1187,7 @@ export async function getTaskDetail({
       ],
     };
   } catch (error) {
-    console.error("取得任務詳情時發生錯誤:", error);
+    console.error("Error retrieving task details:", error);
 
     // 使用prompt生成器獲取錯誤訊息
     const errorPrompt = getGetTaskDetailPrompt({

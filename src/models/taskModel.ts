@@ -129,7 +129,9 @@ export async function updateTask(
 
     if (disallowedFields.length > 0) {
       console.warn(
-        `警告：嘗試更新已完成任務的非法欄位: ${disallowedFields.join(", ")}`
+        `Warning: Attempted to update illegal fields on a completed task: ${disallowedFields.join(
+          ", "
+        )}`
       );
       return null;
     }
@@ -388,11 +390,11 @@ export async function batchCreateOrUpdateTasks(
           existingTasks[existingTaskIndex].status === TaskStatus.COMPLETED
         ) {
           console.warn(
-            `警告：嘗試更新已完成的任務 "${taskData.name}"，操作被忽略`
+            `Warning: Attempted to update completed task "${taskData.name}", operation ignored`
           );
         } else {
           console.warn(
-            `警告：嘗試更新不存在的任務 "${taskData.name}"，操作被忽略`
+            `Warning: Attempted to update non-existent task "${taskData.name}", operation ignored`
           );
         }
       }
@@ -449,7 +451,7 @@ export async function batchCreateOrUpdateTasks(
             dependencyTaskId = taskNameToIdMap.get(dependencyName)!;
           } else {
             console.warn(
-              `警告：任務 "${taskData.name}" 引用了未知的依賴任務 "${dependencyName}"，此依賴將被忽略`
+              `Warning: Task "${taskData.name}" references unknown dependency task "${dependencyName}", dependency ignored`
             );
             continue; // 跳過此依賴
           }
@@ -460,7 +462,7 @@ export async function batchCreateOrUpdateTasks(
           );
           if (!idExists) {
             console.warn(
-              `警告：任務 "${taskData.name}" 引用了未知的依賴任務ID "${dependencyTaskId}"，此依賴將被忽略`
+              `Warning: Task "${taskData.name}" references unknown dependency task ID "${dependencyTaskId}", dependency ignored`
             );
             continue; // 跳過此依賴
           }
@@ -745,7 +747,7 @@ export async function clearAllTasks(): Promise<{
       backupFile: backupFileName,
     };
   } catch (error) {
-    console.error("清除所有任務時發生錯誤:", error);
+    console.error("Error occurred while clearing all tasks:", error);
     return {
       success: false,
       message: `清除任務時發生錯誤: ${
@@ -861,7 +863,7 @@ export async function searchTasksWithCommand(
 
               memoryTasks.push(...filteredTasks);
             } catch (error: unknown) {
-              console.error(`讀取檔案 ${filePath} 時發生錯誤:`, error);
+              console.error(`Error reading file ${filePath}:`, error);
             }
           }
         }
@@ -870,12 +872,12 @@ export async function searchTasksWithCommand(
         // 只有當錯誤代碼不是1(沒有匹配)時才記錄錯誤
         const err = error as { code?: number };
         if (err.code !== 1) {
-          console.error("執行搜尋指令時發生錯誤:", error);
+          console.error("Error executing search command:", error);
         }
       }
     }
   } catch (error: unknown) {
-    console.error("搜尋記憶資料夾時發生錯誤:", error);
+    console.error("Error searching memory directory:", error);
   }
 
   // 從當前任務中過濾符合條件的任務

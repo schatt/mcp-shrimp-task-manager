@@ -53,12 +53,12 @@ import {
 
 async function main() {
   try {
-    console.log("啟動蝦米任務管理器服務...");
+    console.log("Starting Shrimp Task Manager service...");
 
     // 創建MCP服務器
     const server = new Server(
       {
-        name: "蝦米任務管理器",
+        name: "Shrimp Task Manager",
         version: "1.0.0",
       },
       {
@@ -331,7 +331,7 @@ async function main() {
             case "init_project_rules":
               return await initProjectRules();
             default:
-              throw new Error(`工具 ${request.params.name} 不存在`);
+              throw new Error(`Tool ${request.params.name} does not exist`);
           }
         } catch (error) {
           console.error("Error executing tool:", error);
@@ -341,7 +341,7 @@ async function main() {
             content: [
               {
                 type: "text",
-                text: `發生錯誤: ${errorMsg} \n 請嘗試修正錯誤並重新嘗試呼叫工具`,
+                text: `Error occurred: ${errorMsg} \n Please try correcting the error and calling the tool again`,
               },
             ],
           };
@@ -353,9 +353,9 @@ async function main() {
     const transport = new StdioServerTransport();
     await server.connect(transport);
 
-    console.log("蝦米任務管理器服務已啟動");
+    console.log("Shrimp Task Manager service started");
   } catch (error) {
-    console.error("啟動服務失敗:", error);
+    console.error("Failed to start service:", error);
     process.exit(1);
   }
 }
