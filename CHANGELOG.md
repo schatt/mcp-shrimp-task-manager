@@ -2,6 +2,16 @@
 
 # Changelog
 
+## [1.0.11]
+
+### Changed
+
+- Removed unused functions. (f8d9c8)
+
+### Fixed
+
+- Fix: Resolved issue with Chinese character support in Cursor Console. (00943e1)
+
 ## [1.0.10]
 
 ### Changed
