@@ -298,16 +298,6 @@ async function main() {
                 );
               }
               return await updateTaskContent(parsedArgs.data);
-            // case "update_task_files":
-            //   parsedArgs = await updateTaskRelatedFilesSchema.safeParseAsync(
-            //     request.params.arguments
-            //   );
-            //   if (!parsedArgs.success) {
-            //     throw new Error(
-            //       `Invalid arguments for tool ${request.params.name}: ${parsedArgs.error.message}`
-            //     );
-            //   }
-            //   return await updateTaskRelatedFiles(parsedArgs.data);
             case "query_task":
               parsedArgs = await queryTaskSchema.safeParseAsync(
                 request.params.arguments

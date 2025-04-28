@@ -45,35 +45,6 @@ import {
   getUpdateTaskContentPrompt,
 } from "../prompts/index.js";
 
-/**
- * 將任務狀態轉換為更友好的顯示文字
- */
-function getTaskStatusDisplay(status: TaskStatus): string {
-  switch (status) {
-    case TaskStatus.PENDING:
-      return "待處理";
-    case TaskStatus.IN_PROGRESS:
-      return "進行中";
-    case TaskStatus.COMPLETED:
-      return "已完成";
-    default:
-      return status;
-  }
-}
-
-/**
- * 格式化日期為更友好的顯示格式
- */
-function formatDate(date: Date): string {
-  return date.toLocaleString("zh-TW", {
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-}
-
 // 開始規劃工具
 export const planTaskSchema = z.object({
   description: z
@@ -469,14 +440,6 @@ export async function splitTasks({
             (error instanceof Error ? error.message : String(error)),
         },
       ],
-      ephemeral: {
-        taskCreationResult: {
-          success: false,
-          message: `任務創建失敗：${
-            error instanceof Error ? error.message : String(error)
-          }`,
-        },
-      },
     };
   }
 }
