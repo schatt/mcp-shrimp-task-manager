@@ -71,7 +71,6 @@ async function main() {
 
       // 發送 SSE 事件的輔助函數
       function sendSseUpdate() {
-        console.log("Tasks changed, sending update to clients...");
         sseClients.forEach((client) => {
           // 檢查客戶端是否仍然連接
           if (!client.writableEnded) {
@@ -102,7 +101,6 @@ async function main() {
           const tasksData = await fsPromises.readFile(TASKS_FILE_PATH, "utf-8");
           res.json(JSON.parse(tasksData));
         } catch (error) {
-          console.error("Error reading tasks.json:", error);
           // 確保檔案不存在時返回空任務列表
           if ((error as NodeJS.ErrnoException).code === "ENOENT") {
             res.json({ tasks: [] });
@@ -153,18 +151,8 @@ async function main() {
                 sendSseUpdate();
               }
             });
-          } else {
-            console.warn(
-              `${TASKS_FILE_PATH} does not exist. File watching not started. It will start if the file is created later by the application.`
-            );
-            // 可以考慮在這裡也設置一個 watcher 監聽目錄創建或檔案創建
           }
-        } catch (watchError) {
-          console.error(
-            `Error setting up file watch on ${TASKS_FILE_PATH}:`,
-            watchError
-          );
-        }
+        } catch (watchError) {}
       });
 
       // 將 URL 寫入 ebGUI.md
@@ -172,9 +160,7 @@ async function main() {
         const websiteUrl = `[Task Manager UI](http://localhost:${port})`;
         const websiteFilePath = path.join(DATA_DIR, "WebGUI.md");
         await fsPromises.writeFile(websiteFilePath, websiteUrl, "utf-8");
-      } catch (error) {
-        console.error("Error writing website URL to file:", error);
-      }
+      } catch (error) {}
 
       // 設置進程終止事件處理 (確保移除 watcher)
       const shutdownHandler = async () => {
@@ -470,7 +456,6 @@ async function main() {
               throw new Error(`Tool ${request.params.name} does not exist`);
           }
         } catch (error) {
-          console.error("Error executing tool:", error);
           const errorMsg =
             error instanceof Error ? error.message : String(error);
           return {
@@ -491,7 +476,6 @@ async function main() {
 
     console.log("Shrimp Task Manager service started");
   } catch (error) {
-    console.error("Failed to start service:", error);
     process.exit(1);
   }
 }

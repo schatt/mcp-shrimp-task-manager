@@ -92,9 +92,7 @@ export async function planTask({
       pendingTasks = allTasks.filter(
         (task) => task.status !== TaskStatus.COMPLETED
       );
-    } catch (error) {
-      console.error("Error loading existing tasks:", error);
-    }
+    } catch (error) {}
   }
 
   // 使用prompt生成器獲取最終prompt
@@ -402,7 +400,6 @@ export async function splitTasks({
     try {
       allTasks = await getAllTasks();
     } catch (error) {
-      console.error("Error retrieving all tasks:", error);
       allTasks = [...createdTasks]; // 如果獲取失敗，至少使用剛創建的任務
     }
 
@@ -429,8 +426,6 @@ export async function splitTasks({
       },
     };
   } catch (error) {
-    console.error("Error executing task split:", error);
-
     return {
       content: [
         {
@@ -622,7 +617,6 @@ export async function executeTask({
             ? relatedFilesResult
             : relatedFilesResult.summary || "";
       } catch (error) {
-        console.error("Error loading related files:", error);
         relatedFilesSummary =
           "Error loading related files, please check the files manually.";
       }
@@ -645,7 +639,6 @@ export async function executeTask({
       ],
     };
   } catch (error) {
-    console.error("Error executing task:", error);
     return {
       content: [
         {
@@ -1122,7 +1115,6 @@ export async function queryTask({
       ],
     };
   } catch (error) {
-    console.error("Error querying tasks:", error);
     return {
       content: [
         {
@@ -1187,8 +1179,6 @@ export async function getTaskDetail({
       ],
     };
   } catch (error) {
-    console.error("Error retrieving task details:", error);
-
     // 使用prompt生成器獲取錯誤訊息
     const errorPrompt = getGetTaskDetailPrompt({
       taskId,
