@@ -2,6 +2,18 @@
 
 # Changelog
 
+## [1.0.12]
+
+### Added
+
+- Added demonstration video links to README and Chinese README, along with demonstration video image files. (406eb46)
+- Added JSON format notes emphasizing the prohibition of comments and the requirement for special character escaping to prevent parsing failures. (a328322)
+- Added a web-based graphical interface feature, controlled by the `ENABLE_GUI` environment variable. (bf5f367)
+
+### Removed
+
+- Removed unnecessary error log outputs in multiple places to avoid Cursor errors. (552eed8)
+
 ## [1.0.11]
 
 ### Changed
