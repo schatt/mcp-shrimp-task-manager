@@ -7,6 +7,7 @@
 - [🧠 任務記憶功能](#任務記憶功能)
 - [🤔 思維鏈過程](#思維鏈過程)
 - [📋 專案規範初始化](#專案規範初始化)
+- [🌐 網頁圖形介面](#網頁圖形介面)
 - [📚 文件資源](#文件資源)
 - [🔧 安裝與使用](#安裝與使用)
 - [🔌 在支援 MCP 的客戶端中使用](#客戶端中使用)
@@ -35,6 +36,7 @@
 - **任務記憶功能**：自動備份任務歷史記錄，提供長期記憶和參考能力
 - **思維鏈過程**：通過步驟化的推理系統性地分析複雜問題
 - **專案規範初始化**：定義專案標準和規則，維持大型專案的一致性
+- **<a id="網頁圖形介面"></a>網頁圖形介面**：提供選用的網頁圖形化使用者介面來管理任務。透過在您的 `.env` 檔案中設定 `ENABLE_GUI=true` 來啟用。啟用後，將會在您的 `DATA_DIR` 中建立一個包含存取網址的 `WebGUI.md` 檔案。
 
 ## 🧭 <a id="使用指南"></a>使用指南
 
@@ -174,7 +176,10 @@ npm run build
       "command": "node",
       "args": ["/mcp-shrimp-task-manager/dist/index.js"],
       "env": {
-        "DATA_DIR": "/mcp-shrimp-task-manager/data"
+        "DATA_DIR": "/mcp-shrimp-task-manager/data",
+        "ENABLE_THOUGHT_CHAIN": "true",
+        "TEMPLATES_USE": "en",
+        "ENABLE_GUI": "false"
       }
     }
   }
@@ -188,7 +193,10 @@ or
       "command": "npx",
       "args": ["-y", "mcp-shrimp-task-manager"],
       "env": {
-        "DATA_DIR": "/mcp-shrimp-task-manager/data"
+        "DATA_DIR": "/mcp-shrimp-task-manager/data",
+        "ENABLE_THOUGHT_CHAIN": "true",
+        "TEMPLATES_USE": "en",
+        "ENABLE_GUI": "false"
       }
     }
   }
@@ -211,7 +219,10 @@ or
       "command": "node",
       "args": ["/path/to/mcp-shrimp-task-manager/dist/index.js"],
       "env": {
-        "DATA_DIR": "/path/to/project/data" // 必須使用絕對路徑
+        "DATA_DIR": "/path/to/project/data", // 必須使用絕對路徑
+        "ENABLE_THOUGHT_CHAIN": "true",
+        "TEMPLATES_USE": "en",
+        "ENABLE_GUI": "false"
       }
     }
   }
@@ -225,7 +236,10 @@ or
       "command": "npx",
       "args": ["-y", "mcp-shrimp-task-manager"],
       "env": {
-        "DATA_DIR": "/path/to/project/data" // 必須使用絕對路徑
+        "DATA_DIR": "/path/to/project/data", // 必須使用絕對路徑
+        "ENABLE_THOUGHT_CHAIN": "true",
+        "TEMPLATES_USE": "en",
+        "ENABLE_GUI": "false"
       }
     }
   }
@@ -258,7 +272,8 @@ or
         "MCP_PROMPT_PLAN_TASK": "自定義規劃指導...",
         "MCP_PROMPT_EXECUTE_TASK_APPEND": "附加執行說明...",
         "ENABLE_THOUGHT_CHAIN": "true",
-        "TEMPLATES_USE": "en"
+        "TEMPLATES_USE": "en",
+        "ENABLE_GUI": "false"
       }
     }
   }
