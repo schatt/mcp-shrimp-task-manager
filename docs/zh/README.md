@@ -18,6 +18,8 @@
 
 # MCP 蝦米任務管理器
 
+[![Shrimp Task Manager Demo](/docs/yt.png)](https://www.youtube.com/watch?v=Arzu0lV09so)
+
 [![smithery badge](https://smithery.ai/badge/@cjo4m06/mcp-shrimp-task-manager)](https://smithery.ai/server/@cjo4m06/mcp-shrimp-task-manager)
 
 > 🚀 基於 Model Context Protocol (MCP) 的智能任務管理系統，為 AI Agent 提供高效的程式開發工作流程框架。
