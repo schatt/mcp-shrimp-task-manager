@@ -2,6 +2,12 @@
 
 # Changelog
 
+## [1.0.13]
+
+### Fixed
+
+- Fix: Corrected issue with invariantlabs misjudgment (148f0cd)
+
 ## [1.0.12]
 
 ### Added
