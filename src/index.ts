@@ -15,7 +15,7 @@ import fs from "fs";
 import fsPromises from "fs/promises";
 import { fileURLToPath } from "url";
 
-// 導入工具函數
+// 導入所有工具函數和 schema
 import {
   planTask,
   planTaskSchema,
@@ -41,19 +41,11 @@ import {
   queryTaskSchema,
   getTaskDetail,
   getTaskDetailSchema,
-} from "./tools/taskTools.js";
-
-// 導入思維鏈工具
-import {
   processThought,
   processThoughtSchema,
-} from "./tools/thoughtChainTools.js";
-
-// 導入專案工具
-import {
   initProjectRules,
   initProjectRulesSchema,
-} from "./tools/projectTools.js";
+} from "./tools/index.js";
 
 async function main() {
   try {
