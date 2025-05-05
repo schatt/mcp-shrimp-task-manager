@@ -92,6 +92,3 @@ export interface TaskComplexityAssessment {
   };
   recommendations: string[]; // 處理建議列表
 }
-
-// 思維鏈資料結構
-export * from "./thoughtChain.js";
