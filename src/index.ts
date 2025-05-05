@@ -31,8 +31,6 @@ import {
   executeTaskSchema,
   verifyTask,
   verifyTaskSchema,
-  completeTask,
-  completeTaskSchema,
   deleteTask,
   deleteTaskSchema,
   clearAllTasks,
@@ -241,13 +239,6 @@ async function main() {
             inputSchema: zodToJsonSchema(verifyTaskSchema),
           },
           {
-            name: "complete_task",
-            description: loadPromptFromTemplate(
-              "toolsDescription/completeTask.md"
-            ),
-            inputSchema: zodToJsonSchema(completeTaskSchema),
-          },
-          {
             name: "delete_task",
             description: loadPromptFromTemplate(
               "toolsDescription/deleteTask.md"
@@ -380,16 +371,6 @@ async function main() {
                 );
               }
               return await verifyTask(parsedArgs.data);
-            case "complete_task":
-              parsedArgs = await completeTaskSchema.safeParseAsync(
-                request.params.arguments
-              );
-              if (!parsedArgs.success) {
-                throw new Error(
-                  `Invalid arguments for tool ${request.params.name}: ${parsedArgs.error.message}`
-                );
-              }
-              return await completeTask(parsedArgs.data);
             case "delete_task":
               parsedArgs = await deleteTaskSchema.safeParseAsync(
                 request.params.arguments
