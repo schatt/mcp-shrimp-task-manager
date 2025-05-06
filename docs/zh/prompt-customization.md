@@ -16,22 +16,64 @@
 
 其中 `[FUNCTION_NAME]` 是工具函式的名稱，大寫形式。例如，對於任務規劃功能 `planTask`，相應的環境變數名稱為 `MCP_PROMPT_PLAN_TASK`。
 
+## 多語言提示詞模板支持
+
+蝦米任務管理器支持多種語言的提示詞模板，可通過 `TEMPLATES_USE` 環境變數設置：
+
+- 當前支持的語言：`en`（英文）和 `zh`（繁體中文）
+- 默認為 `en`（英文）
+
+### 切換語言
+
+在 `mcp.json` 配置中設置：
+
+```json
+"env": {
+  "TEMPLATES_USE": "zh"  // 使用繁體中文模板
+}
+```
+
+或在 `.env` 文件中設置：
+
+```
+TEMPLATES_USE=zh
+```
+
+### 自定義模板
+
+您可以創建自己的模板集：
+
+1. 將現有模板集（如 `src/prompts/templates_en` 或 `src/prompts/templates_zh`）複製到 `DATA_DIR` 指定的目錄
+2. 重命名複製的目錄（例如：`my_templates`）
+3. 修改模板文件以符合您的需求
+4. 將 `TEMPLATES_USE` 環境變數設置為您的模板目錄名稱：
+
+```json
+"env": {
+  "DATA_DIR": "/path/to/project/data",
+  "TEMPLATES_USE": "my_templates"
+}
+```
+
+系統將優先使用您的自定義模板，如果找不到特定模板文件，會回退到內置的英文模板。
+
 ## 支援的工具函式
 
 系統中的所有主要功能都支援透過環境變數自定義 prompt：
 
-| 功能名稱        | 環境變數前綴                 | 說明         |
-| --------------- | ---------------------------- | ------------ |
-| `planTask`      | `MCP_PROMPT_PLAN_TASK`       | 任務規劃     |
-| `analyzeTask`   | `MCP_PROMPT_ANALYZE_TASK`    | 任務分析     |
-| `reflectTask`   | `MCP_PROMPT_REFLECT_TASK`    | 方案評估     |
-| `splitTasks`    | `MCP_PROMPT_SPLIT_TASKS`     | 任務拆分     |
-| `executeTask`   | `MCP_PROMPT_EXECUTE_TASK`    | 任務執行     |
-| `verifyTask`    | `MCP_PROMPT_VERIFY_TASK`     | 任務驗證     |
-| `completeTask`  | `MCP_PROMPT_COMPLETE_TASK`   | 任務完成     |
-| `listTasks`     | `MCP_PROMPT_LIST_TASKS`      | 列出任務     |
-| `queryTask`     | `MCP_PROMPT_QUERY_TASK`      | 查詢任務     |
-| `getTaskDetail` | `MCP_PROMPT_GET_TASK_DETAIL` | 獲取任務詳情 |
+| 功能名稱           | 環境變數前綴                    | 說明           |
+| ------------------ | ------------------------------- | -------------- |
+| `planTask`         | `MCP_PROMPT_PLAN_TASK`          | 任務規劃       |
+| `analyzeTask`      | `MCP_PROMPT_ANALYZE_TASK`       | 任務分析       |
+| `reflectTask`      | `MCP_PROMPT_REFLECT_TASK`       | 方案評估       |
+| `splitTasks`       | `MCP_PROMPT_SPLIT_TASKS`        | 任務拆分       |
+| `executeTask`      | `MCP_PROMPT_EXECUTE_TASK`       | 任務執行       |
+| `verifyTask`       | `MCP_PROMPT_VERIFY_TASK`        | 任務驗證       |
+| `listTasks`        | `MCP_PROMPT_LIST_TASKS`         | 列出任務       |
+| `queryTask`        | `MCP_PROMPT_QUERY_TASK`         | 查詢任務       |
+| `getTaskDetail`    | `MCP_PROMPT_GET_TASK_DETAIL`    | 獲取任務詳情   |
+| `processThought`   | `MCP_PROMPT_PROCESS_THOUGHT`    | 思維鏈處理     |
+| `initProjectRules` | `MCP_PROMPT_INIT_PROJECT_RULES` | 初始化專案規則 |
 
 ## 環境變數配置方法
 
@@ -148,11 +190,6 @@ MCP_PROMPT_PLAN_TASK_APPEND=\n\n## 額外指導\n\n請特別注意以下事項�
 ### verifyTask 支援的參數
 
 - `{task}` - 任務詳情
-
-### completeTask 支援的參數
-
-- `{task}` - 任務詳情
-- `{completionTime}` - 完成時間
 
 ### listTasks 支援的參數
 

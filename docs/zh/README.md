@@ -5,7 +5,6 @@
 - [✨ 功能特點](#功能特點1)
 - [📖 使用指南](#使用指南)
 - [🧠 任務記憶功能](#任務記憶功能)
-- [🤔 思維鏈過程](#思維鏈過程)
 - [📋 專案規範初始化](#專案規範初始化)
 - [🌐 網頁圖形介面](#網頁圖形介面)
 - [📚 文件資源](#文件資源)
@@ -95,17 +94,6 @@
 
 通過有效利用任務記憶功能，系統能夠不斷積累經驗，智能化程度和工作效率將持續提升。
 
-## 🤔 <a id="思維鏈過程"></a>思維鏈過程
-
-思維鏈功能通過結構化思考增強問題解決能力：
-
-- **系統化推理**：將複雜問題分解為邏輯步驟
-- **假設測試**：挑戰假設以驗證解決方案的可行性
-- **批判性分析**：使用嚴格標準評估各種解決方案選項
-- **改進決策過程**：通過深思熟慮達成更可靠的結論
-
-當啟用此功能（預設設定）時，系統會引導 Agent 使用 `process_thought` 工具進行逐步推理，確保在實施前進行徹底的問題分析。
-
 ## 📋 <a id="專案規範初始化"></a>專案規範初始化
 
 專案規範功能有助於維持代碼庫的一致性：
@@ -134,7 +122,6 @@
 
 ## 📚 <a id="文件資源"></a>文件資源
 
-- [系統架構](architecture.md)：詳細的系統設計與數據流說明
 - [提示詞自定義指南](prompt-customization.md)：透過環境變數自定義工具提示詞的說明
 - [更新日誌](CHANGELOG.md)：記錄此專案的所有重要變更
 
@@ -179,7 +166,6 @@ npm run build
       "args": ["/mcp-shrimp-task-manager/dist/index.js"],
       "env": {
         "DATA_DIR": "/mcp-shrimp-task-manager/data",
-        "ENABLE_THOUGHT_CHAIN": "true",
         "TEMPLATES_USE": "en",
         "ENABLE_GUI": "false"
       }
@@ -196,7 +182,6 @@ or
       "args": ["-y", "mcp-shrimp-task-manager"],
       "env": {
         "DATA_DIR": "/mcp-shrimp-task-manager/data",
-        "ENABLE_THOUGHT_CHAIN": "true",
         "TEMPLATES_USE": "en",
         "ENABLE_GUI": "false"
       }
@@ -222,7 +207,6 @@ or
       "args": ["/path/to/mcp-shrimp-task-manager/dist/index.js"],
       "env": {
         "DATA_DIR": "/path/to/project/data", // 必須使用絕對路徑
-        "ENABLE_THOUGHT_CHAIN": "true",
         "TEMPLATES_USE": "en",
         "ENABLE_GUI": "false"
       }
@@ -239,7 +223,6 @@ or
       "args": ["-y", "mcp-shrimp-task-manager"],
       "env": {
         "DATA_DIR": "/path/to/project/data", // 必須使用絕對路徑
-        "ENABLE_THOUGHT_CHAIN": "true",
         "TEMPLATES_USE": "en",
         "ENABLE_GUI": "false"
       }
@@ -273,7 +256,6 @@ or
         "DATA_DIR": "/path/to/project/data",
         "MCP_PROMPT_PLAN_TASK": "自定義規劃指導...",
         "MCP_PROMPT_EXECUTE_TASK_APPEND": "附加執行說明...",
-        "ENABLE_THOUGHT_CHAIN": "true",
         "TEMPLATES_USE": "en",
         "ENABLE_GUI": "false"
       }
@@ -290,7 +272,6 @@ or
 此外，還有其他系統配置變數：
 
 - **DATA_DIR**：指定任務數據存儲的目錄
-- **ENABLE_THOUGHT_CHAIN**：控制任務規劃工作流中的思考模式。當設置為 `true`（預設值）時，系統引導用戶使用 `process_thought` 工具進行逐步推理。當設置為 `false` 時，系統直接使用 `analyze_task` 提交分析結果，跳過詳細的思考過程。
 - **TEMPLATES_USE**：指定提示詞使用的模板集。預設為 `en`。目前可用的選項有 `en` 和 `zh`。若要使用自定義模板，請將 `src/prompts/templates_en` 目錄複製到 `DATA_DIR` 指定的位置，重新命名複製的目錄（例如，`my_templates`），並將 `TEMPLATES_USE` 設置為新的目錄名稱（例如，`my_templates`）。
 
 有關自定義提示詞的詳細說明，包括支援的參數和範例，請參閱[提示詞自定義指南](prompt-customization.md)。
@@ -349,7 +330,6 @@ or
 |              | `delete_task`        | 刪除未完成的任務           |
 | **任務執行** | `execute_task`       | 執行特定任務               |
 |              | `verify_task`        | 檢驗任務完成情況           |
-|              | `complete_task`      | 標記任務為已完成           |
 
 ## 📄 <a id="許可協議"></a>許可協議
 
