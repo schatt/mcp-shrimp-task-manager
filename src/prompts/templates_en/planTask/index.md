@@ -19,7 +19,7 @@ You must complete the following sub-steps in sequence, and at the end call the `
 
    - View key configuration files and structures:
      - Examine root directory structure and important configuration files (package.json, tsconfig.json, etc.)
-     - If {rulesPath} exists, please read and refer to it in detail
+     - If shrimp-rules.md exists, please read and refer to it in detail
      - Analyze main directory organization and module divisions
    - Identify architectural patterns:
      - Identify core design patterns and architectural styles (MVC, MVVM, microservices, etc.)
