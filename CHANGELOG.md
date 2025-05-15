@@ -2,6 +2,18 @@
 
 # Changelog
 
+## [1.0.15]
+
+### Fixed
+
+- Fix: Corrected an error where gemini-2.5-pro-preview-05-06 would skip task execution and mark it as completed directly (6d8a422)
+- Fixes issue #20 (5d1c28d)
+
+### Changed
+
+- Moved rule.md to the root directory to prepare for future collaborative architecture with DATA_DIR outside the project (313e338)
+- Updated documentation (28984f)
+
 ## [1.0.14]
 
 ### Changed
