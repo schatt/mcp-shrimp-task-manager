@@ -22,9 +22,7 @@ export const splitTasksRawSchema = z.object({
   globalAnalysisResult: z
     .string()
     .optional()
-    .describe(
-      "全局分析結果：來自 reflect_task 的完整分析結果，適用於所有任務的通用部分"
-    ),
+    .describe("任務最終目標，來自之前分析適用於所有任務的通用部分"),
 });
 
 const tasksSchema = z
@@ -122,7 +120,7 @@ export async function splitTasksRaw({
         {
           type: "text" as const,
           text:
-            "tasks 參數格式錯誤，請確保格式正確，錯誤訊息：" +
+            "tasksRaw 參數格式錯誤，請確保格式正確，請嘗試修正錯誤，如果文本太長無法順利修復請分批呼叫，這樣可以避免訊息過長導致不好修正問題，錯誤訊息：" +
             (error instanceof Error ? error.message : String(error)),
         },
       ],

@@ -86,6 +86,7 @@ You must complete the following sub-steps in sequence, and at the end call the `
      - Ensure the solution is consistent with the project's existing architectural patterns
      - Explain how to reuse existing components or follow existing patterns
    - The process must be thought through step by step and organize thoughts; if the problem is too complex, utilize `process_thought` to think
+   - **Critical Warning**: All forms of `assumptions`, `guesses`, and `imagination` are strictly prohibited. You must use every `available tool` at your disposal to `gather real information`.
    - Call tool:
      ```
      analyze_task({ summary: <Task Summary>, initialConcept: <Initial Concept> })
