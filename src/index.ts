@@ -147,9 +147,19 @@ async function main() {
         } catch (watchError) {}
       });
 
-      // 將 URL 寫入 ebGUI.md
+      // 將 URL 寫入 WebGUI.md
       try {
-        const websiteUrl = `[Task Manager UI](http://localhost:${port})`;
+        // 讀取 TEMPLATES_USE 環境變數並轉換為語言代碼
+        const templatesUse = process.env.TEMPLATES_USE || "en";
+        const getLanguageFromTemplate = (template: string): string => {
+          if (template === "zh") return "zh-TW";
+          if (template === "en") return "en";
+          // 自訂範本預設使用英文
+          return "en";
+        };
+        const language = getLanguageFromTemplate(templatesUse);
+
+        const websiteUrl = `[Task Manager UI](http://localhost:${port}?lang=${language})`;
         const websiteFilePath = path.join(DATA_DIR, "WebGUI.md");
         await fsPromises.writeFile(websiteFilePath, websiteUrl, "utf-8");
       } catch (error) {}

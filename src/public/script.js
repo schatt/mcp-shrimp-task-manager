@@ -69,21 +69,25 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 // 新增：i18n 核心函數
-// 1. 語言檢測 (localStorage > navigator.language > 'en')
+// 1. 語言檢測 (URL 參數 > navigator.language > 'en')
 function detectLanguage() {
-  const savedLang = localStorage.getItem("lang");
-  if (savedLang && ["en", "zh-TW"].includes(savedLang)) {
-    // 確保保存的是有效語言
-    return savedLang;
+  // 1. 優先從 URL 參數讀取
+  const urlParams = new URLSearchParams(window.location.search);
+  const urlLang = urlParams.get("lang");
+  if (urlLang && ["en", "zh-TW"].includes(urlLang)) {
+    return urlLang;
   }
-  // 檢查瀏覽器語言
+
+  // 2. 檢查瀏覽器語言（移除 localStorage 檢查）
   const browserLang = navigator.language || navigator.userLanguage;
   if (browserLang) {
     if (browserLang.toLowerCase().startsWith("zh-tw")) return "zh-TW";
     if (browserLang.toLowerCase().startsWith("zh")) return "zh-TW"; // 簡體也先 fallback 到繁體
     if (browserLang.toLowerCase().startsWith("en")) return "en";
   }
-  return "en"; // 預設
+
+  // 3. 預設值
+  return "en";
 }
 
 // 2. 異步加載翻譯文件
@@ -152,7 +156,6 @@ function applyTranslations() {
 async function initI18n() {
   currentLang = detectLanguage();
   console.log(`Initializing i18n with language: ${currentLang}`);
-  localStorage.setItem("lang", currentLang); // 確保 lang 被保存
   // << 新增：設置切換器的初始值 >>
   if (langSwitcher) {
     langSwitcher.value = currentLang;
@@ -169,7 +172,6 @@ function changeLanguage(lang) {
     lang = "en";
   }
   currentLang = lang;
-  localStorage.setItem("lang", lang);
   console.log(`Changing language to: ${currentLang}`);
   loadTranslations(currentLang)
     .then(() => {
