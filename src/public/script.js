@@ -1037,10 +1037,13 @@ function ticked() {
 function getNodeColor(nodeData) {
   switch (nodeData.status) {
     case "已完成":
+    case "completed":
       return "var(--secondary-color)";
     case "進行中":
+    case "in_progress":
       return "var(--primary-color)";
     case "待處理":
+    case "pending":
       return "#f1c40f"; // 與進度條和狀態標籤一致
     default:
       return "#7f8c8d"; // 未知狀態
@@ -1085,12 +1088,14 @@ function updateProgressIndicator() {
   progressIndicator.style.display = "block"; // 確保顯示
 
   const completedTasks = tasks.filter(
-    (task) => task.status === "已完成"
+    (task) => task.status === "completed" || task.status === "已完成"
   ).length;
   const inProgressTasks = tasks.filter(
-    (task) => task.status === "進行中"
+    (task) => task.status === "in_progress" || task.status === "進行中"
   ).length;
-  const pendingTasks = tasks.filter((task) => task.status === "待處理").length;
+  const pendingTasks = tasks.filter(
+    (task) => task.status === "pending" || task.status === "待處理"
+  ).length;
 
   const completedPercent =
     totalTasks > 0 ? (completedTasks / totalTasks) * 100 : 0;
