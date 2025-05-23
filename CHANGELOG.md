@@ -2,6 +2,18 @@
 
 # Changelog
 
+## [1.0.17]
+
+### Fixed
+
+- Fix #26: Fixed issue where task status was displayed in Chinese in WebGUI (16913ad)
+- Fix #26: Optimized WebGUI default language to change based on env TEMPLATES_USE setting (51436bb)
+
+### Changed
+
+- Updated .env.example to include language setting documentation (51436bb)
+- Enhanced WebGUI language handling logic for better internationalization support (51436bb)
+
 ## [1.0.16]
 
 ### Fixed
