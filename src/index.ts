@@ -47,6 +47,8 @@ import {
   processThoughtSchema,
   initProjectRules,
   initProjectRulesSchema,
+  researchMode,
+  researchModeSchema,
 } from "./tools/index.js";
 
 async function main() {
@@ -290,6 +292,13 @@ async function main() {
             ),
             inputSchema: zodToJsonSchema(initProjectRulesSchema),
           },
+          {
+            name: "research_mode",
+            description: loadPromptFromTemplate(
+              "toolsDescription/researchMode.md"
+            ),
+            inputSchema: zodToJsonSchema(researchModeSchema),
+          },
         ],
       };
     });
@@ -436,6 +445,16 @@ async function main() {
               return await processThought(parsedArgs.data);
             case "init_project_rules":
               return await initProjectRules();
+            case "research_mode":
+              parsedArgs = await researchModeSchema.safeParseAsync(
+                request.params.arguments
+              );
+              if (!parsedArgs.success) {
+                throw new Error(
+                  `Invalid arguments for tool ${request.params.name}: ${parsedArgs.error.message}`
+                );
+              }
+              return await researchMode(parsedArgs.data);
             default:
               throw new Error(`Tool ${request.params.name} does not exist`);
           }
