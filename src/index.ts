@@ -51,7 +51,6 @@ import {
 
 async function main() {
   try {
-    console.log("Starting Shrimp Task Manager service...");
     const ENABLE_GUI = process.env.ENABLE_GUI === "true";
 
     if (ENABLE_GUI) {
@@ -458,8 +457,6 @@ async function main() {
     // 建立連接
     const transport = new StdioServerTransport();
     await server.connect(transport);
-
-    console.log("Shrimp Task Manager service started");
   } catch (error) {
     process.exit(1);
   }
