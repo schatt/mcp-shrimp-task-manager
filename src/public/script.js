@@ -587,47 +587,49 @@ function selectTask(taskId) {
     <div class="task-details-header">
       <h3 id="detail-name"></h3>
       <div class="task-meta">
-        <span>狀態: <span id="detail-status" class="task-status"></span></span>
+        <span>${translate(
+          "task_detail_status_label"
+        )} <span id="detail-status" class="task-status"></span></span>
       </div>
     </div>
     
     <!-- 新增：條件顯示 Summary -->
     <div class="task-details-section" id="detail-summary-section" style="display: none;">
-      <h4>完成摘要</h4>
+      <h4>${translate("task_detail_summary_title")}</h4>
       <p id="detail-summary"></p>
     </div>
     
     <div class="task-details-section">
-      <h4>任務描述</h4>
+      <h4>${translate("task_detail_description_title")}</h4>
       <p id="detail-description"></p>
     </div>
     
     <div class="task-details-section">
-      <h4>實現指南</h4>
+      <h4>${translate("task_detail_implementation_guide_title")}</h4>
       <pre id="detail-implementation-guide"></pre>
     </div>
     
     <div class="task-details-section">
-      <h4>驗證標準</h4>
+      <h4>${translate("task_detail_verification_criteria_title")}</h4>
       <p id="detail-verification-criteria"></p>
     </div>
     
     <div class="task-details-section">
-      <h4>依賴項 (前置任務)</h4>
+      <h4>${translate("task_detail_dependencies_title")}</h4>
       <div class="dependencies" id="detail-dependencies">
         <!-- Dependencies will be populated by JS -->
       </div>
     </div>
     
     <div class="task-details-section">
-      <h4>相關文件</h4>
+      <h4>${translate("task_detail_related_files_title")}</h4>
       <div class="related-files" id="detail-related-files">
         <!-- Related files will be populated by JS -->
       </div>
     </div>
 
     <div class="task-details-section">
-      <h4>備註</h4>
+      <h4>${translate("task_detail_notes_title")}</h4>
       <p id="detail-notes"></p>
     </div>
   `;
