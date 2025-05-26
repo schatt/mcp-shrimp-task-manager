@@ -2,6 +2,18 @@
 
 # Changelog
 
+## [1.0.18]
+
+### Fixed
+
+- Fix #29: Removed unnecessary console.log outputs to reduce noise (7cf1a18)
+- Fix #28: Fixed WebGUI internationalization issues in task detail view (fd26bfa)
+
+### Changed
+
+- Enhanced WebGUI task detail view to use proper translation functions for all labels (fd26bfa)
+- Updated thought process stage description to use English for better consistency (fd26bfa)
+
 ## [1.0.17]
 
 ### Fixed
