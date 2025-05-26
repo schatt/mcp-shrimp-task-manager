@@ -2,6 +2,19 @@
 
 # Changelog
 
+## [1.0.19]
+
+### Added
+
+- Added research mode functionality for systematic programming research (5267fa4)
+- Added research mode prompts and templates for both English and Chinese (5267fa4)
+- Added comprehensive research mode documentation and usage guides (288bec9)
+
+### Changed
+
+- Enhanced README with research mode feature description and usage instructions (288bec9)
+- Updated Chinese documentation to include research mode functionality (288bec9)
+
 ## [1.0.18]
 
 ### Fixed
