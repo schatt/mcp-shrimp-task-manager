@@ -5,6 +5,7 @@ let searchTerm = "";
 let sortOption = "date-asc";
 let globalAnalysisResult = null; // 新增：儲存全局分析結果
 let svg, g, simulation; // << 修改：定義 D3 相關變量
+let isGraphInitialized = false; // << 新增：追蹤圖表是否已初始化
 
 // 新增：i18n 全局變量
 let currentLang = "en"; // 預設語言
@@ -765,6 +766,7 @@ function renderDependencyGraph() {
     svg = null;
     g = null;
     simulation = null;
+    isGraphInitialized = false; // << 新增：重置初始化標誌
     return;
   }
 
@@ -865,7 +867,38 @@ function renderDependencyGraph() {
     simulation.force("center", d3.forceCenter(width / 2, height / 2));
   }
 
-  // 3. 更新連結
+  // --- 預先運算穩定的節點位置 ---
+  // 複製節點和連結以進行穩定化計算
+  const stableNodes = [...nodes];
+  const stableLinks = [...links];
+  
+  // 暫時創建一個模擬器來計算穩定的位置
+  const stableSim = d3
+    .forceSimulation(stableNodes)
+    .force("link", d3.forceLink(stableLinks).id(d => d.id).distance(100))
+    .force("charge", d3.forceManyBody().strength(-300))
+    .force("center", d3.forceCenter(width / 2, height / 2))
+    .force("collide", d3.forceCollide().radius(30));
+  
+  // 預熱模擬獲得穩定位置
+  for (let i = 0; i < 10; i++) {
+    stableSim.tick();
+  }
+  
+  // 將穩定位置複製回原始節點
+  stableNodes.forEach((stableNode) => {
+    const originalNode = nodes.find(n => n.id === stableNode.id);
+    if (originalNode) {
+      originalNode.x = stableNode.x;
+      originalNode.y = stableNode.y;
+    }
+  });
+  
+  // 停止臨時模擬器
+  stableSim.stop();
+  // --- 預先運算結束 ---
+
+  // 3. 更新連結 (無動畫)
   const linkSelection = g
     .select(".links") // 選擇放置連結的 g 元素
     .selectAll("line.link")
@@ -874,62 +907,43 @@ function renderDependencyGraph() {
       (d) => `${d.source.id || d.source}-${d.target.id || d.target}`
     ); // Key function 基於 source/target ID
 
-  // Exit - 移除舊連結
-  linkSelection
-    .exit()
-    .transition("exit")
-    .duration(300)
-    .attr("stroke-opacity", 0)
-    .remove();
+  // Exit - 直接移除舊連結
+  linkSelection.exit().remove();
 
-  // Enter - 添加新連結
+  // Enter - 添加新連結 (無動畫)
   const linkEnter = linkSelection
     .enter()
     .append("line")
     .attr("class", "link")
     .attr("stroke", "#999")
     .attr("marker-end", "url(#arrowhead)")
-    .attr("stroke-opacity", 0); // 初始透明
-
-  // Update + Enter - 更新所有連結的屬性 (合併 enter 和 update 選擇集)
-  const linkUpdate = linkSelection.merge(linkEnter);
-
-  linkUpdate
-    .transition("update")
-    .duration(500)
     .attr("stroke-opacity", 0.6)
     .attr("stroke-width", 1.5);
 
-  // 4. 更新節點
+  // 立即設置連結位置
+  linkEnter
+    .attr("x1", d => d.source.x || 0)
+    .attr("y1", d => d.source.y || 0)
+    .attr("x2", d => d.target.x || 0)
+    .attr("y2", d => d.target.y || 0);
+
+  // 4. 更新節點 (無動畫)
   const nodeSelection = g
     .select(".nodes") // 選擇放置節點的 g 元素
     .selectAll("g.node-item")
     .data(nodes, (d) => d.id); // 使用 ID 作為 key
 
-  // Exit - 移除舊節點
-  nodeSelection
-    .exit()
-    .transition("exit")
-    .duration(300)
-    .attr("transform", (d) => `translate(${d.x || 0}, ${d.y || 0}) scale(0)`) // 從當前位置縮放消失
-    .attr("opacity", 0)
-    .remove();
+  // Exit - 直接移除舊節點
+  nodeSelection.exit().remove();
 
-  // Enter - 添加新節點組
+  // Enter - 添加新節點組 (無動畫，直接在最終位置創建)
   const nodeEnter = nodeSelection
     .enter()
     .append("g")
     .attr("class", (d) => `node-item status-${getStatusClass(d.status)}`) // 使用輔助函數設置 class
     .attr("data-id", (d) => d.id)
-    // 初始位置：從模擬計算的位置（如果存在）或隨機位置出現，初始縮放為0
-    .attr(
-      "transform",
-      (d) =>
-        `translate(${d.x || Math.random() * width}, ${
-          d.y || Math.random() * height
-        }) scale(0)`
-    )
-    .attr("opacity", 0)
+    // 直接使用預計算的位置，無需縮放或透明度過渡
+    .attr("transform", (d) => `translate(${d.x || 0}, ${d.y || 0})`)
     .call(drag(simulation)); // 添加拖拽
 
   // 添加圓形到 Enter 選擇集
@@ -937,8 +951,8 @@ function renderDependencyGraph() {
     .append("circle")
     .attr("r", 10)
     .attr("stroke", "#fff")
-    .attr("stroke-width", 1.5);
-  // 顏色將在 merge 後通過 update 過渡設置
+    .attr("stroke-width", 1.5)
+    .attr("fill", getNodeColor); // 直接設置顏色
 
   // 添加文字到 Enter 選擇集
   nodeEnter
@@ -960,28 +974,14 @@ function renderDependencyGraph() {
     event.stopPropagation();
   });
 
-  // Update + Enter - 合併並更新所有節點
-  const nodeUpdate = nodeSelection.merge(nodeEnter);
+  // Update - 立即更新現有節點 (無動畫)
+  nodeSelection
+    .attr("transform", (d) => `translate(${d.x || 0}, ${d.y || 0})`)
+    .attr("class", (d) => `node-item status-${getStatusClass(d.status)}`);
 
-  // 過渡到最終位置和狀態
-  nodeUpdate
-    .transition("update")
-    .duration(500)
-    .attr("transform", (d) => `translate(${d.x || 0}, ${d.y || 0}) scale(1)`) // 移動到模擬位置並恢復大小
-    .attr("opacity", 1);
-
-  // 更新節點顏色 (單獨過渡)
-  nodeUpdate
+  nodeSelection
     .select("circle")
-    .transition("color")
-    .duration(500)
-    .attr("fill", getNodeColor); // 使用已有的 getNodeColor 函數
-
-  // 更新節點狀態 Class (即時更新，無需過渡)
-  nodeUpdate.attr(
-    "class",
-    (d) => `node-item status-${getStatusClass(d.status)}`
-  );
+    .attr("fill", getNodeColor);
 
   // << 新增：重新定義 drag 函數 >>
   function drag(simulation) {
@@ -1012,10 +1012,10 @@ function renderDependencyGraph() {
   }
   // << drag 函數定義結束 >>
 
-  // 5. 更新力導向模擬
-  simulation.nodes(nodes); // 在處理完 enter/exit 後更新模擬節點
+  // 5. 更新力導向模擬，但不啟動
+  simulation.nodes(nodes); // 更新模擬節點
   simulation.force("link").links(links); // 更新模擬連結
-  simulation.alpha(0.3).restart(); // 重新激活模擬
+  // 注意：移除了 restart() 調用，防止刷新時的動畫跳變
 }
 
 // Tick 函數: 更新節點和連結位置
