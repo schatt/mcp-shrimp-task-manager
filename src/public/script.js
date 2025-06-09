@@ -894,6 +894,23 @@ function renderDependencyGraph() {
       .force("charge", d3.forceManyBody().strength(-300))
       .force("center", d3.forceCenter(width / 2, height / 2))
       .force("collide", d3.forceCollide().radius(30))
+      // 新增：水平分布力
+      .force("x", d3.forceX().x(d => {
+        // 计算节点的入度和出度
+        const inDegree = links.filter(l => (l.target.id || l.target) === d.id).length;
+        const outDegree = links.filter(l => (l.source.id || l.source) === d.id).length;
+        
+        if (inDegree === 0) {
+          // 入度为0的节点（起始节点）靠左
+          return width * 0.2;
+        } else if (outDegree === 0) {
+          // 出度为0的节点（终止节点）靠右
+          return width * 0.8;
+        } else {
+          // 其他节点在中间
+          return width * 0.5;
+        }
+      }).strength(0.2)) // 调整力的强度，可以根据需要调整
       .on("tick", ticked);
 
     // 添加用於存放連結和節點的組
@@ -1054,6 +1071,20 @@ function renderDependencyGraph() {
   // 5. 更新力導向模擬，但不啟動
   simulation.nodes(nodes); // 更新模擬節點
   simulation.force("link").links(links); // 更新模擬連結
+  
+  // 更新水平分布力的目標位置
+  simulation.force("x").x(d => {
+    const inDegree = links.filter(l => (l.target.id || l.target) === d.id).length;
+    const outDegree = links.filter(l => (l.source.id || l.source) === d.id).length;
+    
+    if (inDegree === 0) {
+      return width * 0.2;
+    } else if (outDegree === 0) {
+      return width * 0.8;
+    } else {
+      return width * 0.5;
+    }
+  });
   // 注意：移除了 restart() 調用，防止刷新時的動畫跳變
 }
 
