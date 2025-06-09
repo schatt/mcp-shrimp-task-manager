@@ -4,8 +4,10 @@ let selectedTaskId = null;
 let searchTerm = "";
 let sortOption = "date-asc";
 let globalAnalysisResult = null; // 新增：儲存全局分析結果
-let svg, g, simulation; // << 修改：定義 D3 相關變量
+let svg, g, simulation;
+let width, height; // << 新增：將寬高定義為全局變量
 let isGraphInitialized = false; // << 新增：追蹤圖表是否已初始化
+let zoom; // << 新增：保存縮放行為對象
 
 // 新增：i18n 全局變量
 let currentLang = "en"; // 預設語言
@@ -26,6 +28,7 @@ const globalAnalysisResultElement = document.getElementById(
   "global-analysis-result"
 ); // 假設 HTML 中有這個元素
 const langSwitcher = document.getElementById("lang-switcher"); // << 新增：獲取切換器元素
+const resetViewBtn = document.getElementById("reset-view-btn"); // << 新增：獲取重置按鈕元素
 
 // 初始化
 document.addEventListener("DOMContentLoaded", () => {
@@ -33,11 +36,17 @@ document.addEventListener("DOMContentLoaded", () => {
   initI18n(); // << 新增：初始化 i18n
   updateCurrentTime();
   setInterval(updateCurrentTime, 1000);
+  updateDimensions(); // << 新增：初始化時更新尺寸
 
   // 事件監聽器
   // statusFilter.addEventListener("change", renderTasks); // 將由 changeLanguage 觸發或在 applyTranslations 後觸發
   if (statusFilter) {
     statusFilter.addEventListener("change", renderTasks);
+  }
+
+  // 新增：重置視圖按鈕事件監聽
+  if (resetViewBtn) {
+    resetViewBtn.addEventListener("click", resetView);
   }
 
   // 新增：搜索和排序事件監聽
@@ -67,6 +76,16 @@ document.addEventListener("DOMContentLoaded", () => {
       changeLanguage(e.target.value)
     );
   }
+
+  // 新增：視窗大小改變時更新尺寸
+  window.addEventListener("resize", () => {
+    updateDimensions();
+    if (svg && simulation) {
+      svg.attr("viewBox", [0, 0, width, height]);
+      simulation.force("center", d3.forceCenter(width / 2, height / 2));
+      simulation.alpha(0.3).restart();
+    }
+  });
 });
 
 // 新增：i18n 核心函數
@@ -742,31 +761,75 @@ function selectTask(taskId) {
   highlightNode(taskId); // 只調用 highlightNode
 }
 
+// 新增：重置視圖功能
+function resetView() {
+  if (!svg || !simulation) return;
+
+  // 添加重置動畫效果
+  resetViewBtn.classList.add("resetting");
+
+  // 計算視圖中心
+  const centerX = width / 2;
+  const centerY = height / 2;
+
+  // 重置縮放和平移（使用 transform 過渡）
+  svg.transition()
+    .duration(750)
+    .call(zoom.transform, d3.zoomIdentity);
+
+  // 重置所有節點位置到中心附近
+  simulation.nodes().forEach(node => {
+    node.x = centerX + (Math.random() - 0.5) * 50; // 在中心點附近隨機分佈
+    node.y = centerY + (Math.random() - 0.5) * 50;
+    node.fx = null; // 清除固定位置
+    node.fy = null;
+  });
+
+  // 重置力導向模擬
+  simulation
+    .force("center", d3.forceCenter(centerX, centerY))
+    .alpha(1) // 完全重啟模擬
+    .restart();
+
+  // 750ms 後移除動畫類
+  setTimeout(() => {
+    resetViewBtn.classList.remove("resetting");
+  }, 750);
+}
+
+// 新增：初始化縮放行為
+function initZoom() {
+  zoom = d3.zoom()
+    .scaleExtent([0.1, 4]) // 設置縮放範圍
+    .on("zoom", (event) => {
+      g.attr("transform", event.transform);
+    });
+  
+  if (svg) {
+    svg.call(zoom);
+  }
+}
+
 // 渲染依賴關係圖 - 修改為全局視圖和 enter/update/exit 模式
 function renderDependencyGraph() {
   if (!dependencyGraphElement || !window.d3) {
     console.warn("D3 or dependency graph element not found.");
     if (dependencyGraphElement) {
-      // 首次或D3丟失時顯示提示，不清空已有的圖
       if (!dependencyGraphElement.querySelector("svg")) {
-        dependencyGraphElement.innerHTML = `<p class="placeholder">${translate(
-          "error_loading_graph_d3" // Use a specific key
-        )}</p>`;
+        dependencyGraphElement.innerHTML = `<p class="placeholder">${translate("error_loading_graph_d3")}</p>`;
       }
     }
     return;
   }
 
+  updateDimensions();
+
   // 如果沒有任務，清空圖表並顯示提示
   if (tasks.length === 0) {
-    dependencyGraphElement.innerHTML = `<p class="placeholder">${translate(
-      "dependency_graph_placeholder_empty"
-    )}</p>`;
-    // 重置 SVG 和 simulation 變數，以便下次正確初始化
+    dependencyGraphElement.innerHTML = `<p class="placeholder">${translate("dependency_graph_placeholder_empty")}</p>`;
     svg = null;
     g = null;
     simulation = null;
-    isGraphInitialized = false; // << 新增：重置初始化標誌
     return;
   }
 
@@ -775,10 +838,9 @@ function renderDependencyGraph() {
     id: task.id,
     name: task.name,
     status: task.status,
-    // 保留現有位置以便平滑過渡
     x: simulation?.nodes().find((n) => n.id === task.id)?.x,
     y: simulation?.nodes().find((n) => n.id === task.id)?.y,
-    fx: simulation?.nodes().find((n) => n.id === task.id)?.fx, // 保留固定位置
+    fx: simulation?.nodes().find((n) => n.id === task.id)?.fx,
     fy: simulation?.nodes().find((n) => n.id === task.id)?.fy,
   }));
 
@@ -788,44 +850,29 @@ function renderDependencyGraph() {
       task.dependencies.forEach((dep) => {
         const sourceId = typeof dep === "object" ? dep.taskId : dep;
         const targetId = task.id;
-        if (
-          nodes.some((n) => n.id === sourceId) &&
-          nodes.some((n) => n.id === targetId)
-        ) {
-          // 確保 link 的 source/target 是 ID，以便力導向識別
+        if (nodes.some((n) => n.id === sourceId) && nodes.some((n) => n.id === targetId)) {
           links.push({ source: sourceId, target: targetId });
         } else {
-          console.warn(
-            `Dependency link ignored: Task ${sourceId} or ${targetId} not found in task list.`
-          );
+          console.warn(`Dependency link ignored: Task ${sourceId} or ${targetId} not found in task list.`);
         }
       });
     }
   });
 
-  // 2. D3 繪圖設置與更新
-  const width = dependencyGraphElement.clientWidth;
-  const height = dependencyGraphElement.clientHeight || 400;
-
   if (!svg) {
     // --- 首次渲染 ---
     console.log("First render of dependency graph");
-    dependencyGraphElement.innerHTML = ""; // 清空 placeholder
+    dependencyGraphElement.innerHTML = "";
 
-    svg = d3
-      .select(dependencyGraphElement)
+    svg = d3.select(dependencyGraphElement)
       .append("svg")
       .attr("viewBox", [0, 0, width, height])
       .attr("preserveAspectRatio", "xMidYMid meet");
 
-    g = svg.append("g"); // 主要組，用於縮放和平移
+    g = svg.append("g");
 
-    // 添加縮放和平移
-    svg.call(
-      d3.zoom().on("zoom", (event) => {
-        g.attr("transform", event.transform);
-      })
-    );
+    // 初始化並添加縮放行為
+    initZoom();
 
     // 添加箭頭定義
     g.append("defs")
@@ -842,19 +889,12 @@ function renderDependencyGraph() {
       .attr("fill", "#999");
 
     // 初始化力導向模擬
-    simulation = d3
-      .forceSimulation() // 初始化時不傳入 nodes
-      .force(
-        "link",
-        d3
-          .forceLink()
-          .id((d) => d.id)
-          .distance(100) // 指定 id 訪問器
-      )
+    simulation = d3.forceSimulation()
+      .force("link", d3.forceLink().id((d) => d.id).distance(100))
       .force("charge", d3.forceManyBody().strength(-300))
       .force("center", d3.forceCenter(width / 2, height / 2))
       .force("collide", d3.forceCollide().radius(30))
-      .on("tick", ticked); // 綁定 tick 事件處理函數
+      .on("tick", ticked);
 
     // 添加用於存放連結和節點的組
     g.append("g").attr("class", "links");
@@ -862,7 +902,6 @@ function renderDependencyGraph() {
   } else {
     // --- 更新渲染 ---
     console.log("Updating dependency graph");
-    // 更新 SVG 尺寸和中心力 (如果窗口大小改變)
     svg.attr("viewBox", [0, 0, width, height]);
     simulation.force("center", d3.forceCenter(width / 2, height / 2));
   }
@@ -1189,6 +1228,14 @@ function highlightNode(taskId, status = null) {
 // 新增：輔助函數獲取狀態 class (應放在 ticked 函數之後，getNodeColor 之前或之後均可)
 function getStatusClass(status) {
   return status ? status.replace(/_/g, "-") : "unknown"; // 替換所有下劃線
+}
+
+// 新增：更新寬高的函數
+function updateDimensions() {
+  if (dependencyGraphElement) {
+    width = dependencyGraphElement.clientWidth;
+    height = dependencyGraphElement.clientHeight || 400;
+  }
 }
 
 // 函數：啟用節點拖拽 (保持不變)
