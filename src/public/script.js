@@ -910,7 +910,17 @@ function renderDependencyGraph() {
           // 其他节点在中间
           return width * 0.5;
         }
-      }).strength(0.2)) // 调整力的强度，可以根据需要调整
+      }).strength(0.2))
+      // 新增：基于节点度数的垂直分布力
+      .force("y", d3.forceY().y(height / 2).strength(d => {
+        // 计算节点的总度数（入度+出度）
+        const inDegree = links.filter(l => (l.target.id || l.target) === d.id).length;
+        const outDegree = links.filter(l => (l.source.id || l.source) === d.id).length;
+        const totalDegree = inDegree + outDegree;
+        
+        // 度数越大，力越大（基础力0.05，每个连接增加0.03，最大0.3）
+        return Math.min(0.05 + totalDegree * 0.03, 0.3);
+      }))
       .on("tick", ticked);
 
     // 添加用於存放連結和節點的組
