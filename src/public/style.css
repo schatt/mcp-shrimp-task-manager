@@ -485,3 +485,11 @@ g.node-item.highlighted circle {
   flex-grow: 1; /* 讓搜索框佔據更多空間 */
   min-width: 150px;
 }
+
+/* 新增：缩略图视口指示器样式 */
+.minimap-viewport {
+  fill: rgba(255, 255, 255, 0.025);
+  stroke: rgba(255, 255, 255, 0.1);
+  stroke-width: 1;
+  pointer-events: none;
+}

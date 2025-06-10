@@ -970,11 +970,7 @@ function renderDependencyGraph() {
 
     // 添加視口指示器
     minimap.append("rect")
-      .attr("class", "minimap-viewport")
-      .attr("fill", "none")
-      .attr("stroke", "var(--accent-color)")
-      .attr("stroke-width", 1.5)
-      .attr("pointer-events", "none");
+      .attr("class", "minimap-viewport");
 
     g = svg.append("g");
 
@@ -1397,19 +1393,25 @@ function updateMinimap() {
   const nodes = simulation.nodes();
   const links = simulation.force("link").links();
 
-  // 計算當前圖的邊界
+  // 計算當前圖的邊界（添加padding）
+  const padding = 20; // 添加內邊距
   const xExtent = d3.extent(nodes, d => d.x);
   const yExtent = d3.extent(nodes, d => d.y);
-  const graphWidth = xExtent[1] - xExtent[0] || width;
-  const graphHeight = yExtent[1] - yExtent[0] || height;
-  const scale = Math.min(minimapSize / graphWidth, minimapSize / graphHeight) * 0.9;
+  const graphWidth = (xExtent[1] - xExtent[0]) || width;
+  const graphHeight = (yExtent[1] - yExtent[0]) || height;
 
-  // 創建縮放函數
+  // 計算縮放比例，確保考慮padding
+  const scale = Math.min(
+    minimapSize / (graphWidth + padding * 2),
+    minimapSize / (graphHeight + padding * 2)
+  ) * 0.9; // 0.9作為安全係數
+
+  // 創建縮放函數，加入padding
   const minimapX = d3.scaleLinear()
-    .domain([xExtent[0] - graphWidth * 0.05, xExtent[1] + graphWidth * 0.05])
+    .domain([xExtent[0] - padding, xExtent[1] + padding])
     .range([0, minimapSize]);
   const minimapY = d3.scaleLinear()
-    .domain([yExtent[0] - graphHeight * 0.05, yExtent[1] + graphHeight * 0.05])
+    .domain([yExtent[0] - padding, yExtent[1] + padding])
     .range([0, minimapSize]);
 
   // 更新縮略圖中的連接
