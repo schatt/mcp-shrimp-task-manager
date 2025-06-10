@@ -490,7 +490,7 @@ function renderTasks() {
     );
   }
 
-  // 保存筛选后的任务ID集合，用于图形渲染
+  // 儲存篩選後的任務 ID 集合，用於圖形渲染
   const filteredTaskIds = new Set(filteredTasks.map(task => task.id));
 
   filteredTasks.sort((a, b) => {
@@ -510,7 +510,7 @@ function renderTasks() {
     }
   });
 
-  // 更新图形的显示状态
+  // 更新圖形的顯示狀態
   updateGraphVisibility(filteredTaskIds);
 
   // --- 簡單粗暴的替換 (會導致閃爍) ---
