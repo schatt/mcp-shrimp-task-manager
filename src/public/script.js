@@ -1001,7 +1001,7 @@ function renderDependencyGraph() {
       .force("charge", d3.forceManyBody().strength(-300))
       .force("center", d3.forceCenter(width / 2, height / 2))
       .force("collide", d3.forceCollide().radius(30))
-      // 新增：水平分布力
+      // 新增：水平分布力，用於優化節點在水平方向的分布，根據節點的入度和出度來決定節點的水平位置，入度為0的節點（起始節點）靠左，出度為0的節點（終止節點）靠右，其他節點則分布在中間位置
       .force("x", d3.forceX().x(d => {
         // 計算節點的入度和出度
         const inDegree = links.filter(l => (l.target.id || l.target) === d.id).length;
@@ -1034,7 +1034,7 @@ function renderDependencyGraph() {
     g.append("g").attr("class", "links");
     g.append("g").attr("class", "nodes");
   } else {
-    // --- 更新渲染 ---
+    // --- 更新圖表渲染 ---
     console.log("Updating dependency graph");
     svg.attr("viewBox", [0, 0, width, height]);
     simulation.force("center", d3.forceCenter(width / 2, height / 2));
