@@ -490,6 +490,9 @@ function renderTasks() {
     );
   }
 
+  // 保存筛选后的任务ID集合，用于图形渲染
+  const filteredTaskIds = new Set(filteredTasks.map(task => task.id));
+
   filteredTasks.sort((a, b) => {
     switch (sortOption) {
       case "name-asc":
@@ -506,6 +509,9 @@ function renderTasks() {
         return new Date(b.createdAt || 0) - new Date(a.createdAt || 0);
     }
   });
+
+  // 更新图形的显示状态
+  updateGraphVisibility(filteredTaskIds);
 
   // --- 簡單粗暴的替換 (會導致閃爍) ---
   // TODO: 實現 DOM Diffing 或更智慧的更新策略
@@ -559,9 +565,77 @@ function renderTasks() {
   }
 }
 
-// 選擇任務
+// 新增：更新图形可见性的函数
+function updateGraphVisibility(filteredTaskIds) {
+  if (!g) return;
+
+  // 更新节点的样式
+  g.select(".nodes")
+    .selectAll("g.node-item")
+    .style("opacity", d => filteredTaskIds.has(d.id) ? 1 : 0.2)
+    .style("filter", d => filteredTaskIds.has(d.id) ? "none" : "grayscale(80%)");
+
+  // 更新连接的样式
+  g.select(".links")
+    .selectAll("line.link")
+    .style("opacity", d => {
+      const sourceVisible = filteredTaskIds.has(d.source.id || d.source);
+      const targetVisible = filteredTaskIds.has(d.target.id || d.target);
+      return (sourceVisible && targetVisible) ? 0.6 : 0.1;
+    })
+    .style("stroke", d => {
+      const sourceVisible = filteredTaskIds.has(d.source.id || d.source);
+      const targetVisible = filteredTaskIds.has(d.target.id || d.target);
+      return (sourceVisible && targetVisible) ? "#999" : "#ccc";
+    });
+
+  // 更新缩略图中的节点和连接样式
+  const minimapContent = svg.select(".minimap-content");
+  
+  minimapContent.selectAll(".minimap-node")
+    .style("opacity", d => filteredTaskIds.has(d.id) ? 1 : 0.2)
+    .style("filter", d => filteredTaskIds.has(d.id) ? "none" : "grayscale(80%)");
+
+  minimapContent.selectAll(".minimap-link")
+    .style("opacity", d => {
+      const sourceVisible = filteredTaskIds.has(d.source.id || d.source);
+      const targetVisible = filteredTaskIds.has(d.target.id || d.target);
+      return (sourceVisible && targetVisible) ? 0.6 : 0.1;
+    })
+    .style("stroke", d => {
+      const sourceVisible = filteredTaskIds.has(d.source.id || d.source);
+      const targetVisible = filteredTaskIds.has(d.target.id || d.target);
+      return (sourceVisible && targetVisible) ? "#999" : "#ccc";
+    });
+}
+
+// 新增：将节点移动到视图中心的函数
+function centerNode(nodeId) {
+  if (!svg || !g || !simulation) return;
+
+  const node = simulation.nodes().find(n => n.id === nodeId);
+  if (!node) return;
+
+  // 获取当前视图的变换状态
+  const transform = d3.zoomTransform(svg.node());
+  
+  // 计算需要的变换以将节点居中
+  const scale = transform.k; // 保持当前缩放级别
+  const x = width / 2 - node.x * scale;
+  const y = height / 2 - node.y * scale;
+
+  // 使用过渡动画平滑地移动到新位置
+  svg.transition()
+    .duration(750) // 750ms的过渡时间
+    .call(zoom.transform, d3.zoomIdentity
+      .translate(x, y)
+      .scale(scale)
+    );
+}
+
+// 修改选择任务的函数
 function selectTask(taskId) {
-  // 清除舊的選中狀態和高亮
+  // 清除旧的选中状态和高亮
   if (selectedTaskId) {
     const previousElement = document.querySelector(
       `.task-item[data-id="${selectedTaskId}"]`
@@ -571,7 +645,7 @@ function selectTask(taskId) {
     }
   }
 
-  // 如果再次點擊同一個任務，則取消選中
+  // 如果再次点击同一个任务，则取消选中
   if (selectedTaskId === taskId) {
     selectedTaskId = null;
     taskDetailsContent.innerHTML = `<p class="placeholder">${translate(
@@ -583,7 +657,7 @@ function selectTask(taskId) {
 
   selectedTaskId = taskId;
 
-  // 添加新的選中狀態
+  // 添加新的选中状态
   const selectedElement = document.querySelector(
     `.task-item[data-id="${taskId}"]`
   );
@@ -591,7 +665,7 @@ function selectTask(taskId) {
     selectedElement.classList.add("selected");
   }
 
-  // 獲取並顯示任務詳情
+  // 获取并显示任务详情
   const task = tasks.find((t) => t.id === taskId);
 
   if (!task) {
@@ -757,8 +831,9 @@ function selectTask(taskId) {
 
   // --- 原來的 innerHTML 賦值已移除 ---
 
-  // 只調用高亮函數
-  highlightNode(taskId); // 只調用 highlightNode
+  // 高亮节点并将其移动到中心
+  highlightNode(taskId);
+  centerNode(taskId);
 }
 
 // 新增：重置視圖功能
@@ -803,6 +878,7 @@ function initZoom() {
     .scaleExtent([0.1, 4]) // 設置縮放範圍
     .on("zoom", (event) => {
       g.attr("transform", event.transform);
+      updateMinimap(); // 在縮放時更新縮略圖
     });
   
   if (svg) {
@@ -869,6 +945,37 @@ function renderDependencyGraph() {
       .attr("viewBox", [0, 0, width, height])
       .attr("preserveAspectRatio", "xMidYMid meet");
 
+    // 添加縮略圖背景
+    const minimapSize = Math.min(width, height) * 0.2; // 縮略圖大小為主視圖的20%
+    const minimapMargin = 40;
+    
+    // 創建縮略圖容器
+    const minimap = svg.append("g")
+      .attr("class", "minimap")
+      .attr("transform", `translate(${width - minimapSize - minimapMargin}, ${height - minimapSize - minimapMargin*(height/width)})`);
+
+    // 添加縮略圖背景
+    minimap.append("rect")
+      .attr("width", minimapSize)
+      .attr("height", minimapSize)
+      .attr("fill", "rgba(0, 0, 0, 0.2)")
+      .attr("stroke", "#666")
+      .attr("stroke-width", 1)
+      .attr("rx", 4)
+      .attr("ry", 4);
+
+    // 創建縮略圖內容組
+    minimap.append("g")
+      .attr("class", "minimap-content");
+
+    // 添加視口指示器
+    minimap.append("rect")
+      .attr("class", "minimap-viewport")
+      .attr("fill", "none")
+      .attr("stroke", "var(--accent-color)")
+      .attr("stroke-width", 1.5)
+      .attr("pointer-events", "none");
+
     g = svg.append("g");
 
     // 初始化並添加縮放行為
@@ -896,29 +1003,29 @@ function renderDependencyGraph() {
       .force("collide", d3.forceCollide().radius(30))
       // 新增：水平分布力
       .force("x", d3.forceX().x(d => {
-        // 计算节点的入度和出度
+        // 計算節點的入度和出度
         const inDegree = links.filter(l => (l.target.id || l.target) === d.id).length;
         const outDegree = links.filter(l => (l.source.id || l.source) === d.id).length;
         
         if (inDegree === 0) {
-          // 入度为0的节点（起始节点）靠左
+          // 入度為0的節點（起始節點）靠左
           return width * 0.2;
         } else if (outDegree === 0) {
-          // 出度为0的节点（终止节点）靠右
+          // 出度為0的節點（終止節點）靠右
           return width * 0.8;
         } else {
-          // 其他节点在中间
+          // 其他節點在中間
           return width * 0.5;
         }
       }).strength(0.2))
-      // 新增：基于节点度数的垂直分布力
+      // 新增：基于節點度數的垂直分布力
       .force("y", d3.forceY().y(height / 2).strength(d => {
-        // 计算节点的总度数（入度+出度）
+        // 計算節點的總度數（入度+出度）
         const inDegree = links.filter(l => (l.target.id || l.target) === d.id).length;
         const outDegree = links.filter(l => (l.source.id || l.source) === d.id).length;
         const totalDegree = inDegree + outDegree;
         
-        // 度数越大，力越大（基础力0.05，每个连接增加0.03，最大0.3）
+        // 度數越大，力越大（基礎力0.05，每個連接增加0.03，最大0.3）
         return Math.min(0.05 + totalDegree * 0.03, 0.3);
       }))
       .on("tick", ticked);
@@ -1115,6 +1222,9 @@ function ticked() {
     .selectAll("g.node-item")
     // << 修改：添加座標後備值 >>
     .attr("transform", (d) => `translate(${d.x || 0}, ${d.y || 0})`);
+
+  // 更新縮略圖
+  updateMinimap();
 }
 
 // 函數：根據節點數據返回顏色 (示例)
@@ -1277,6 +1387,77 @@ function updateDimensions() {
     width = dependencyGraphElement.clientWidth;
     height = dependencyGraphElement.clientHeight || 400;
   }
+}
+
+// 添加縮略圖更新函數
+function updateMinimap() {
+  if (!svg || !simulation) return;
+
+  const minimapSize = Math.min(width, height) * 0.2;
+  const nodes = simulation.nodes();
+  const links = simulation.force("link").links();
+
+  // 計算當前圖的邊界
+  const xExtent = d3.extent(nodes, d => d.x);
+  const yExtent = d3.extent(nodes, d => d.y);
+  const graphWidth = xExtent[1] - xExtent[0] || width;
+  const graphHeight = yExtent[1] - yExtent[0] || height;
+  const scale = Math.min(minimapSize / graphWidth, minimapSize / graphHeight) * 0.9;
+
+  // 創建縮放函數
+  const minimapX = d3.scaleLinear()
+    .domain([xExtent[0] - graphWidth * 0.05, xExtent[1] + graphWidth * 0.05])
+    .range([0, minimapSize]);
+  const minimapY = d3.scaleLinear()
+    .domain([yExtent[0] - graphHeight * 0.05, yExtent[1] + graphHeight * 0.05])
+    .range([0, minimapSize]);
+
+  // 更新縮略圖中的連接
+  const minimapContent = svg.select(".minimap-content");
+  const minimapLinks = minimapContent.selectAll(".minimap-link")
+    .data(links);
+
+  minimapLinks.enter()
+    .append("line")
+    .attr("class", "minimap-link")
+    .merge(minimapLinks)
+    .attr("x1", d => minimapX(d.source.x))
+    .attr("y1", d => minimapY(d.source.y))
+    .attr("x2", d => minimapX(d.target.x))
+    .attr("y2", d => minimapY(d.target.y))
+    .attr("stroke", "#999")
+    .attr("stroke-width", 0.5)
+    .attr("stroke-opacity", 0.6);
+
+  minimapLinks.exit().remove();
+
+  // 更新縮略圖中的節點
+  const minimapNodes = minimapContent.selectAll(".minimap-node")
+    .data(nodes);
+
+  minimapNodes.enter()
+    .append("circle")
+    .attr("class", "minimap-node")
+    .attr("r", 2)
+    .merge(minimapNodes)
+    .attr("cx", d => minimapX(d.x))
+    .attr("cy", d => minimapY(d.y))
+    .attr("fill", getNodeColor);
+
+  minimapNodes.exit().remove();
+
+  // 更新視口指示器
+  const transform = d3.zoomTransform(svg.node());
+  const viewportWidth = width / transform.k;
+  const viewportHeight = height / transform.k;
+  const viewportX = -transform.x / transform.k;
+  const viewportY = -transform.y / transform.k;
+
+  svg.select(".minimap-viewport")
+    .attr("x", minimapX(viewportX))
+    .attr("y", minimapY(viewportY))
+    .attr("width", minimapX(viewportX + viewportWidth) - minimapX(viewportX))
+    .attr("height", minimapY(viewportY + viewportHeight) - minimapY(viewportY));
 }
 
 // 函數：啟用節點拖拽 (保持不變)
