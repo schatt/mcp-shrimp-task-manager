@@ -1,0 +1,45 @@
+{
+  "name": "shrimp-task-viewer",
+  "version": "1.0.0",
+  "description": "Web-based viewer for Shrimp Task Manager data with auto-discovery",
+  "main": "server.js",
+  "bin": {
+    "shrimp-viewer": "./cli.js"
+  },
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js",
+    "stop": "node cli.js stop",
+    "restart": "node cli.js restart",
+    "status": "node cli.js status"
+  },
+  "keywords": [
+    "shrimp",
+    "task-manager",
+    "viewer",
+    "web",
+    "dashboard",
+    "mcp",
+    "auto-discovery"
+  ],
+  "author": "SoraOrc Team",
+  "license": "MIT",
+  "engines": {
+    "node": ">=14.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/cjo4m06/mcp-shrimp-task-manager.git"
+  },
+  "bugs": {
+    "url": "https://github.com/cjo4m06/mcp-shrimp-task-manager/issues"
+  },
+  "dependencies": {},
+  "devDependencies": {},
+  "files": [
+    "server.js",
+    "cli.js",
+    "README.md",
+    "example-config.json"
+  ]
+}
