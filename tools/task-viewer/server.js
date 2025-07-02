@@ -3,142 +3,75 @@
 const http = require('http');
 const fs = require('fs').promises;
 const path = require('path');
+const os = require('os');
 
-// Configuration
-const config = {
-    port: process.env.SHRIMP_VIEWER_PORT || 9999,
-    host: process.env.SHRIMP_VIEWER_HOST || '127.0.0.1',
-    dataDir: process.env.SHRIMP_DATA_DIR || process.cwd(),
-    configFile: process.env.SHRIMP_CONFIG_FILE || null
-};
+// Version information
+const VERSION = '1.0.0';
+const PORT = process.env.SHRIMP_VIEWER_PORT || 9998;
+const SETTINGS_FILE = path.join(os.homedir(), '.shrimp-task-viewer-settings.json');
 
-// Auto-discovery of task data files
-async function discoverTaskFiles(baseDir) {
-    const taskFiles = [];
-    
+// Default agent data paths configuration (can be customized per installation)
+const defaultAgents = [
+    // Example: { id: 'project1', name: 'My Project Tasks', path: '/path/to/project/shrimp_data/tasks.json' }
+    // Add your default task file paths here, or use the web interface to add profiles
+];
+
+let agents = [];
+
+// Load or create settings file
+async function loadSettings() {
     try {
-        // Common patterns for Shrimp task data locations
-        const patterns = [
-            'shrimp_data/tasks.json',
-            'shrimp_data_*/tasks.json', 
-            'tasks.json',
-            'data/tasks.json',
-            '**/shrimp_data/tasks.json',
-            '**/tasks.json'
-        ];
-        
-        // Simple directory traversal for common patterns
-        const searchDirs = [
-            baseDir,
-            path.join(baseDir, 'teams'),
-            path.join(baseDir, 'agents'),
-            path.join(baseDir, 'data')
-        ];
-        
-        for (const searchDir of searchDirs) {
-            try {
-                const entries = await fs.readdir(searchDir, { withFileTypes: true });
-                
-                for (const entry of entries) {
-                    if (entry.isDirectory()) {
-                        const subDir = path.join(searchDir, entry.name);
-                        
-                        // Check for shrimp_data folders
-                        if (entry.name.includes('shrimp') || entry.name.includes('task')) {
-                            const tasksFile = path.join(subDir, 'tasks.json');
-                            try {
-                                await fs.access(tasksFile);
-                                taskFiles.push({
-                                    id: generateId(entry.name, subDir),
-                                    name: formatName(entry.name, subDir),
-                                    path: tasksFile
-                                });
-                            } catch {} // File doesn't exist, skip
-                        }
-                        
-                        // Recurse into team/agent directories
-                        if (entry.name.startsWith('team') || entry.name.startsWith('agent')) {
-                            try {
-                                const subEntries = await fs.readdir(subDir, { withFileTypes: true });
-                                for (const subEntry of subEntries) {
-                                    if (subEntry.isDirectory()) {
-                                        const subSubDir = path.join(subDir, subEntry.name);
-                                        const patterns = ['shrimp_data', 'shrimp_data_cipher', 'shrimp_data_bart'];
-                                        
-                                        for (const pattern of patterns) {
-                                            const dataDir = path.join(subSubDir, pattern);
-                                            const tasksFile = path.join(dataDir, 'tasks.json');
-                                            try {
-                                                await fs.access(tasksFile);
-                                                taskFiles.push({
-                                                    id: generateId(`${entry.name}-${subEntry.name}`, dataDir),
-                                                    name: formatName(`${entry.name}-${subEntry.name}`, dataDir),
-                                                    path: tasksFile
-                                                });
-                                            } catch {} // File doesn't exist, skip
-                                        }
-                                    }
-                                }
-                            } catch {} // Can't read subdirectory, skip
-                        }
-                    }
-                }
-            } catch {} // Can't read directory, skip
-        }
+        const data = await fs.readFile(SETTINGS_FILE, 'utf8');
+        const settings = JSON.parse(data);
+        return settings.agents || defaultAgents;
     } catch (err) {
-        console.warn('Discovery warning:', err.message);
+        // File doesn't exist, create with defaults
+        await saveSettings(defaultAgents);
+        return defaultAgents;
+    }
+}
+
+// Save settings file
+async function saveSettings(agentList) {
+    const settings = {
+        agents: agentList,
+        lastUpdated: new Date().toISOString(),
+        version: VERSION
+    };
+    await fs.writeFile(SETTINGS_FILE, JSON.stringify(settings, null, 2));
+}
+
+// Add new agent
+async function addAgent(name, filePath) {
+    const id = name.toLowerCase().replace(/[^a-z0-9-]/g, '-').replace(/-+/g, '-');
+    const newAgent = { id, name, path: filePath };
+    
+    // Check if agent already exists
+    const existingIndex = agents.findIndex(a => a.id === id);
+    if (existingIndex >= 0) {
+        agents[existingIndex] = newAgent;
+    } else {
+        agents.push(newAgent);
     }
     
-    return taskFiles;
+    await saveSettings(agents);
+    return newAgent;
 }
 
-function generateId(name, filePath) {
-    // Generate a clean ID from name and path
-    return name.toLowerCase()
-        .replace(/[^a-z0-9-_]/g, '-')
-        .replace(/-+/g, '-')
-        .replace(/^-|-$/g, '');
+// Remove agent
+async function removeAgent(agentId) {
+    agents = agents.filter(a => a.id !== agentId);
+    await saveSettings(agents);
 }
 
-function formatName(name, filePath) {
-    // Format display name
-    return name
-        .replace(/[_-]/g, ' ')
-        .replace(/\b\w/g, l => l.toUpperCase())
-        .replace(/Team(\d+)/i, 'Team $1')
-        .trim();
-}
-
-// Load configuration from file if provided
-async function loadConfig() {
-    if (config.configFile) {
-        try {
-            const configData = await fs.readFile(config.configFile, 'utf8');
-            const fileConfig = JSON.parse(configData);
-            
-            if (fileConfig.agents) {
-                return fileConfig.agents;
-            }
-        } catch (err) {
-            console.warn('Could not load config file:', err.message);
-        }
-    }
-    
-    // Auto-discover task files
-    console.log('Auto-discovering task files...');
-    const discovered = await discoverTaskFiles(config.dataDir);
-    console.log(`Found ${discovered.length} task file(s)`);
-    
-    return discovered;
-}
-
-// HTML content for the viewer
+// Enhanced HTML with real data fetching
 const htmlContent = `<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Shrimp Task Manager Viewer</title>
+    <title>Shrimp Task Manager Viewer v${VERSION}</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🦐</text></svg>">
     <style>
         body {
             font-family: 'Segoe UI', Arial, sans-serif;
@@ -158,6 +91,13 @@ const htmlContent = `<!DOCTYPE html>
             margin-bottom: 30px;
             font-size: 2.5rem;
             text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+        .version-info {
+            text-align: center;
+            color: #666;
+            font-size: 0.9rem;
+            margin-top: -20px;
+            margin-bottom: 30px;
         }
         .agent-selector {
             text-align: center;
@@ -366,27 +306,191 @@ const htmlContent = `<!DOCTYPE html>
             background: #4fbdba;
             transform: scale(1.05);
         }
-        .config-info {
-            background: #0f3460;
-            padding: 10px 20px;
+        .manage-btn {
+            margin-left: 15px;
+            padding: 8px 15px;
+            background: #4fbdba;
+            color: white;
+            border: none;
             border-radius: 5px;
-            margin-bottom: 20px;
+            cursor: pointer;
             font-size: 0.9rem;
+            transition: all 0.3s;
+        }
+        .manage-btn:hover {
+            background: #0f4c75;
+        }
+        .management-panel {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .management-content {
+            background: #1a1a2e;
+            border-radius: 15px;
+            padding: 30px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            border: 2px solid #4fbdba;
+        }
+        .management-content h3 {
+            color: #4fbdba;
+            margin-top: 0;
             text-align: center;
+        }
+        .management-content h4 {
+            color: #0f4c75;
+            border-bottom: 1px solid #0f4c75;
+            padding-bottom: 10px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #eee;
+            font-weight: bold;
+        }
+        .form-group input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            background: #16213e;
+            border: 2px solid #0f4c75;
+            border-radius: 5px;
+            color: #eee;
+            font-size: 14px;
+        }
+        .form-group input[type="file"] {
+            width: 100%;
+            padding: 10px;
+            background: #16213e;
+            border: 2px solid #0f4c75;
+            border-radius: 5px;
+            color: #eee;
+            cursor: pointer;
+        }
+        .file-info {
+            margin-top: 10px;
+            padding: 10px;
+            background: #0f3460;
+            border-radius: 5px;
+            font-size: 0.9rem;
+            color: #aaa;
+        }
+        .add-btn, .close-btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+            margin: 10px 5px;
+            transition: all 0.3s;
+        }
+        .add-btn {
+            background: #27ae60;
+            color: white;
+        }
+        .add-btn:hover {
+            background: #2ecc71;
+        }
+        .close-btn {
+            background: #e74c3c;
+            color: white;
+            float: right;
+        }
+        .close-btn:hover {
+            background: #c0392b;
+        }
+        .profiles-list {
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        .profile-item {
+            background: #16213e;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .profile-info {
+            flex: 1;
+        }
+        .profile-name {
+            color: #4fbdba;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        .profile-path {
+            color: #aaa;
+            font-size: 0.8rem;
+            font-family: monospace;
+        }
+        .remove-btn {
+            background: #e74c3c;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.8rem;
+        }
+        .remove-btn:hover {
+            background: #c0392b;
         }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>🦐 Shrimp Task Manager Viewer</h1>
-        
-        <div id="configInfo" class="config-info" style="display: none;"></div>
+        <div class="version-info">Version ${VERSION} - Universal Profile Management<br>
+            <a href="https://github.com/cjo4m06/mcp-shrimp-task-manager" target="_blank" style="color: #4fbdba; text-decoration: none;">📁 GitHub Repository</a>
+        </div>
         
         <div class="agent-selector">
-            <label for="agent">Select Data Source: </label>
-            <select id="agent" onchange="loadTasks()">
-                <option value="">Select a data source...</option>
+            <label for="agent">Select Profile: </label>
+            <select id="agent">
+                <option value="">Select a profile...</option>
             </select>
+            <button class="manage-btn" id="manageBtn">⚙️ Manage Profiles</button>
+        </div>
+
+        <div id="management" class="management-panel" style="display: none;">
+            <div class="management-content">
+                <h3>🗂️ Profile Management</h3>
+                
+                <div class="add-profile-section">
+                    <h4>Add New Profile</h4>
+                    <div class="form-group">
+                        <label for="profileName">Profile Name:</label>
+                        <input type="text" id="profileName" placeholder="e.g., My Project Tasks" />
+                    </div>
+                    <div class="form-group">
+                        <label for="taskFile">Select tasks.json file:</label>
+                        <input type="file" id="taskFile" accept=".json" />
+                        <div class="file-info" id="fileInfo" style="display: none;"></div>
+                    </div>
+                    <button id="addBtn" class="add-btn">➕ Add Profile</button>
+                </div>
+
+                <div class="existing-profiles-section">
+                    <h4>Existing Profiles</h4>
+                    <div id="profilesList" class="profiles-list"></div>
+                </div>
+
+                <button id="closeBtn" class="close-btn">✖️ Close</button>
+            </div>
         </div>
 
         <div id="stats" class="stats" style="display: none;">
@@ -409,46 +513,172 @@ const htmlContent = `<!DOCTYPE html>
         </div>
 
         <div id="filterControls" class="filter-controls" style="display: none;">
-            <button class="filter-btn active" onclick="filterTasks('all', this)">All Tasks</button>
-            <button class="filter-btn" onclick="filterTasks('completed', this)">Completed</button>
-            <button class="filter-btn" onclick="filterTasks('in_progress', this)">In Progress</button>
-            <button class="filter-btn" onclick="filterTasks('pending', this)">Pending</button>
+            <button class="filter-btn active" data-filter="all">All Tasks</button>
+            <button class="filter-btn" data-filter="completed">Completed</button>
+            <button class="filter-btn" data-filter="in_progress">In Progress</button>
+            <button class="filter-btn" data-filter="pending">Pending</button>
         </div>
 
-        <div id="loading" class="loading">Select a data source to view tasks...</div>
+        <div id="loading" class="loading">Select a profile to view tasks...</div>
         <div id="error" class="error" style="display: none;"></div>
         <div id="tasks" class="tasks-grid" style="display: none;"></div>
     </div>
 
-    <button class="refresh-btn" onclick="loadTasks()">🔄 Refresh</button>
+    <button class="refresh-btn" id="refreshBtn">🔄 Refresh</button>
 
     <script>
         let currentTasks = [];
         let filteredTasks = [];
         let currentFilter = 'all';
 
-        async function loadAgents() {
+        // Profile management functions
+        function toggleManagement() {
+            const panel = document.getElementById('management');
+            console.log('Toggle management called, current display:', panel.style.display);
+            if (panel.style.display === 'none' || panel.style.display === '') {
+                panel.style.display = 'flex';
+                loadProfilesList();
+                console.log('Management panel opened');
+            } else {
+                panel.style.display = 'none';
+                console.log('Management panel closed');
+            }
+        }
+
+        async function loadProfilesList() {
             try {
                 const response = await fetch('/api/agents');
-                const data = await response.json();
+                const agents = await response.json();
+                
+                const container = document.getElementById('profilesList');
+                container.innerHTML = agents.map(agent => 
+                    '<div class="profile-item">' +
+                        '<div class="profile-info">' +
+                            '<div class="profile-name">' + escapeHtml(agent.name) + '</div>' +
+                            '<div class="profile-path">' + escapeHtml(agent.path) + '</div>' +
+                        '</div>' +
+                        '<button class="remove-btn" data-agent-id="' + agent.id + '">🗑️ Remove</button>' +
+                    '</div>'
+                ).join('');
+                
+                // Add event listeners to remove buttons
+                document.querySelectorAll('.remove-btn').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        removeProfile(this.getAttribute('data-agent-id'));
+                    });
+                });
+            } catch (err) {
+                console.error('Error loading profiles:', err);
+            }
+        }
+
+        async function addProfile() {
+            const nameInput = document.getElementById('profileName');
+            const fileInput = document.getElementById('taskFile');
+            
+            const name = nameInput.value.trim();
+            const file = fileInput.files[0];
+            
+            if (!name) {
+                alert('Please enter a profile name');
+                return;
+            }
+            
+            if (!file) {
+                alert('Please select a tasks.json file');
+                return;
+            }
+
+            try {
+                // Read file content to validate it's a valid tasks.json
+                const fileContent = await file.text();
+                const taskData = JSON.parse(fileContent);
+                
+                if (!taskData.tasks || !Array.isArray(taskData.tasks)) {
+                    alert('Invalid tasks.json file. Must contain a "tasks" array.');
+                    return;
+                }
+
+                // Create FormData to send file content as text
+                const formData = new FormData();
+                formData.append('name', name);
+                formData.append('taskFile', fileContent);
+
+                const response = await fetch('/api/add-profile', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (response.ok) {
+                    nameInput.value = '';
+                    fileInput.value = '';
+                    document.getElementById('fileInfo').style.display = 'none';
+                    
+                    // Reload agents and profiles list
+                    await loadAgents();
+                    await loadProfilesList();
+                    
+                    alert('Profile added successfully!');
+                } else {
+                    const error = await response.text();
+                    alert('Error adding profile: ' + error);
+                }
+            } catch (err) {
+                alert('Error processing file: ' + err.message);
+            }
+        }
+
+        async function removeProfile(agentId) {
+            if (!confirm('Are you sure you want to remove this profile?')) {
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/remove-profile/' + agentId, {
+                    method: 'DELETE'
+                });
+
+                if (response.ok) {
+                    await loadAgents();
+                    await loadProfilesList();
+                    
+                    // Clear selection if removed profile was selected
+                    const agentSelect = document.getElementById('agent');
+                    if (agentSelect.value === agentId) {
+                        agentSelect.value = '';
+                        document.getElementById('tasks').style.display = 'none';
+                        document.getElementById('stats').style.display = 'none';
+                        document.getElementById('filterControls').style.display = 'none';
+                    }
+                } else {
+                    const error = await response.text();
+                    alert('Error removing profile: ' + error);
+                }
+            } catch (err) {
+                alert('Error removing profile: ' + err.message);
+            }
+        }
+
+        async function loadAgents() {
+            try {
+                console.log('Loading agents...');
+                const response = await fetch('/api/agents');
+                console.log('Response status:', response.status);
+                const agents = await response.json();
+                console.log('Agents loaded:', agents);
                 
                 const select = document.getElementById('agent');
-                select.innerHTML = '<option value="">Select a data source...</option>' + 
-                    data.agents.map(agent => 
+                select.innerHTML = '<option value="">Select a profile...</option>' + 
+                    agents.map(agent => 
                         '<option value="' + agent.id + '">' + agent.name + '</option>'
                     ).join('');
                 
-                // Show config info if available
-                if (data.config) {
-                    const configInfo = document.getElementById('configInfo');
-                    configInfo.innerHTML = 'Found ' + data.agents.length + ' data source(s) in: ' + data.config.baseDir;
-                    configInfo.style.display = 'block';
-                }
+                console.log('Dropdown updated with', agents.length, 'agents');
                 
             } catch (err) {
                 console.error('Error loading agents:', err);
                 const error = document.getElementById('error');
-                error.textContent = 'Error loading data sources: ' + err.message;
+                error.textContent = 'Error loading agents: ' + err.message;
                 error.style.display = 'block';
             }
         }
@@ -608,14 +838,116 @@ const htmlContent = `<!DOCTYPE html>
             return (text || '').replace(/[&<>"']/g, m => map[m]);
         }
 
+        // Handle file selection
+        document.addEventListener('DOMContentLoaded', function() {
+            const fileInput = document.getElementById('taskFile');
+            fileInput?.addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                const fileInfo = document.getElementById('fileInfo');
+                
+                if (file) {
+                    fileInfo.innerHTML = 
+                        '<strong>Selected:</strong> ' + escapeHtml(file.name) + '<br>' +
+                        '<strong>Size:</strong> ' + (file.size / 1024).toFixed(1) + ' KB<br>' +
+                        '<strong>Path:</strong> ' + escapeHtml(file.webkitRelativePath || file.name);
+                    fileInfo.style.display = 'block';
+                } else {
+                    fileInfo.style.display = 'none';
+                }
+            });
+        });
+
         // Initialize on page load
-        window.onload = loadAgents;
+        window.onload = function() {
+            console.log('Page loaded, initializing...');
+            loadAgents();
+        };
+
+        // Setup event listeners when DOM is ready
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM Content Loaded, setting up event listeners...');
+            
+            // Management button
+            const manageBtn = document.getElementById('manageBtn');
+            if (manageBtn) {
+                manageBtn.addEventListener('click', toggleManagement);
+                console.log('Management button listener added');
+            }
+            
+            // Add profile button
+            const addBtn = document.getElementById('addBtn');
+            if (addBtn) {
+                addBtn.addEventListener('click', addProfile);
+                console.log('Add button listener added');
+            }
+            
+            // Close button
+            const closeBtn = document.getElementById('closeBtn');
+            if (closeBtn) {
+                closeBtn.addEventListener('click', toggleManagement);
+                console.log('Close button listener added');
+            }
+            
+            // Agent selector
+            const agentSelect = document.getElementById('agent');
+            if (agentSelect) {
+                agentSelect.addEventListener('change', loadTasks);
+                console.log('Agent selector listener added');
+            }
+            
+            // Refresh button
+            const refreshBtn = document.getElementById('refreshBtn');
+            if (refreshBtn) {
+                refreshBtn.addEventListener('click', loadTasks);
+                console.log('Refresh button listener added');
+            }
+            
+            // Filter buttons
+            document.addEventListener('click', function(e) {
+                if (e.target.classList.contains('filter-btn')) {
+                    const filter = e.target.getAttribute('data-filter');
+                    filterTasks(filter, e.target);
+                }
+            });
+            
+            console.log('All event listeners set up successfully');
+        });
     </script>
 </body>
 </html>`;
 
-// Initialize agents configuration
-let agents = [];
+// Parse multipart form data
+function parseMultipart(req) {
+    return new Promise((resolve, reject) => {
+        const boundary = req.headers['content-type']?.split('boundary=')[1];
+        if (!boundary) {
+            reject(new Error('No boundary found'));
+            return;
+        }
+
+        let body = '';
+        req.on('data', chunk => body += chunk.toString());
+        req.on('end', () => {
+            const parts = body.split('--' + boundary);
+            const result = {};
+            
+            for (const part of parts) {
+                if (part.includes('Content-Disposition')) {
+                    const nameMatch = part.match(/name="([^"]+)"/);
+                    if (nameMatch) {
+                        const name = nameMatch[1];
+                        const content = part.split('\r\n\r\n')[1]?.split('\r\n--')[0];
+                        if (content) {
+                            result[name] = content;
+                        }
+                    }
+                }
+            }
+            resolve(result);
+        });
+        req.on('error', reject);
+    });
+}
 
 // Create server
 const server = http.createServer(async (req, res) => {
@@ -623,7 +955,7 @@ const server = http.createServer(async (req, res) => {
 
     // CORS headers
     res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Access-Control-Allow-Methods', 'GET');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, DELETE');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
     if (req.url === '/') {
@@ -631,21 +963,93 @@ const server = http.createServer(async (req, res) => {
         res.end(htmlContent);
     } else if (req.url === '/api/agents') {
         res.writeHead(200, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify({
-            agents: agents,
-            config: {
-                baseDir: config.dataDir,
-                port: config.port,
-                discoveryEnabled: !config.configFile
+        res.end(JSON.stringify(agents));
+    } else if (req.url === '/api/add-profile' && req.method === 'POST') {
+        try {
+            const formData = await parseMultipart(req);
+            const name = formData.name?.trim();
+            const taskFileContent = formData.taskFile;
+            
+            if (!name || !taskFileContent) {
+                res.writeHead(400, { 'Content-Type': 'text/plain' });
+                res.end('Missing name or task file content');
+                return;
             }
-        }));
+
+            // Validate JSON
+            let taskData;
+            try {
+                taskData = JSON.parse(taskFileContent);
+            } catch (err) {
+                res.writeHead(400, { 'Content-Type': 'text/plain' });
+                res.end('Invalid JSON in task file');
+                return;
+            }
+
+            if (!taskData.tasks || !Array.isArray(taskData.tasks)) {
+                res.writeHead(400, { 'Content-Type': 'text/plain' });
+                res.end('Invalid tasks.json format - must contain tasks array');
+                return;
+            }
+
+            // Create a file in user's home directory for this profile
+            const userDataDir = path.join(os.homedir(), '.shrimp-task-viewer-data');
+            await fs.mkdir(userDataDir, { recursive: true });
+            
+            const profileId = name.toLowerCase().replace(/[^a-z0-9-]/g, '-').replace(/-+/g, '-');
+            const profileFilePath = path.join(userDataDir, `${profileId}.json`);
+            
+            // Save the task data
+            await fs.writeFile(profileFilePath, taskFileContent);
+            
+            // Add to agents list
+            const newAgent = await addAgent(name, profileFilePath);
+            
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify(newAgent));
+        } catch (err) {
+            console.error('Error adding profile:', err);
+            res.writeHead(500, { 'Content-Type': 'text/plain' });
+            res.end('Internal server error: ' + err.message);
+        }
+    } else if (req.url.startsWith('/api/remove-profile/') && req.method === 'DELETE') {
+        try {
+            const agentId = req.url.split('/').pop();
+            const agent = agents.find(a => a.id === agentId);
+            
+            if (!agent) {
+                res.writeHead(404, { 'Content-Type': 'text/plain' });
+                res.end('Profile not found');
+                return;
+            }
+
+            // Remove file if it's in user data directory
+            const userDataDir = path.join(os.homedir(), '.shrimp-task-viewer-data');
+            if (agent.path.startsWith(userDataDir)) {
+                try {
+                    await fs.unlink(agent.path);
+                } catch (err) {
+                    console.warn('Could not delete profile file:', err.message);
+                }
+            }
+
+            // Remove from agents list
+            await removeAgent(agentId);
+            
+            res.writeHead(200, { 'Content-Type': 'text/plain' });
+            res.end('Profile removed successfully');
+        } catch (err) {
+            console.error('Error removing profile:', err);
+            res.writeHead(500, { 'Content-Type': 'text/plain' });
+            res.end('Internal server error: ' + err.message);
+        }
     } else if (req.url.startsWith('/api/tasks/')) {
         const agentId = req.url.split('/').pop();
         const agent = agents.find(a => a.id === agentId);
         
         if (!agent) {
             res.writeHead(404, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify({ error: 'Data source not found' }));
+            res.end(JSON.stringify({ error: 'Agent not found' }));
             return;
         }
 
@@ -664,21 +1068,28 @@ const server = http.createServer(async (req, res) => {
     }
 });
 
-// Initialize and start server
+// Initialize server with settings
 async function startServer() {
     try {
-        agents = await loadConfig();
+        agents = await loadSettings();
         
-        server.listen(config.port, config.host, () => {
+        server.listen(PORT, '127.0.0.1', () => {
             console.log(`
-🦐 Shrimp Task Manager Viewer Server
-=====================================
-Server is running at: http://${config.host}:${config.port}
-Base directory: ${config.dataDir}
-Config file: ${config.configFile || 'Auto-discovery mode'}
+🦐 Shrimp Task Manager Viewer Server v${VERSION}
+===============================================
+Server is running at: http://localhost:${PORT}
+Also accessible at: http://127.0.0.1:${PORT}
 
-Available data sources:
+Settings file: ${SETTINGS_FILE}
+    
+Available profiles:
 ${agents.map(a => `  - ${a.name} (${a.path})`).join('\n')}
+
+🎯 Features:
+  • View tasks from multiple profiles
+  • Add custom task files via web interface
+  • Persistent profile management
+  • Real-time task filtering and statistics
 
 Open your browser to view tasks!
             `);
@@ -689,6 +1100,9 @@ Open your browser to view tasks!
     }
 }
 
+// Start the server
+startServer();
+
 // Handle graceful shutdown
 process.on('SIGINT', () => {
     console.log('\nShutting down server...');
@@ -697,6 +1111,3 @@ process.on('SIGINT', () => {
         process.exit(0);
     });
 });
-
-// Start the server
-startServer();
