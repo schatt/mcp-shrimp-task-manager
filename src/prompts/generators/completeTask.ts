@@ -23,12 +23,12 @@ export interface CompleteTaskPromptParams {
  * @param params prompt 參數
  * @returns 生成的 prompt
  */
-export function getCompleteTaskPrompt(
+export async function getCompleteTaskPrompt(
   params: CompleteTaskPromptParams
-): string {
+): Promise<string> {
   const { task, completionTime } = params;
 
-  const indexTemplate = loadPromptFromTemplate("completeTask/index.md");
+  const indexTemplate = await loadPromptFromTemplate("completeTask/index.md");
 
   // 開始構建基本 prompt
   let prompt = generatePrompt(indexTemplate, {

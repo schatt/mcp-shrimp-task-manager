@@ -38,7 +38,7 @@ export async function getTaskDetail({
     const task = result.tasks[0];
 
     // 使用prompt生成器獲取最終prompt
-    const prompt = getGetTaskDetailPrompt({
+    const prompt = await getGetTaskDetailPrompt({
       taskId,
       task,
     });
@@ -53,7 +53,7 @@ export async function getTaskDetail({
     };
   } catch (error) {
     // 使用prompt生成器獲取錯誤訊息
-    const errorPrompt = getGetTaskDetailPrompt({
+    const errorPrompt = await getGetTaskDetailPrompt({
       taskId,
       error: error instanceof Error ? error.message : String(error),
     });

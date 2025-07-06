@@ -69,7 +69,7 @@ export async function verifyTask({
   }
 
   // 使用prompt生成器獲取最終prompt
-  const prompt = getVerifyTaskPrompt({ task, score, summary });
+  const prompt = await getVerifyTaskPrompt({ task, score, summary });
 
   return {
     content: [

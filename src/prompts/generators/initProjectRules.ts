@@ -16,10 +16,12 @@ export interface InitProjectRulesPromptParams {
  * @param params prompt 參數（可選）
  * @returns 生成的 prompt
  */
-export function getInitProjectRulesPrompt(
+export async function getInitProjectRulesPrompt(
   params?: InitProjectRulesPromptParams
-): string {
-  const indexTemplate = loadPromptFromTemplate("initProjectRules/index.md");
+): Promise<string> {
+  const indexTemplate = await loadPromptFromTemplate(
+    "initProjectRules/index.md"
+  );
 
   // 載入可能的自定義 prompt (通過環境變數覆蓋或追加)
   return loadPrompt(indexTemplate, "INIT_PROJECT_RULES");

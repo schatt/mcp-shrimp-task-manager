@@ -23,10 +23,14 @@ export interface AnalyzeTaskPromptParams {
  * @param params prompt 參數
  * @returns 生成的 prompt
  */
-export function getAnalyzeTaskPrompt(params: AnalyzeTaskPromptParams): string {
-  const indexTemplate = loadPromptFromTemplate("analyzeTask/index.md");
+export async function getAnalyzeTaskPrompt(
+  params: AnalyzeTaskPromptParams
+): Promise<string> {
+  const indexTemplate = await loadPromptFromTemplate("analyzeTask/index.md");
 
-  const iterationTemplate = loadPromptFromTemplate("analyzeTask/iteration.md");
+  const iterationTemplate = await loadPromptFromTemplate(
+    "analyzeTask/iteration.md"
+  );
 
   let iterationPrompt = "";
   if (params.previousAnalysis) {

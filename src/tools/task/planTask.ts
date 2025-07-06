@@ -4,6 +4,7 @@ import { fileURLToPath } from "url";
 import { getAllTasks } from "../../models/taskModel.js";
 import { TaskStatus, Task } from "../../types/index.js";
 import { getPlanTaskPrompt } from "../../prompts/index.js";
+import { getMemoryDir } from "../../utils/paths.js";
 
 // 開始規劃工具
 export const planTaskSchema = z.object({
@@ -33,8 +34,7 @@ export async function planTask({
   const __filename = fileURLToPath(import.meta.url);
   const __dirname = path.dirname(__filename);
   const PROJECT_ROOT = path.resolve(__dirname, "../../..");
-  const DATA_DIR = process.env.DATA_DIR || path.join(PROJECT_ROOT, "data");
-  const MEMORY_DIR = path.join(DATA_DIR, "memory");
+  const MEMORY_DIR = await getMemoryDir();
 
   // 準備所需參數
   let completedTasks: Task[] = [];
@@ -56,7 +56,7 @@ export async function planTask({
   }
 
   // 使用prompt生成器獲取最終prompt
-  const prompt = getPlanTaskPrompt({
+  const prompt = await getPlanTaskPrompt({
     description,
     requirements,
     existingTasksReference,

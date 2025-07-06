@@ -55,11 +55,13 @@ function getComplexityStyle(level: string): string {
  * @param params prompt 參數
  * @returns 生成的 prompt
  */
-export function getExecuteTaskPrompt(params: ExecuteTaskPromptParams): string {
+export async function getExecuteTaskPrompt(
+  params: ExecuteTaskPromptParams
+): Promise<string> {
   const { task, complexityAssessment, relatedFilesSummary, dependencyTasks } =
     params;
 
-  const notesTemplate = loadPromptFromTemplate("executeTask/notes.md");
+  const notesTemplate = await loadPromptFromTemplate("executeTask/notes.md");
   let notesPrompt = "";
   if (task.notes) {
     notesPrompt = generatePrompt(notesTemplate, {
@@ -67,7 +69,7 @@ export function getExecuteTaskPrompt(params: ExecuteTaskPromptParams): string {
     });
   }
 
-  const implementationGuideTemplate = loadPromptFromTemplate(
+  const implementationGuideTemplate = await loadPromptFromTemplate(
     "executeTask/implementationGuide.md"
   );
   let implementationGuidePrompt = "";
@@ -77,7 +79,7 @@ export function getExecuteTaskPrompt(params: ExecuteTaskPromptParams): string {
     });
   }
 
-  const verificationCriteriaTemplate = loadPromptFromTemplate(
+  const verificationCriteriaTemplate = await loadPromptFromTemplate(
     "executeTask/verificationCriteria.md"
   );
   let verificationCriteriaPrompt = "";
@@ -87,7 +89,7 @@ export function getExecuteTaskPrompt(params: ExecuteTaskPromptParams): string {
     });
   }
 
-  const analysisResultTemplate = loadPromptFromTemplate(
+  const analysisResultTemplate = await loadPromptFromTemplate(
     "executeTask/analysisResult.md"
   );
   let analysisResultPrompt = "";
@@ -97,7 +99,7 @@ export function getExecuteTaskPrompt(params: ExecuteTaskPromptParams): string {
     });
   }
 
-  const dependencyTasksTemplate = loadPromptFromTemplate(
+  const dependencyTasksTemplate = await loadPromptFromTemplate(
     "executeTask/dependencyTasks.md"
   );
   let dependencyTasksPrompt = "";
@@ -119,7 +121,7 @@ export function getExecuteTaskPrompt(params: ExecuteTaskPromptParams): string {
     }
   }
 
-  const relatedFilesSummaryTemplate = loadPromptFromTemplate(
+  const relatedFilesSummaryTemplate = await loadPromptFromTemplate(
     "executeTask/relatedFilesSummary.md"
   );
   let relatedFilesSummaryPrompt = "";
@@ -127,7 +129,7 @@ export function getExecuteTaskPrompt(params: ExecuteTaskPromptParams): string {
     relatedFilesSummary: relatedFilesSummary || "當前任務沒有關聯的文件。",
   });
 
-  const complexityTemplate = loadPromptFromTemplate(
+  const complexityTemplate = await loadPromptFromTemplate(
     "executeTask/complexity.md"
   );
   let complexityPrompt = "";
@@ -151,7 +153,7 @@ export function getExecuteTaskPrompt(params: ExecuteTaskPromptParams): string {
     });
   }
 
-  const indexTemplate = loadPromptFromTemplate("executeTask/index.md");
+  const indexTemplate = await loadPromptFromTemplate("executeTask/index.md");
   let prompt = generatePrompt(indexTemplate, {
     name: task.name,
     id: task.id,

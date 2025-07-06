@@ -25,13 +25,13 @@ export interface ResearchModePromptParams {
  * @param params prompt 參數
  * @returns 生成的 prompt
  */
-export function getResearchModePrompt(
+export async function getResearchModePrompt(
   params: ResearchModePromptParams
-): string {
+): Promise<string> {
   // 處理之前的研究狀態
   let previousStateContent = "";
   if (params.previousState && params.previousState.trim() !== "") {
-    const previousStateTemplate = loadPromptFromTemplate(
+    const previousStateTemplate = await loadPromptFromTemplate(
       "researchMode/previousState.md"
     );
     previousStateContent = generatePrompt(previousStateTemplate, {
@@ -42,7 +42,7 @@ export function getResearchModePrompt(
   }
 
   // 載入主要模板
-  const indexTemplate = loadPromptFromTemplate("researchMode/index.md");
+  const indexTemplate = await loadPromptFromTemplate("researchMode/index.md");
   let prompt = generatePrompt(indexTemplate, {
     topic: params.topic,
     previousStateContent: previousStateContent,
