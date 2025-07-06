@@ -126,7 +126,7 @@ async function main() {
       });
 
       // 獲取可用埠
-      const port = await getPort();
+      const port = process.env.WEB_PORT || (await getPort());
 
       // 啟動 HTTP 伺服器
       const httpServer = app.listen(port, () => {
