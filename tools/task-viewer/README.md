@@ -1,37 +1,82 @@
 # 🦐 Shrimp Task Manager Viewer
 
-A universal web-based GUI for viewing and monitoring Shrimp Task Manager data across multiple agents and projects. Features profile management, file upload interface, and real-time task monitoring.
+A modern, React-based web interface for viewing and managing Shrimp Task Manager data across multiple profiles. Features a professional tabbed interface, real-time search, configurable auto-refresh, and comprehensive task management capabilities.
 
-## Features
+## 🌟 Features
 
-- **🗂️ Profile Management**: Add/remove task file profiles via web interface
-- **📁 File Upload**: Upload any tasks.json file through the browser
-- **💾 Persistent Settings**: Profiles saved across server restarts
-- **🌐 Web Interface**: Clean, responsive dashboard for viewing tasks
-- **📊 Statistics**: Real-time task counts and status breakdown
-- **🔄 Real-time Updates**: Refresh data with a single click
-- **🎯 Filtering**: Filter tasks by status (pending, in progress, completed)
-- **📁 Multi-Source**: Support for multiple task data sources
-- **🔒 Secure**: Localhost-only binding for security
-- **🎨 Dark Theme**: Professional dark UI optimized for development
-- **🌍 Universal**: Works with any project structure
+### 🏷️ Modern Tab Interface
+- **Draggable Tabs**: Reorder profiles by dragging tabs
+- **Professional Design**: Browser-style tabs that connect seamlessly to content
+- **Visual Feedback**: Clear active tab indication and hover effects
+- **Add New Profiles**: Integrated "+ Add Tab" button matching the interface design
 
-## Quick Start
+### 🔍 Advanced Search & Filtering
+- **Real-time Search**: Instant task filtering by name, description, status, or ID
+- **Sortable Columns**: Click column headers to sort by any field
+- **TanStack Table**: Powerful table component with pagination and filtering
+- **Responsive Design**: Works perfectly on desktop, tablet, and mobile
 
-### Installation
+### 🔄 Intelligent Auto-Refresh
+- **Configurable Intervals**: Choose from 5s, 10s, 15s, 30s, 1m, 2m, or 5m
+- **Smart Controls**: Auto-refresh toggles with interval selection
+- **Visual Indicators**: Loading states and refresh status
+- **Manual Refresh**: Dedicated refresh button for on-demand updates
+
+### 📊 Comprehensive Task Management
+- **Task Statistics**: Live counts for Total, Completed, In Progress, and Pending tasks
+- **Profile Management**: Add/remove/reorder profiles via intuitive interface
+- **Persistent Settings**: Profile configurations saved across sessions
+- **Hot Reload**: Development mode with instant updates
+
+### 🎨 Professional UI/UX
+- **Dark Theme**: Optimized for development environments
+- **Responsive Layout**: Adapts to all screen sizes
+- **Accessibility**: Full keyboard navigation and screen reader support
+- **Interactive Elements**: Hover tooltips and visual feedback throughout
+
+## 🚀 Quick Start
+
+### Installation & Setup
 
 ```bash
-# Clone or navigate to your mcp-shrimp-task-manager directory
+# Navigate to the task viewer directory
 cd path/to/mcp-shrimp-task-manager/tools/task-viewer
 
-# Make CLI executable (Linux/macOS)
-chmod +x cli.js
+# Install dependencies
+npm install
 
-# Start the viewer
-./cli.js start
+# Build the React application
+npm run build
+
+# Start the server
+npm start
 ```
 
-### Using the Viewer
+### Development Mode (with Hot Reload)
+
+```bash
+# Start the development server with hot reload
+npm run dev
+
+# The app will be available at http://localhost:3000
+# with automatic rebuilding when you make changes
+```
+
+### Production Mode
+
+```bash
+# Build for production
+npm run build
+
+# Start the production server
+node server.js
+
+# Access at http://127.0.0.1:9998
+```
+
+## 🖥️ Usage
+
+### Getting Started
 
 1. **Start the server**:
    ```bash
@@ -41,311 +86,258 @@ chmod +x cli.js
 2. **Open your browser**:
    Navigate to http://127.0.0.1:9998
 
-3. **Add task profiles**:
-   - Click "⚙️ Manage Profiles" 
-   - Enter a profile name
-   - Upload a tasks.json file
-   - Click "➕ Add Profile"
+3. **Add your first profile**:
+   - Click the teal "**+ Add Tab**" button
+   - Enter a descriptive profile name (e.g., "Team Alpha Tasks")
+   - Upload your tasks.json file
+   - Click "**Add Profile**"
 
-4. **View and filter tasks**:
-   - Select a profile from the dropdown
-   - Use filter buttons to view tasks by status
+4. **Manage your tasks**:
+   - Switch between profiles using the tabs
+   - Search tasks using the search box
+   - Sort columns by clicking headers
+   - Configure auto-refresh as needed
 
-## Usage
+### Interface Overview
 
-### Command Line Interface
+```
+[Profile Tab 1] [Profile Tab 2] [Active Tab] [+ Add Tab] | [🔄] [Auto-refresh ▼30s]
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+┌──────────────────────────────────────────────────────────────────────────┐
+│ [🔍 Search tasks...] [Total: 6] [Completed: 5] [In Progress: 1] [Pending: 0] │
+├──────────────────────────────────────────────────────────────────────────┤
+│ #  │ Task Name              │ Status      │ Created    │ Updated    │ Notes│
+│ T1 │ Setup authentication  │ Completed   │ 2024-01-15 │ 2024-01-16 │ ... │
+│ T2 │ Implement dashboard    │ In Progress │ 2024-01-16 │ 2024-01-17 │ ... │
+└──────────────────────────────────────────────────────────────────────────┘
+```
+
+### Tab Management
+
+- **Switch Profiles**: Click any tab to switch to that profile
+- **Reorder Tabs**: Drag tabs to rearrange them in your preferred order
+- **Add New Profile**: Click the teal "**+ Add Tab**" button
+- **Remove Profile**: Click the × on any tab (with confirmation)
+
+### Search & Filtering
+
+- **Global Search**: Type in the search box to filter across all task fields
+- **Column Sorting**: Click any column header to sort (click again to reverse)
+- **Pagination**: Navigate large task lists with built-in pagination controls
+- **Real-time Updates**: Search and sorting update instantly as you type
+
+### Auto-Refresh Configuration
+
+1. **Enable Auto-refresh**: Check the "Auto-refresh" checkbox
+2. **Set Interval**: Choose from the dropdown (5s to 5m)
+3. **Manual Refresh**: Click the 🔄 button anytime for immediate refresh
+4. **Visual Feedback**: Spinner shows during refresh operations
+
+## 🔧 Configuration
+
+### Environment Variables
 
 ```bash
-# Start the server (default command)
-./cli.js start
-
-# Start with custom options
-./cli.js start --port 8080 --data-dir ~/projects
-
-# Stop the server
-./cli.js stop
-
-# Restart the server
-./cli.js restart
-
-# Check server status
-./cli.js status
-
-# Show help
-./cli.js help
+export SHRIMP_VIEWER_PORT=9998           # Server port (default: 9998)
+export SHRIMP_VIEWER_HOST=127.0.0.1      # Server host (localhost only)
 ```
 
-### Configuration Options
-
-#### Environment Variables
+### Development Configuration
 
 ```bash
-export SHRIMP_VIEWER_PORT=9998           # Server port
-export SHRIMP_VIEWER_HOST=127.0.0.1      # Server host
-export SHRIMP_DATA_DIR=/path/to/project   # Base directory for discovery
-export SHRIMP_CONFIG_FILE=/path/to/config.json  # Manual config file
+# Development server with hot reload (Vite)
+npm run dev                              # Runs on port 3000
+
+# Production build and serve
+npm run build && npm start               # Runs on port 9998
 ```
 
-#### Command Line Arguments
+### Profile Data Storage
 
-```bash
---port <number>     # Server port (default: 9998)
---host <host>       # Server host (default: 127.0.0.1)
---data-dir <path>   # Base directory for task discovery
---config <file>     # Configuration file path
-```
+- **Settings File**: `~/.shrimp-task-viewer-settings.json`
+- **Uploaded Files**: Stored in system temp directory
+- **Hot Reload**: Development changes rebuild automatically
 
-### Auto-Discovery vs Manual Configuration
+## 🏗️ Technical Architecture
 
-#### Auto-Discovery Mode (Default)
+### Technology Stack
 
-The viewer automatically searches for task files in common locations:
-
-```
-Base Directory/
-├── shrimp_data/tasks.json
-├── teams/
-│   ├── team-1/
-│   │   ├── dev__neo/shrimp_data/tasks.json
-│   │   └── testing__trinity/shrimp_data/tasks.json
-│   ├── team-2/
-│   │   ├── dev__morpheus/shrimp_data/tasks.json
-│   │   └── testing__cipher/shrimp_data_cipher/tasks.json
-│   └── team-3/
-│       ├── dev__homer/shrimp_data/tasks.json
-│       └── testing__bart/shrimp_data_bart/tasks.json
-├── agents/
-│   └── agent-*/shrimp_data/tasks.json
-└── data/tasks.json
-```
-
-#### Manual Configuration
-
-Create a configuration file to specify exact data sources:
-
-```json
-{
-  "agents": [
-    {
-      "id": "team1-neo",
-      "name": "Team 1 - Neo (Development)",
-      "path": "/absolute/path/to/team1/dev__neo/shrimp_data/tasks.json"
-    },
-    {
-      "id": "team1-trinity", 
-      "name": "Team 1 - Trinity (Testing)",
-      "path": "/absolute/path/to/team1/testing__trinity/shrimp_data/tasks.json"
-    }
-  ]
-}
-```
-
-Then start with the config file:
-
-```bash
-./cli.js start --config config.json
-```
-
-## Integration Examples
-
-### Multi-Team Project Setup
-
-For projects with multiple teams/agents:
-
-```bash
-cd /path/to/your/project
-node server.js
-```
-
-Then use the web interface to add profiles for each team:
-- Upload each team's tasks.json file
-- Give descriptive names like "Team 1 - Development" 
-- Switch between teams using the dropdown
-
-### Single Project Setup
-
-For a single project with Shrimp tasks:
-
-```bash
-cd ~/my-project
-./path/to/task-viewer/cli.js start
-```
-
-Auto-discovers:
-- `./shrimp_data/tasks.json`
-- `./data/tasks.json`
-- Any subdirectory task files
-
-### Custom Directory Structure
-
-For custom project layouts:
-
-```bash
-# Search a specific directory
-./cli.js start --data-dir /path/to/my/projects
-
-# Use manual configuration
-./cli.js start --config my-projects-config.json
-```
-
-## Process Management
-
-The CLI includes built-in process management:
-
-```bash
-# Start in background (daemon mode)
-./cli.js start
-
-# Check if running
-./cli.js status
-# Output: 🦐 Shrimp Task Viewer: Running (PID: 12345)
-
-# Stop gracefully
-./cli.js stop
-
-# Restart (stop + start)
-./cli.js restart
-
-# Force kill if needed
-./cli.js stop  # Tries SIGTERM first, then SIGKILL
-```
-
-PID file is stored as `.shrimp-viewer.pid` in the current directory.
-
-## Web Interface Features
-
-### Dashboard Overview
-
-- **Profile Management**: Add/remove task file profiles via "⚙️ Manage Profiles"
-- **Task Statistics**: Total, completed, in progress, and pending counts
-- **Profile Selector**: Dropdown to switch between different profiles
-- **Filter Controls**: Buttons to filter tasks by status
-- **Real-time Refresh**: Manual refresh button for latest data
-
-### Profile Management Interface
-
-- **Add Profiles**: Upload tasks.json files with custom names
-- **Remove Profiles**: Delete profiles you no longer need
-- **File Validation**: Automatic validation of uploaded task files
-- **Persistent Storage**: Profiles saved to `~/.shrimp-task-viewer-settings.json`
-
-### Task Display
-
-Each task card shows:
-- **Task Name**: Clear title and description
-- **Status Badge**: Color-coded status (pending/in progress/completed)
-- **Timestamps**: Created and last updated dates
-- **Task ID**: Unique identifier for reference
-- **Related Files**: Associated files with type indicators
-- **Summary**: Task completion summary when available
-- **Notes**: Additional task notes and comments
-
-### Responsive Design
-
-- **Desktop**: Multi-column grid layout
-- **Tablet**: Responsive grid adjustment
-- **Mobile**: Single column stack
-- **Dark Theme**: Professional appearance for development environments
-
-## Security Considerations
-
-- **Localhost Only**: Server binds to 127.0.0.1 by default
-- **No External Access**: Not accessible from other machines
-- **File System Access**: Only reads specified JSON files
-- **No Authentication**: Designed for local development use
-
-## Troubleshooting
-
-### Server Won't Start
-
-```bash
-# Check if port is in use
-lsof -i :9998
-
-# Try different port
-./cli.js start --port 8080
-
-# Check for permission issues
-ls -la .shrimp-viewer.pid
-```
-
-### No Task Files Found
-
-```bash
-# Verify data directory
-./cli.js start --data-dir /correct/path
-
-# Check file permissions
-find . -name "tasks.json" -type f
-
-# Use manual configuration
-./cli.js start --config manual-config.json
-```
-
-### Tasks Not Loading
-
-1. **Check file format**: Ensure tasks.json contains valid JSON with `tasks` array
-2. **Verify paths**: Check that file paths in config are absolute and correct
-3. **File permissions**: Ensure the viewer can read the task files
-4. **JSON validity**: Validate JSON syntax in task files
-
-### Browser Connection Issues
-
-```bash
-# Verify server is running
-./cli.js status
-
-# Check firewall settings (Windows/Linux)
-# Ensure localhost connections are allowed on port 9998
-
-# Try different browser
-# Clear browser cache
-```
-
-## Development
+- **Frontend**: React 19 + Vite for hot reload development
+- **Table Component**: TanStack React Table for advanced table features
+- **Styling**: Custom CSS with dark theme and responsive design
+- **Backend**: Node.js HTTP server with RESTful API
+- **Build System**: Vite for fast development and optimized production builds
 
 ### File Structure
 
 ```
 task-viewer/
-├── server.js           # Main HTTP server with auto-discovery
-├── cli.js              # Command-line interface and process management
-├── package.json        # Node.js package configuration
-├── example-config.json # Example configuration file
-└── README.md          # This documentation
+├── src/
+│   ├── App.jsx                 # Main React application
+│   ├── components/
+│   │   └── TaskTable.jsx       # TanStack table component
+│   └── index.css              # Complete styling system
+├── dist/                      # Built React application (generated)
+├── server.js                  # Node.js backend server
+├── vite.config.js            # Vite configuration
+├── package.json              # Dependencies and scripts
+└── README.md                 # This documentation
 ```
 
 ### API Endpoints
 
-- `GET /` - Main web interface
-- `GET /api/agents` - List available profiles
-- `GET /api/tasks/{profileId}` - Get tasks for specific profile
-- `POST /api/add-profile` - Add new profile (multipart form data)
-- `DELETE /api/remove-profile/{profileId}` - Remove profile
+- `GET /` - Serves the React application
+- `GET /api/agents` - Lists all configured profiles
+- `GET /api/tasks/{profileId}` - Returns tasks for specific profile
+- `POST /api/add-profile` - Adds new profile with file upload
+- `DELETE /api/remove-profile/{profileId}` - Removes profile
 
-### Extending the Viewer
+## 🛠️ Development
 
-The viewer is designed to be easily extensible:
+### Setting Up Development Environment
 
-1. **Custom Discovery**: Modify `discoverTaskFiles()` function
-2. **Additional Endpoints**: Add new routes to the server
-3. **UI Enhancements**: Modify the embedded HTML/CSS/JS
-4. **Custom Filtering**: Extend the filtering logic
+```bash
+# Install dependencies
+npm install
 
-## License
+# Start development server with hot reload
+npm run dev
+
+# Development server runs on http://localhost:3000
+# Backend API server runs on http://localhost:9998
+```
+
+### Building for Production
+
+```bash
+# Build optimized production bundle
+npm run build
+
+# Files are generated in dist/ directory
+# Start production server
+npm start
+```
+
+### Extending the Interface
+
+The modular React architecture makes it easy to extend:
+
+1. **Add New Components**: Create in `src/components/`
+2. **Modify Styling**: Edit `src/index.css` with CSS custom properties
+3. **Add Features**: Extend `App.jsx` with new state and functionality
+4. **API Integration**: Add endpoints in `server.js`
+
+## 🔒 Security & Performance
+
+### Security Features
+
+- **Localhost Binding**: Server only accessible from local machine
+- **File Upload Validation**: JSON validation and safe file handling
+- **No External Dependencies**: Self-contained with minimal attack surface
+- **CORS Protection**: API endpoints protected with CORS headers
+
+### Performance Optimizations
+
+- **Hot Module Replacement**: Instant development updates
+- **Code Splitting**: Optimized bundle loading
+- **Efficient Re-rendering**: React optimization patterns
+- **Caching**: Static asset caching for faster loads
+- **Responsive Images**: Optimized for all device sizes
+
+## 🐛 Troubleshooting
+
+### Common Issues
+
+**Server Won't Start**
+```bash
+# Check if port is in use
+lsof -i :9998
+
+# Kill existing processes
+pkill -f "node.*server.js"
+
+# Try different port
+SHRIMP_VIEWER_PORT=8080 node server.js
+```
+
+**Hot Reload Not Working**
+```bash
+# Ensure development dependencies are installed
+npm install
+
+# Restart development server
+npm run dev
+```
+
+**Tasks Not Loading**
+1. Check that tasks.json files contain valid JSON
+2. Verify file permissions are readable
+3. Check browser console for error messages
+4. Use manual refresh button to reload data
+
+**Build Errors**
+```bash
+# Clear node_modules and reinstall
+rm -rf node_modules package-lock.json
+npm install
+
+# Clear Vite cache
+rm -rf dist/
+npm run build
+```
+
+## 📋 Changelog
+
+### Version 1.0.0 (Latest)
+
+#### 🎨 Major UI Overhaul
+- **Modern Tab Interface**: Professional browser-style tabs with drag & drop reordering
+- **Connected Design**: Seamless visual connection between tabs and content
+- **Improved Layout**: Search and controls repositioned for better workflow
+
+#### ⚡ Enhanced Functionality  
+- **Configurable Auto-refresh**: Choose intervals from 5 seconds to 5 minutes
+- **Advanced Search**: Real-time filtering across all task fields
+- **Sortable Columns**: Click headers to sort by any column
+- **Hot Reload Development**: Instant updates during development
+
+#### 🔧 Technical Improvements
+- **React Architecture**: Complete rewrite using React 19 + Vite
+- **TanStack Table**: Professional table component with pagination
+- **Responsive Design**: Mobile-first approach with breakpoint optimization
+- **Performance**: Optimized rendering and efficient state management
+
+#### 🎯 UX Enhancements
+- **Visual Feedback**: Hover states, loading indicators, and transitions
+- **Accessibility**: Full keyboard navigation and screen reader support
+- **Professional Styling**: Cohesive design language throughout
+- **Intuitive Controls**: Logical grouping and placement of interface elements
+
+## 📄 License
 
 MIT License - see the main project license for details.
 
-## Contributing
+## 🤝 Contributing
 
 This tool is part of the MCP Shrimp Task Manager project. Contributions welcome!
 
 1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Test thoroughly
-5. Submit a pull request
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Make your changes with proper testing
+4. Commit your changes (`git commit -m 'Add amazing feature'`)
+5. Push to the branch (`git push origin feature/amazing-feature`)
+6. Submit a pull request
+
+### Development Guidelines
+
+- Follow React best practices and hooks patterns
+- Maintain responsive design principles
+- Add proper TypeScript types where applicable
+- Test across different browsers and devices
+- Update documentation for new features
 
 ---
 
-**Happy task viewing! 🦐**
+**Happy task management! 🦐✨**
+
+Built with ❤️ using React, Vite, and modern web technologies.

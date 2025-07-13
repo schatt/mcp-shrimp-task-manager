@@ -4,11 +4,13 @@
   "description": "Web-based viewer for Shrimp Task Manager data with auto-discovery (port 9998)",
   "main": "server.js",
   "bin": {
-    "shrimp-viewer": "./cli.js"
+    "shrimp-viewer": "cli.js"
   },
   "scripts": {
+    "dev": "vite build --watch",
+    "build": "vite build",
+    "preview": "vite preview",
     "start": "node server.js",
-    "dev": "node server.js",
     "stop": "node cli.js stop",
     "restart": "node cli.js restart",
     "status": "node cli.js status"
@@ -29,17 +31,25 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/cjo4m06/mcp-shrimp-task-manager.git"
+    "url": "git+https://github.com/cjo4m06/mcp-shrimp-task-manager.git"
   },
   "bugs": {
     "url": "https://github.com/cjo4m06/mcp-shrimp-task-manager/issues"
   },
-  "dependencies": {},
-  "devDependencies": {},
   "files": [
     "server.js",
     "cli.js",
     "README.md",
     "example-config.json"
-  ]
+  ],
+  "homepage": "https://github.com/cjo4m06/mcp-shrimp-task-manager#readme",
+  "dependencies": {
+    "@tanstack/react-table": "^8.21.3",
+    "@types/react": "^19.1.8",
+    "@types/react-dom": "^19.1.6",
+    "@vitejs/plugin-react": "^4.6.0",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
+    "vite": "^7.0.4"
+  }
 }
