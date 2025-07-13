@@ -5,7 +5,7 @@ const path = require('path');
 const { spawn } = require('child_process');
 
 const PID_FILE = path.join(process.cwd(), '.shrimp-viewer.pid');
-const DEFAULT_PORT = 9999;
+const DEFAULT_PORT = 9998;
 const DEFAULT_HOST = '127.0.0.1';
 
 async function getPid() {

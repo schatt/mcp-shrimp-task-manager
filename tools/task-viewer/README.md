@@ -1,18 +1,20 @@
 # 🦐 Shrimp Task Manager Viewer
 
-A web-based GUI for viewing and monitoring Shrimp Task Manager data across multiple agents and projects. Features automatic task file discovery and real-time task monitoring.
+A universal web-based GUI for viewing and monitoring Shrimp Task Manager data across multiple agents and projects. Features profile management, file upload interface, and real-time task monitoring.
 
 ## Features
 
-- **🔍 Auto-Discovery**: Automatically finds task files in your project structure
+- **🗂️ Profile Management**: Add/remove task file profiles via web interface
+- **📁 File Upload**: Upload any tasks.json file through the browser
+- **💾 Persistent Settings**: Profiles saved across server restarts
 - **🌐 Web Interface**: Clean, responsive dashboard for viewing tasks
 - **📊 Statistics**: Real-time task counts and status breakdown
 - **🔄 Real-time Updates**: Refresh data with a single click
 - **🎯 Filtering**: Filter tasks by status (pending, in progress, completed)
 - **📁 Multi-Source**: Support for multiple task data sources
-- **⚙️ Configurable**: Manual configuration or automatic discovery
 - **🔒 Secure**: Localhost-only binding for security
 - **🎨 Dark Theme**: Professional dark UI optimized for development
+- **🌍 Universal**: Works with any project structure
 
 ## Quick Start
 
@@ -33,17 +35,21 @@ chmod +x cli.js
 
 1. **Start the server**:
    ```bash
-   ./cli.js start
+   node server.js
    ```
 
 2. **Open your browser**:
-   Navigate to http://127.0.0.1:9999
+   Navigate to http://127.0.0.1:9998
 
-3. **Select a data source**:
-   Choose from auto-discovered task files in the dropdown
+3. **Add task profiles**:
+   - Click "⚙️ Manage Profiles" 
+   - Enter a profile name
+   - Upload a tasks.json file
+   - Click "➕ Add Profile"
 
 4. **View and filter tasks**:
-   Use the filter buttons to view tasks by status
+   - Select a profile from the dropdown
+   - Use filter buttons to view tasks by status
 
 ## Usage
 
@@ -74,7 +80,7 @@ chmod +x cli.js
 #### Environment Variables
 
 ```bash
-export SHRIMP_VIEWER_PORT=9999           # Server port
+export SHRIMP_VIEWER_PORT=9998           # Server port
 export SHRIMP_VIEWER_HOST=127.0.0.1      # Server host
 export SHRIMP_DATA_DIR=/path/to/project   # Base directory for discovery
 export SHRIMP_CONFIG_FILE=/path/to/config.json  # Manual config file
@@ -83,7 +89,7 @@ export SHRIMP_CONFIG_FILE=/path/to/config.json  # Manual config file
 #### Command Line Arguments
 
 ```bash
---port <number>     # Server port (default: 9999)
+--port <number>     # Server port (default: 9998)
 --host <host>       # Server host (default: 127.0.0.1)
 --data-dir <path>   # Base directory for task discovery
 --config <file>     # Configuration file path
@@ -142,19 +148,19 @@ Then start with the config file:
 
 ## Integration Examples
 
-### SoraOrc Multi-Team Setup
+### Multi-Team Project Setup
 
-For the SoraOrc project structure:
+For projects with multiple teams/agents:
 
 ```bash
-cd ~/claude/SoraOrc
-./path/to/task-viewer/cli.js start --data-dir .
+cd /path/to/your/project
+node server.js
 ```
 
-This will auto-discover all team task files:
-- Team 1: Neo (dev), Trinity (testing)
-- Team 2: Morpheus (dev), Cipher (testing)  
-- Team 3: Homer (dev), Bart (testing)
+Then use the web interface to add profiles for each team:
+- Upload each team's tasks.json file
+- Give descriptive names like "Team 1 - Development" 
+- Switch between teams using the dropdown
 
 ### Single Project Setup
 
@@ -210,10 +216,18 @@ PID file is stored as `.shrimp-viewer.pid` in the current directory.
 
 ### Dashboard Overview
 
+- **Profile Management**: Add/remove task file profiles via "⚙️ Manage Profiles"
 - **Task Statistics**: Total, completed, in progress, and pending counts
-- **Data Source Selector**: Dropdown to switch between different agents/teams
+- **Profile Selector**: Dropdown to switch between different profiles
 - **Filter Controls**: Buttons to filter tasks by status
 - **Real-time Refresh**: Manual refresh button for latest data
+
+### Profile Management Interface
+
+- **Add Profiles**: Upload tasks.json files with custom names
+- **Remove Profiles**: Delete profiles you no longer need
+- **File Validation**: Automatic validation of uploaded task files
+- **Persistent Storage**: Profiles saved to `~/.shrimp-task-viewer-settings.json`
 
 ### Task Display
 
@@ -246,7 +260,7 @@ Each task card shows:
 
 ```bash
 # Check if port is in use
-lsof -i :9999
+lsof -i :9998
 
 # Try different port
 ./cli.js start --port 8080
@@ -282,7 +296,7 @@ find . -name "tasks.json" -type f
 ./cli.js status
 
 # Check firewall settings (Windows/Linux)
-# Ensure localhost connections are allowed
+# Ensure localhost connections are allowed on port 9998
 
 # Try different browser
 # Clear browser cache
@@ -304,8 +318,10 @@ task-viewer/
 ### API Endpoints
 
 - `GET /` - Main web interface
-- `GET /api/agents` - List available data sources
-- `GET /api/tasks/{agentId}` - Get tasks for specific agent
+- `GET /api/agents` - List available profiles
+- `GET /api/tasks/{profileId}` - Get tasks for specific profile
+- `POST /api/add-profile` - Add new profile (multipart form data)
+- `DELETE /api/remove-profile/{profileId}` - Remove profile
 
 ### Extending the Viewer
 

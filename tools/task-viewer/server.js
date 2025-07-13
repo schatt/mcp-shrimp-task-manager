@@ -21,10 +21,13 @@ let agents = [];
 // Load or create settings file
 async function loadSettings() {
     try {
+        console.log('Loading settings from:', SETTINGS_FILE);
         const data = await fs.readFile(SETTINGS_FILE, 'utf8');
         const settings = JSON.parse(data);
-        return settings.agents || defaultAgents;
+        console.log('Loaded settings:', settings);
+        return settings.agents || [];
     } catch (err) {
+        console.error('Error loading settings:', err.message);
         // File doesn't exist, create with defaults
         await saveSettings(defaultAgents);
         return defaultAgents;
@@ -135,11 +138,45 @@ const htmlContent = `<!DOCTYPE html>
             color: #4fbdba;
         }
         .filter-controls {
+            margin-bottom: 20px;
+        }
+        .search-container {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .filter-buttons {
             display: flex;
             gap: 20px;
             justify-content: center;
-            margin-bottom: 20px;
             flex-wrap: wrap;
+        }
+        #searchBox {
+            flex: 1;
+            min-width: 200px;
+            padding: 10px 15px;
+            border: 2px solid #2c3e50;
+            border-radius: 25px;
+            background: #1a252f;
+            color: white;
+            font-size: 1rem;
+        }
+        #searchBox:focus {
+            outline: none;
+            border-color: #4fbdba;
+        }
+        .auto-refresh-toggle {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #aaa;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+        .auto-refresh-toggle input[type="checkbox"] {
+            transform: scale(1.2);
         }
         .filter-btn {
             padding: 8px 20px;
@@ -176,6 +213,15 @@ const htmlContent = `<!DOCTYPE html>
             margin-bottom: 15px;
             flex-wrap: wrap;
             gap: 10px;
+        }
+        .task-number {
+            background: #0f4c75;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 0.9rem;
+            white-space: nowrap;
         }
         .task-title {
             font-size: 1.2rem;
@@ -264,6 +310,14 @@ const htmlContent = `<!DOCTYPE html>
             text-align: center;
             padding: 50px;
             font-size: 1.2rem;
+        }
+        .loading.with-spinner::after {
+            content: ' ⏳';
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
         }
         .error {
             background: #e74c3c;
@@ -513,10 +567,19 @@ const htmlContent = `<!DOCTYPE html>
         </div>
 
         <div id="filterControls" class="filter-controls" style="display: none;">
-            <button class="filter-btn active" data-filter="all">All Tasks</button>
-            <button class="filter-btn" data-filter="completed">Completed</button>
+            <div class="search-container">
+                <input type="text" id="searchBox" placeholder="🔍 Search tasks..." oninput="filterTasksBySearch(this.value)" />
+                <label class="auto-refresh-toggle">
+                    <input type="checkbox" id="autoRefresh" onchange="toggleAutoRefresh(this.checked)" />
+                    Auto-refresh (30s)
+                </label>
+            </div>
+            <div class="filter-buttons">
+                <button class="filter-btn active" data-filter="all">All Tasks</button>
+                <button class="filter-btn" data-filter="completed">Completed</button>
             <button class="filter-btn" data-filter="in_progress">In Progress</button>
             <button class="filter-btn" data-filter="pending">Pending</button>
+            </div>
         </div>
 
         <div id="loading" class="loading">Select a profile to view tasks...</div>
@@ -694,36 +757,48 @@ const htmlContent = `<!DOCTYPE html>
             const filterControls = document.getElementById('filterControls');
 
             loading.style.display = 'block';
-            loading.textContent = 'Loading tasks...';
+            loading.textContent = 'Loading tasks... ⏳';
+            loading.className = 'loading with-spinner';
             error.style.display = 'none';
             tasksContainer.style.display = 'none';
             stats.style.display = 'none';
             filterControls.style.display = 'none';
 
             try {
-                const response = await fetch('/api/tasks/' + agentId);
+                console.log('Loading tasks for agent:', agentId);
+                // Add timestamp to bypass cache
+                const response = await fetch('/api/tasks/' + agentId + '?t=' + Date.now());
+                console.log('Response status:', response.status);
+                
                 if (!response.ok) {
-                    throw new Error('Failed to load tasks');
+                    const errorText = await response.text();
+                    console.error('Response error:', errorText);
+                    throw new Error('Failed to load tasks: ' + response.status + ' - ' + errorText);
                 }
                 
                 const data = await response.json();
+                console.log('Received data:', data);
                 currentTasks = data.tasks || [];
+                console.log('Current tasks:', currentTasks.length);
                 
-                // Sort tasks by updatedAt descending
-                currentTasks.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
+                // Keep original order from tasks.json to match CLI numbering
+                // Comment out sorting to preserve task numbers
+                // currentTasks.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
                 
                 filterTasks(currentFilter);
                 updateStats();
 
                 loading.style.display = 'none';
+                loading.className = 'loading';
                 tasksContainer.style.display = 'grid';
                 stats.style.display = 'grid';
-                filterControls.style.display = 'flex';
+                filterControls.style.display = 'block';
 
             } catch (err) {
                 loading.style.display = 'none';
+                loading.className = 'loading';
                 error.style.display = 'block';
-                error.textContent = 'Error loading tasks: ' + err.message;
+                error.textContent = '❌ Error loading tasks: ' + err.message;
             }
         }
 
@@ -749,13 +824,7 @@ const htmlContent = `<!DOCTYPE html>
                 });
             }
             
-            if (filter === 'all') {
-                filteredTasks = currentTasks;
-            } else {
-                filteredTasks = currentTasks.filter(task => task.status === filter);
-            }
-            
-            displayTasks();
+            applyFilters();
         }
 
         function displayTasks() {
@@ -772,8 +841,12 @@ const htmlContent = `<!DOCTYPE html>
                 const updatedDate = new Date(task.updatedAt).toLocaleDateString() + ' ' + 
                                    new Date(task.updatedAt).toLocaleTimeString();
                 
+                // Find the task number based on its position in the original array
+                const taskNumber = currentTasks.findIndex(t => t.id === task.id) + 1;
+                
                 return '<div class="task-card">' +
                     '<div class="task-header">' +
+                        '<span class="task-number">TASK ' + taskNumber + '</span>' +
                         '<h3 class="task-title">' + escapeHtml(task.name) + '</h3>' +
                         '<span class="task-status status-' + task.status + '">' + task.status.replace('_', ' ') + '</span>' +
                     '</div>' +
@@ -811,6 +884,62 @@ const htmlContent = `<!DOCTYPE html>
                     : '') +
                 '</div>';
             }).join('');
+        }
+
+        // Global variables for search and auto-refresh
+        let currentSearchTerm = '';
+        let autoRefreshInterval = null;
+
+        function filterTasksBySearch(searchTerm) {
+            currentSearchTerm = searchTerm.toLowerCase();
+            applyFilters();
+        }
+
+        function applyFilters() {
+            let tasks = currentTasks;
+            
+            // Apply status filter
+            if (currentFilter !== 'all') {
+                tasks = tasks.filter(task => task.status === currentFilter);
+            }
+            
+            // Apply search filter
+            if (currentSearchTerm.trim()) {
+                tasks = tasks.filter(task => {
+                    const searchableText = (
+                        task.name + ' ' + 
+                        task.description + ' ' + 
+                        (task.notes || '') + ' ' +
+                        task.status + ' ' +
+                        task.id
+                    ).toLowerCase();
+                    return searchableText.includes(currentSearchTerm);
+                });
+            }
+            
+            filteredTasks = tasks;
+            displayTasks();
+        }
+
+        function toggleAutoRefresh(enabled) {
+            if (autoRefreshInterval) {
+                clearInterval(autoRefreshInterval);
+                autoRefreshInterval = null;
+            }
+            
+            if (enabled) {
+                // Refresh every 30 seconds
+                autoRefreshInterval = setInterval(() => {
+                    const agentId = document.getElementById('agent').value;
+                    if (agentId) {
+                        console.log('Auto-refreshing tasks...');
+                        loadTasks();
+                    }
+                }, 30000);
+                console.log('Auto-refresh enabled (30s intervals)');
+            } else {
+                console.log('Auto-refresh disabled');
+            }
         }
 
         function updateStats() {
@@ -1043,8 +1172,20 @@ const server = http.createServer(async (req, res) => {
             res.writeHead(500, { 'Content-Type': 'text/plain' });
             res.end('Internal server error: ' + err.message);
         }
+    } else if (req.url === '/api/refresh' && req.method === 'POST') {
+        // Reload settings from disk
+        try {
+            agents = await loadSettings();
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ message: 'Settings reloaded', agents: agents.length }));
+        } catch (err) {
+            res.writeHead(500, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ error: 'Failed to reload settings' }));
+        }
     } else if (req.url.startsWith('/api/tasks/')) {
-        const agentId = req.url.split('/').pop();
+        // Extract agentId and remove query parameters
+        const urlParts = req.url.split('?')[0].split('/');
+        const agentId = urlParts.pop();
         const agent = agents.find(a => a.id === agentId);
         
         if (!agent) {
@@ -1055,7 +1196,12 @@ const server = http.createServer(async (req, res) => {
 
         try {
             const data = await fs.readFile(agent.path, 'utf8');
-            res.writeHead(200, { 'Content-Type': 'application/json' });
+            res.writeHead(200, { 
+                'Content-Type': 'application/json',
+                'Cache-Control': 'no-store, no-cache, must-revalidate',
+                'Pragma': 'no-cache',
+                'Expires': '0'
+            });
             res.end(data);
         } catch (err) {
             console.error(`Error reading file ${agent.path}:`, err);
