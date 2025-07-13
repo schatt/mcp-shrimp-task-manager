@@ -59,7 +59,7 @@ This PR introduces a **modern, React-based Task Viewer** - a professional web in
 
 ### 📸 Visual Preview
 
-![Task Viewer Interface](tools/task-viewer/screenshot.png)
+![Task Viewer Interface](https://raw.githubusercontent.com/paulpreibisch/mcp-shrimp-task-manager/feature/task-viewer-ui/tools/task-viewer/screenshot.png)
 
 *Modern tabbed interface showing task management with real-time search, configurable auto-refresh, and professional table display*
 
