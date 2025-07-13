@@ -9,6 +9,7 @@ import {
 } from '@tanstack/react-table';
 
 function TaskTable({ data, globalFilter, onGlobalFilterChange }) {
+  // Define table columns configuration with custom cell renderers
   const columns = useMemo(() => [
     {
       accessorKey: 'taskNumber',

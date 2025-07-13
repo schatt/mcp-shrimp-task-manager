@@ -123,18 +123,20 @@ function App() {
     }
   };
 
+  // Drag and drop handlers for tab reordering
   const handleDragStart = (e, index) => {
     setDraggedTabIndex(index);
     e.dataTransfer.effectAllowed = 'move';
-    e.dataTransfer.setData('text/html', '');
+    e.dataTransfer.setData('text/html', ''); // Required for Firefox compatibility
   };
 
   const handleDragOver = (e, index) => {
-    e.preventDefault();
-    setDragOverIndex(index);
+    e.preventDefault(); // Required to allow drop
+    setDragOverIndex(index); // Visual feedback for drop target
   };
 
   const handleDragEnd = () => {
+    // Clean up drag state regardless of drop success
     setDraggedTabIndex(null);
     setDragOverIndex(null);
   };
@@ -142,23 +144,27 @@ function App() {
   const handleDrop = (e, dropIndex) => {
     e.preventDefault();
     
+    // Ignore invalid drops (same position or invalid state)
     if (draggedTabIndex === null || draggedTabIndex === dropIndex) {
       return;
     }
 
+    // Reorder profiles array using splice operations
     const newProfiles = [...profiles];
     const draggedProfile = newProfiles[draggedTabIndex];
     
-    // Remove dragged item
+    // Remove dragged item from original position
     newProfiles.splice(draggedTabIndex, 1);
     // Insert at new position
     newProfiles.splice(dropIndex, 0, draggedProfile);
     
+    // Update state and clear drag indicators
     setProfiles(newProfiles);
     setDraggedTabIndex(null);
     setDragOverIndex(null);
   };
 
+  // Memoized task statistics to avoid recalculation on every render
   const stats = useMemo(() => {
     const total = tasks.length;
     const completed = tasks.filter(t => t.status === 'completed').length;

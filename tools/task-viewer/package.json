@@ -13,7 +13,8 @@
     "start": "node server.js",
     "stop": "node cli.js stop",
     "restart": "node cli.js restart",
-    "status": "node cli.js status"
+    "status": "node cli.js status",
+    "test": "echo 'See TESTING.md for manual testing procedures'"
   },
   "keywords": [
     "shrimp",
