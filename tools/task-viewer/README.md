@@ -2,6 +2,12 @@
 
 A modern, React-based web interface for viewing and managing Shrimp Task Manager data across multiple profiles. Features a professional tabbed interface, real-time search, configurable auto-refresh, and comprehensive task management capabilities.
 
+## 📸 Screenshot
+
+![Shrimp Task Manager Viewer Interface](screenshot.png)
+
+*Modern tabbed interface showing task management with real-time search, configurable auto-refresh, and professional table display*
+
 ## 🌟 Features
 
 ### 🏷️ Modern Tab Interface
