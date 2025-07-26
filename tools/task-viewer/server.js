@@ -139,9 +139,28 @@ async function startServer() {
             req.on('data', chunk => body += chunk.toString());
             req.on('end', async () => {
                 try {
-                    const formData = new URLSearchParams(body);
-                    const name = formData.get('name');
-                    const taskFileContent = formData.get('taskFile');
+                    let name, taskFileContent;
+                    
+                    // Check if it's multipart form data
+                    const contentType = req.headers['content-type'] || '';
+                    if (contentType.includes('multipart/form-data')) {
+                        // Simple multipart parser for our specific case
+                        const boundary = contentType.split('boundary=')[1];
+                        const parts = body.split(`--${boundary}`);
+                        
+                        for (const part of parts) {
+                            if (part.includes('name="name"')) {
+                                name = part.split('\r\n\r\n')[1]?.split('\r\n')[0];
+                            } else if (part.includes('name="taskFile"')) {
+                                taskFileContent = part.split('\r\n\r\n')[1]?.split('\r\n--')[0];
+                            }
+                        }
+                    } else {
+                        // Original URL-encoded form data
+                        const formData = new URLSearchParams(body);
+                        name = formData.get('name');
+                        taskFileContent = formData.get('taskFile');
+                    }
                     
                     if (!name || !taskFileContent) {
                         res.writeHead(400, { 'Content-Type': 'text/plain' });
