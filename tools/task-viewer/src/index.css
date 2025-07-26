@@ -625,3 +625,166 @@ body {
 .table th.sortable:hover {
   background: #1a4480;
 }
+
+/* Clickable Table Rows */
+.clickable-row {
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.clickable-row:hover {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+/* Task Detail Modal Styles */
+.task-detail-modal {
+  max-width: 800px;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px;
+  border-bottom: 1px solid #2c3e50;
+}
+
+.modal-header h2 {
+  margin: 0;
+  color: #3498db;
+  font-size: 24px;
+}
+
+.modal-close {
+  background: none;
+  border: none;
+  font-size: 28px;
+  color: #7f8c8d;
+  cursor: pointer;
+  padding: 0;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-close:hover {
+  color: #e74c3c;
+}
+
+.modal-body {
+  padding: 20px;
+}
+
+.task-detail-section {
+  margin-bottom: 25px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid #2c3e50;
+}
+
+.task-detail-section:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+  padding-bottom: 0;
+}
+
+.task-detail-section h3 {
+  color: #3498db;
+  margin: 0 0 12px 0;
+  font-size: 18px;
+}
+
+.detail-row {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 10px;
+  align-items: center;
+}
+
+.detail-label {
+  font-weight: 600;
+  color: #95a5a6;
+  min-width: 100px;
+}
+
+.detail-value {
+  color: #ecf0f1;
+}
+
+.detail-content {
+  background: rgba(0, 0, 0, 0.3);
+  padding: 12px;
+  border-radius: 6px;
+  color: #ecf0f1;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.monospace {
+  font-family: 'Consolas', 'Monaco', monospace;
+  font-size: 13px;
+}
+
+.dependency-list {
+  margin: 0;
+  padding-left: 20px;
+  list-style-type: none;
+}
+
+.dependency-list li {
+  margin-bottom: 6px;
+  color: #95a5a6;
+}
+
+.dependency-list li::before {
+  content: "→ ";
+  color: #3498db;
+  font-weight: bold;
+}
+
+.related-files-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.related-file-item {
+  display: flex;
+  gap: 12px;
+  background: rgba(0, 0, 0, 0.3);
+  padding: 12px;
+  border-radius: 6px;
+  align-items: flex-start;
+}
+
+.file-type-icon {
+  font-size: 20px;
+  min-width: 30px;
+  text-align: center;
+}
+
+.file-info {
+  flex: 1;
+}
+
+.file-path {
+  color: #3498db;
+  margin-bottom: 4px;
+  word-break: break-all;
+}
+
+.file-description {
+  color: #95a5a6;
+  font-size: 14px;
+  margin-top: 4px;
+}
+
+.file-lines {
+  color: #7f8c8d;
+  font-size: 12px;
+  margin-top: 4px;
+}

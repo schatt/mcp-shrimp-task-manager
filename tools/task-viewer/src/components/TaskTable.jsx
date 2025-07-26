@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import {
   useReactTable,
   getCoreRowModel,
@@ -7,8 +7,10 @@ import {
   getSortedRowModel,
   flexRender,
 } from '@tanstack/react-table';
+import TaskDetailModal from './TaskDetailModal';
 
 function TaskTable({ data, globalFilter, onGlobalFilterChange }) {
+  const [selectedTask, setSelectedTask] = useState(null);
   // Define table columns configuration with custom cell renderers
   const columns = useMemo(() => [
     {
@@ -153,7 +155,12 @@ function TaskTable({ data, globalFilter, onGlobalFilterChange }) {
         </thead>
         <tbody>
           {table.getRowModel().rows.map(row => (
-            <tr key={row.id}>
+            <tr 
+              key={row.id}
+              className="clickable-row"
+              onClick={() => setSelectedTask(row.original)}
+              title="Click to view task details"
+            >
               {row.getVisibleCells().map(cell => (
                 <td key={cell.id}>
                   {flexRender(cell.column.columnDef.cell, cell.getContext())}
@@ -206,6 +213,13 @@ function TaskTable({ data, globalFilter, onGlobalFilterChange }) {
           </button>
         </div>
       </div>
+      
+      {selectedTask && (
+        <TaskDetailModal 
+          task={selectedTask} 
+          onClose={() => setSelectedTask(null)} 
+        />
+      )}
     </>
   );
 }
