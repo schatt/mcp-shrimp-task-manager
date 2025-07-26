@@ -4,6 +4,7 @@ const http = require('http');
 const fs = require('fs').promises;
 const path = require('path');
 const os = require('os');
+const Busboy = require('busboy');
 
 // Version information
 const VERSION = '2.0.0';
@@ -135,53 +136,77 @@ async function startServer() {
             res.end(JSON.stringify(agents));
             
         } else if (url.pathname === '/api/add-profile' && req.method === 'POST') {
-            let body = '';
-            req.on('data', chunk => body += chunk.toString());
-            req.on('end', async () => {
-                try {
-                    let name, taskFileContent;
-                    
-                    // Check if it's multipart form data
-                    const contentType = req.headers['content-type'] || '';
-                    if (contentType.includes('multipart/form-data')) {
-                        // Simple multipart parser for our specific case
-                        const boundary = contentType.split('boundary=')[1];
-                        const parts = body.split(`--${boundary}`);
-                        
-                        for (const part of parts) {
-                            if (part.includes('name="name"')) {
-                                name = part.split('\r\n\r\n')[1]?.split('\r\n')[0];
-                            } else if (part.includes('name="taskFile"')) {
-                                taskFileContent = part.split('\r\n\r\n')[1]?.split('\r\n--')[0];
-                            }
-                        }
-                    } else {
-                        // Original URL-encoded form data
-                        const formData = new URLSearchParams(body);
-                        name = formData.get('name');
-                        taskFileContent = formData.get('taskFile');
+            const contentType = req.headers['content-type'] || '';
+            
+            if (contentType.includes('multipart/form-data')) {
+                // Handle multipart form data with busboy
+                const busboy = new Busboy({ headers: req.headers });
+                let name = null;
+                let taskFileContent = null;
+                
+                busboy.on('field', (fieldname, value) => {
+                    if (fieldname === 'name') {
+                        name = value;
+                    } else if (fieldname === 'taskFile') {
+                        taskFileContent = value;
                     }
-                    
+                });
+                
+                busboy.on('finish', async () => {
                     if (!name || !taskFileContent) {
                         res.writeHead(400, { 'Content-Type': 'text/plain' });
                         res.end('Missing name or taskFile');
                         return;
                     }
                     
-                    // Save the file content to a temporary location
-                    const tempDir = path.join(os.tmpdir(), 'shrimp-task-viewer');
-                    await fs.mkdir(tempDir, { recursive: true });
-                    const tempFilePath = path.join(tempDir, `${Date.now()}-tasks.json`);
-                    await fs.writeFile(tempFilePath, taskFileContent);
-                    
-                    const agent = await addAgent(name, tempFilePath);
-                    res.writeHead(200, { 'Content-Type': 'application/json' });
-                    res.end(JSON.stringify(agent));
-                } catch (err) {
-                    res.writeHead(500, { 'Content-Type': 'text/plain' });
-                    res.end('Internal server error: ' + err.message);
-                }
-            });
+                    try {
+                        // Save the file content to a temporary location
+                        const tempDir = path.join(os.tmpdir(), 'shrimp-task-viewer');
+                        await fs.mkdir(tempDir, { recursive: true });
+                        const tempFilePath = path.join(tempDir, `${Date.now()}-tasks.json`);
+                        await fs.writeFile(tempFilePath, taskFileContent);
+                        
+                        const agent = await addAgent(name, tempFilePath);
+                        res.writeHead(200, { 'Content-Type': 'application/json' });
+                        res.end(JSON.stringify(agent));
+                    } catch (err) {
+                        res.writeHead(500, { 'Content-Type': 'text/plain' });
+                        res.end('Internal server error: ' + err.message);
+                    }
+                });
+                
+                req.pipe(busboy);
+            } else {
+                // Handle URL-encoded form data
+                let body = '';
+                req.on('data', chunk => body += chunk.toString());
+                req.on('end', async () => {
+                    try {
+                        const formData = new URLSearchParams(body);
+                        const name = formData.get('name');
+                        const taskFileContent = formData.get('taskFile');
+                        
+                        if (!name || !taskFileContent) {
+                            res.writeHead(400, { 'Content-Type': 'text/plain' });
+                            res.end('Missing name or taskFile');
+                            return;
+                        }
+                        
+                        // Save the file content to a temporary location
+                        const tempDir = path.join(os.tmpdir(), 'shrimp-task-viewer');
+                        await fs.mkdir(tempDir, { recursive: true });
+                        const tempFilePath = path.join(tempDir, `${Date.now()}-tasks.json`);
+                        await fs.writeFile(tempFilePath, taskFileContent);
+                        
+                        const agent = await addAgent(name, tempFilePath);
+                        res.writeHead(200, { 'Content-Type': 'application/json' });
+                        res.end(JSON.stringify(agent));
+                    } catch (err) {
+                        res.writeHead(500, { 'Content-Type': 'text/plain' });
+                        res.end('Internal server error: ' + err.message);
+                    }
+                });
+            }
             
         } else if (url.pathname.startsWith('/api/remove-profile/') && req.method === 'DELETE') {
             const agentId = url.pathname.split('/').pop();

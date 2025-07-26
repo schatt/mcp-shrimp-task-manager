@@ -1,9 +1,20 @@
-import '@testing-library/jest-dom'
+import '@testing-library/jest-dom';
+import { cleanup } from '@testing-library/react';
+import { afterEach, beforeEach, vi } from 'vitest';
 
-// Mock fetch globally for tests
-global.fetch = vi.fn()
+// Cleanup after each test
+afterEach(() => {
+  cleanup();
+});
+
+// Mock window.confirm for tests
+global.confirm = vi.fn(() => true);
+
+// Mock fetch for tests
+global.fetch = vi.fn();
 
 // Reset mocks before each test
 beforeEach(() => {
-  vi.clearAllMocks()
-})
+  vi.clearAllMocks();
+  fetch.mockClear();
+});

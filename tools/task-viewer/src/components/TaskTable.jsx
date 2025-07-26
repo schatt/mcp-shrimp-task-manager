@@ -7,7 +7,7 @@ import {
   getSortedRowModel,
   flexRender,
 } from '@tanstack/react-table';
-import TaskDetailModal from './TaskDetailModal';
+import TaskDetailView from './TaskDetailView';
 
 function TaskTable({ data, globalFilter, onGlobalFilterChange }) {
   const [selectedTask, setSelectedTask] = useState(null);
@@ -129,6 +129,17 @@ function TaskTable({ data, globalFilter, onGlobalFilterChange }) {
     );
   }
 
+  // If a task is selected, show the detail view
+  if (selectedTask) {
+    return (
+      <TaskDetailView 
+        task={selectedTask} 
+        onBack={() => setSelectedTask(null)} 
+      />
+    );
+  }
+
+  // Otherwise, show the table
   return (
     <>
       <table className="table">
@@ -213,13 +224,6 @@ function TaskTable({ data, globalFilter, onGlobalFilterChange }) {
           </button>
         </div>
       </div>
-      
-      {selectedTask && (
-        <TaskDetailModal 
-          task={selectedTask} 
-          onClose={() => setSelectedTask(null)} 
-        />
-      )}
     </>
   );
 }

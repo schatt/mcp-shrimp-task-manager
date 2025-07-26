@@ -636,47 +636,60 @@ body {
   background: rgba(255, 255, 255, 0.03);
 }
 
-/* Task Detail Modal Styles */
-.task-detail-modal {
-  max-width: 800px;
-  max-height: 90vh;
-  overflow-y: auto;
+/* Task Detail View Styles */
+.task-detail-view {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: #1a1f2e;
+  border-radius: 8px;
 }
 
-.modal-header {
+.task-detail-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding: 20px;
   border-bottom: 1px solid #2c3e50;
+  background: rgba(0, 0, 0, 0.2);
 }
 
-.modal-header h2 {
+.task-detail-header h2 {
   margin: 0;
   color: #3498db;
   font-size: 24px;
 }
 
-.modal-close {
-  background: none;
+.back-button {
+  background: #2c3e50;
+  color: white;
   border: none;
-  font-size: 28px;
-  color: #7f8c8d;
+  padding: 10px 20px;
+  border-radius: 6px;
   cursor: pointer;
-  padding: 0;
-  width: 32px;
-  height: 32px;
+  font-size: 14px;
   display: flex;
   align-items: center;
-  justify-content: center;
+  gap: 8px;
+  transition: background 0.2s;
 }
 
-.modal-close:hover {
-  color: #e74c3c;
+.back-button:hover {
+  background: #34495e;
 }
 
-.modal-body {
+.task-detail-content {
+  flex: 1;
   padding: 20px;
+  overflow-y: auto;
+}
+
+.task-detail-footer {
+  padding: 20px;
+  border-top: 1px solid #2c3e50;
+  background: rgba(0, 0, 0, 0.2);
+  display: flex;
+  justify-content: center;
 }
 
 .task-detail-section {
