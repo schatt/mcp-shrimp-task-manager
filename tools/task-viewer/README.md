@@ -113,8 +113,8 @@ node server.js
 │ [🔍 Search tasks...] [Total: 6] [Completed: 5] [In Progress: 1] [Pending: 0] │
 ├──────────────────────────────────────────────────────────────────────────┤
 │ #  │ Task Name              │ Status      │ Created    │ Updated    │ Notes│
-│ T1 │ Setup authentication  │ Completed   │ 2024-01-15 │ 2024-01-16 │ ... │
-│ T2 │ Implement dashboard    │ In Progress │ 2024-01-16 │ 2024-01-17 │ ... │
+│ T1 │ Setup authentication  │ Completed   │ 2025-01-12 │ 2025-01-13 │ ... │
+│ T2 │ Implement dashboard    │ In Progress │ 2025-01-13 │ 2025-01-13 │ ... │
 └──────────────────────────────────────────────────────────────────────────┘
 ```
 
@@ -294,7 +294,22 @@ npm run build
 
 ## 📋 Changelog
 
-### Version 1.0.0 (Latest)
+### Version 1.0.3 (Latest) - 2025-01-13
+
+#### 🧪 Testing & Reliability
+- **Comprehensive Test Suite**: Added full test coverage with Vitest
+- **Component Tests**: React Testing Library tests for all components
+- **Integration Tests**: End-to-end testing of server and API endpoints
+- **Bug Fixes**: Resolved multipart form data handling in profile management
+
+### Version 1.0.2 - 2025-01-13
+
+#### 🎨 Task Detail View
+- **In-Tab Navigation**: Replaced modal with seamless in-tab task details
+- **Back Button**: Easy navigation back to task list
+- **Improved UX**: Better workflow without popup interruptions
+
+### Version 1.0.1 - 2025-01-13
 
 #### 🎨 Major UI Overhaul
 - **Modern Tab Interface**: Professional browser-style tabs with drag & drop reordering
@@ -313,11 +328,13 @@ npm run build
 - **Responsive Design**: Mobile-first approach with breakpoint optimization
 - **Performance**: Optimized rendering and efficient state management
 
-#### 🎯 UX Enhancements
-- **Visual Feedback**: Hover states, loading indicators, and transitions
-- **Accessibility**: Full keyboard navigation and screen reader support
-- **Professional Styling**: Cohesive design language throughout
-- **Intuitive Controls**: Logical grouping and placement of interface elements
+### Version 1.0.0 - 2025-01-12
+
+#### 🚀 Initial Release
+- **Basic Viewer**: Initial implementation with vanilla JavaScript
+- **Profile Management**: Add and remove task profiles
+- **Server API**: RESTful endpoints for task data
+- **Auto-Discovery**: Automatic detection of task files
 
 ## 📄 License
 

@@ -1,7 +1,7 @@
 {
   "name": "shrimp-task-viewer",
-  "version": "1.0.2",
-  "description": "Web-based viewer for Shrimp Task Manager data with auto-discovery and testing (port 9998)",
+  "version": "1.0.3",
+  "description": "Web-based viewer for Shrimp Task Manager data with comprehensive testing suite (port 9998)",
   "main": "server.js",
   "bin": {
     "shrimp-viewer": "cli.js"
