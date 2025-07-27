@@ -11,7 +11,7 @@ export const initProjectRulesSchema = z.object({});
 export async function initProjectRules() {
   try {
     // 從生成器獲取提示詞
-    const promptContent = getInitProjectRulesPrompt();
+    const promptContent = await getInitProjectRulesPrompt();
 
     // 返回成功響應
     return {

@@ -13,21 +13,25 @@ import { v4 as uuidv4 } from "uuid";
 import { fileURLToPath } from "url";
 import { exec } from "child_process";
 import { promisify } from "util";
+import { getDataDir, getTasksFilePath, getMemoryDir } from "../utils/paths.js";
 
 // 確保獲取專案資料夾路徑
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const PROJECT_ROOT = path.resolve(__dirname, "../..");
 
-// 數據文件路徑
-const DATA_DIR = process.env.DATA_DIR || path.join(PROJECT_ROOT, "data");
-const TASKS_FILE = path.join(DATA_DIR, "tasks.json");
+// 數據文件路徑（改為異步獲取）
+// const DATA_DIR = getDataDir();
+// const TASKS_FILE = getTasksFilePath();
 
 // 將exec轉換為Promise形式
 const execPromise = promisify(exec);
 
 // 確保數據目錄存在
 async function ensureDataDir() {
+  const DATA_DIR = await getDataDir();
+  const TASKS_FILE = await getTasksFilePath();
+
   try {
     await fs.access(DATA_DIR);
   } catch (error) {
@@ -44,6 +48,7 @@ async function ensureDataDir() {
 // 讀取所有任務
 async function readTasks(): Promise<Task[]> {
   await ensureDataDir();
+  const TASKS_FILE = await getTasksFilePath();
   const data = await fs.readFile(TASKS_FILE, "utf-8");
   const tasks = JSON.parse(data).tasks;
 
@@ -59,6 +64,7 @@ async function readTasks(): Promise<Task[]> {
 // 寫入所有任務
 async function writeTasks(tasks: Task[]): Promise<void> {
   await ensureDataDir();
+  const TASKS_FILE = await getTasksFilePath();
   await fs.writeFile(TASKS_FILE, JSON.stringify({ tasks }, null, 2));
 }
 
@@ -697,7 +703,7 @@ export async function clearAllTasks(): Promise<{
     const backupFileName = `tasks_memory_${timestamp}.json`;
 
     // 確保 memory 目錄存在
-    const MEMORY_DIR = path.join(DATA_DIR, "memory");
+    const MEMORY_DIR = await getMemoryDir();
     try {
       await fs.access(MEMORY_DIR);
     } catch (error) {
@@ -751,7 +757,7 @@ export async function searchTasksWithCommand(
   let memoryTasks: Task[] = [];
 
   // 搜尋記憶資料夾中的任務
-  const MEMORY_DIR = path.join(DATA_DIR, "memory");
+  const MEMORY_DIR = await getMemoryDir();
 
   try {
     // 確保記憶資料夾存在

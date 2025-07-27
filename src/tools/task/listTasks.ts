@@ -55,7 +55,7 @@ export async function listTasks({ status }: z.infer<typeof listTasksSchema>) {
   }, {} as Record<string, typeof tasks>);
 
   // 使用prompt生成器獲取最終prompt
-  const prompt = getListTasksPrompt({
+  const prompt = await getListTasksPrompt({
     status,
     tasks: tasksByStatus,
     allTasks: filteredTasks,

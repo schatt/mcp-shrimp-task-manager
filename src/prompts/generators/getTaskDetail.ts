@@ -24,14 +24,16 @@ export interface GetTaskDetailPromptParams {
  * @param params prompt 參數
  * @returns 生成的 prompt
  */
-export function getGetTaskDetailPrompt(
+export async function getGetTaskDetailPrompt(
   params: GetTaskDetailPromptParams
-): string {
+): Promise<string> {
   const { taskId, task, error } = params;
 
   // 如果有錯誤，顯示錯誤訊息
   if (error) {
-    const errorTemplate = loadPromptFromTemplate("getTaskDetail/error.md");
+    const errorTemplate = await loadPromptFromTemplate(
+      "getTaskDetail/error.md"
+    );
     return generatePrompt(errorTemplate, {
       errorMessage: error,
     });
@@ -39,7 +41,7 @@ export function getGetTaskDetailPrompt(
 
   // 如果找不到任務，顯示找不到任務的訊息
   if (!task) {
-    const notFoundTemplate = loadPromptFromTemplate(
+    const notFoundTemplate = await loadPromptFromTemplate(
       "getTaskDetail/notFound.md"
     );
     return generatePrompt(notFoundTemplate, {
@@ -49,7 +51,9 @@ export function getGetTaskDetailPrompt(
 
   let notesPrompt = "";
   if (task.notes) {
-    const notesTemplate = loadPromptFromTemplate("getTaskDetail/notes.md");
+    const notesTemplate = await loadPromptFromTemplate(
+      "getTaskDetail/notes.md"
+    );
     notesPrompt = generatePrompt(notesTemplate, {
       notes: task.notes,
     });
@@ -57,7 +61,7 @@ export function getGetTaskDetailPrompt(
 
   let dependenciesPrompt = "";
   if (task.dependencies && task.dependencies.length > 0) {
-    const dependenciesTemplate = loadPromptFromTemplate(
+    const dependenciesTemplate = await loadPromptFromTemplate(
       "getTaskDetail/dependencies.md"
     );
     dependenciesPrompt = generatePrompt(dependenciesTemplate, {
@@ -69,7 +73,7 @@ export function getGetTaskDetailPrompt(
 
   let implementationGuidePrompt = "";
   if (task.implementationGuide) {
-    const implementationGuideTemplate = loadPromptFromTemplate(
+    const implementationGuideTemplate = await loadPromptFromTemplate(
       "getTaskDetail/implementationGuide.md"
     );
     implementationGuidePrompt = generatePrompt(implementationGuideTemplate, {
@@ -79,7 +83,7 @@ export function getGetTaskDetailPrompt(
 
   let verificationCriteriaPrompt = "";
   if (task.verificationCriteria) {
-    const verificationCriteriaTemplate = loadPromptFromTemplate(
+    const verificationCriteriaTemplate = await loadPromptFromTemplate(
       "getTaskDetail/verificationCriteria.md"
     );
     verificationCriteriaPrompt = generatePrompt(verificationCriteriaTemplate, {
@@ -89,7 +93,7 @@ export function getGetTaskDetailPrompt(
 
   let relatedFilesPrompt = "";
   if (task.relatedFiles && task.relatedFiles.length > 0) {
-    const relatedFilesTemplate = loadPromptFromTemplate(
+    const relatedFilesTemplate = await loadPromptFromTemplate(
       "getTaskDetail/relatedFiles.md"
     );
     relatedFilesPrompt = generatePrompt(relatedFilesTemplate, {
@@ -106,7 +110,7 @@ export function getGetTaskDetailPrompt(
 
   let complatedSummaryPrompt = "";
   if (task.completedAt) {
-    const complatedSummaryTemplate = loadPromptFromTemplate(
+    const complatedSummaryTemplate = await loadPromptFromTemplate(
       "getTaskDetail/complatedSummary.md"
     );
     complatedSummaryPrompt = generatePrompt(complatedSummaryTemplate, {
@@ -115,7 +119,7 @@ export function getGetTaskDetailPrompt(
     });
   }
 
-  const indexTemplate = loadPromptFromTemplate("getTaskDetail/index.md");
+  const indexTemplate = await loadPromptFromTemplate("getTaskDetail/index.md");
 
   // 開始構建基本 prompt
   let prompt = generatePrompt(indexTemplate, {

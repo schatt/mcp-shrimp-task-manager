@@ -25,20 +25,24 @@ export interface ClearAllTasksPromptParams {
  * @param params prompt 參數
  * @returns 生成的 prompt
  */
-export function getClearAllTasksPrompt(
+export async function getClearAllTasksPrompt(
   params: ClearAllTasksPromptParams
-): string {
+): Promise<string> {
   const { confirm, success, message, backupFile, isEmpty } = params;
 
   // 處理未確認的情況
   if (confirm === false) {
-    const cancelTemplate = loadPromptFromTemplate("clearAllTasks/cancel.md");
+    const cancelTemplate = await loadPromptFromTemplate(
+      "clearAllTasks/cancel.md"
+    );
     return generatePrompt(cancelTemplate, {});
   }
 
   // 處理無任務需要清除的情況
   if (isEmpty) {
-    const emptyTemplate = loadPromptFromTemplate("clearAllTasks/empty.md");
+    const emptyTemplate = await loadPromptFromTemplate(
+      "clearAllTasks/empty.md"
+    );
     return generatePrompt(emptyTemplate, {});
   }
 
@@ -47,12 +51,15 @@ export function getClearAllTasksPrompt(
 
   // 使用模板生成 backupInfo
   const backupInfo = backupFile
-    ? generatePrompt(loadPromptFromTemplate("clearAllTasks/backupInfo.md"), {
-        backupFile,
-      })
+    ? generatePrompt(
+        await loadPromptFromTemplate("clearAllTasks/backupInfo.md"),
+        {
+          backupFile,
+        }
+      )
     : "";
 
-  const indexTemplate = loadPromptFromTemplate("clearAllTasks/index.md");
+  const indexTemplate = await loadPromptFromTemplate("clearAllTasks/index.md");
   const prompt = generatePrompt(indexTemplate, {
     responseTitle,
     message,

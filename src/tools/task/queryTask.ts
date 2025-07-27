@@ -44,7 +44,7 @@ export async function queryTask({
     const results = await searchTasksWithCommand(query, isId, page, pageSize);
 
     // 使用prompt生成器獲取最終prompt
-    const prompt = getQueryTaskPrompt({
+    const prompt = await getQueryTaskPrompt({
       query,
       isId,
       tasks: results.tasks,

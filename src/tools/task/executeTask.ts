@@ -126,7 +126,7 @@ export async function executeTask({
     }
 
     // 使用prompt生成器獲取最終prompt
-    const prompt = getExecuteTaskPrompt({
+    const prompt = await getExecuteTaskPrompt({
       task,
       complexityAssessment,
       relatedFilesSummary,

@@ -26,12 +26,16 @@ export interface DeleteTaskPromptParams {
  * @param params prompt 參數
  * @returns 生成的 prompt
  */
-export function getDeleteTaskPrompt(params: DeleteTaskPromptParams): string {
+export async function getDeleteTaskPrompt(
+  params: DeleteTaskPromptParams
+): Promise<string> {
   const { taskId, task, success, message, isTaskCompleted } = params;
 
   // 處理任務不存在的情況
   if (!task) {
-    const notFoundTemplate = loadPromptFromTemplate("deleteTask/notFound.md");
+    const notFoundTemplate = await loadPromptFromTemplate(
+      "deleteTask/notFound.md"
+    );
     return generatePrompt(notFoundTemplate, {
       taskId,
     });
@@ -39,7 +43,9 @@ export function getDeleteTaskPrompt(params: DeleteTaskPromptParams): string {
 
   // 處理任務已完成的情況
   if (isTaskCompleted) {
-    const completedTemplate = loadPromptFromTemplate("deleteTask/completed.md");
+    const completedTemplate = await loadPromptFromTemplate(
+      "deleteTask/completed.md"
+    );
     return generatePrompt(completedTemplate, {
       taskId: task.id,
       taskName: task.name,
@@ -48,7 +54,7 @@ export function getDeleteTaskPrompt(params: DeleteTaskPromptParams): string {
 
   // 處理刪除成功或失敗的情況
   const responseTitle = success ? "Success" : "Failure";
-  const indexTemplate = loadPromptFromTemplate("deleteTask/index.md");
+  const indexTemplate = await loadPromptFromTemplate("deleteTask/index.md");
   const prompt = generatePrompt(indexTemplate, {
     responseTitle,
     message,

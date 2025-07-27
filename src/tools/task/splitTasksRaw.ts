@@ -247,7 +247,7 @@ export async function splitTasksRaw({
     }
 
     // 使用prompt生成器獲取最終prompt
-    const prompt = getSplitTasksPrompt({
+    const prompt = await getSplitTasksPrompt({
       updateMode,
       createdTasks,
       allTasks,

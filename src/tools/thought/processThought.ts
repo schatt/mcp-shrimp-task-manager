@@ -74,7 +74,7 @@ export async function processThought(
     }
 
     // 格式化思維輸出
-    const formattedThought = getProcessThoughtPrompt(thoughtData);
+    const formattedThought = await getProcessThoughtPrompt(thoughtData);
 
     // 返回成功響應
     return {

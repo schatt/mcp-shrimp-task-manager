@@ -32,7 +32,7 @@ export async function analyzeTask({
   previousAnalysis,
 }: z.infer<typeof analyzeTaskSchema>) {
   // 使用prompt生成器獲取最終prompt
-  const prompt = getAnalyzeTaskPrompt({
+  const prompt = await getAnalyzeTaskPrompt({
     summary,
     initialConcept,
     previousAnalysis,

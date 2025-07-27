@@ -84,7 +84,7 @@ export async function updateTaskContent({
           content: [
             {
               type: "text" as const,
-              text: getUpdateTaskContentPrompt({
+              text: await getUpdateTaskContentPrompt({
                 taskId,
                 validationError:
                   "行號設置無效：必須同時設置起始行和結束行，且起始行必須小於結束行",
@@ -111,7 +111,7 @@ export async function updateTaskContent({
       content: [
         {
           type: "text" as const,
-          text: getUpdateTaskContentPrompt({
+          text: await getUpdateTaskContentPrompt({
             taskId,
             emptyUpdate: true,
           }),
@@ -128,7 +128,7 @@ export async function updateTaskContent({
       content: [
         {
           type: "text" as const,
-          text: getUpdateTaskContentPrompt({
+          text: await getUpdateTaskContentPrompt({
             taskId,
           }),
         },
@@ -164,7 +164,7 @@ export async function updateTaskContent({
     content: [
       {
         type: "text" as const,
-        text: getUpdateTaskContentPrompt({
+        text: await getUpdateTaskContentPrompt({
           taskId,
           task,
           success: result.success,

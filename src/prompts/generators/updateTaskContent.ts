@@ -28,9 +28,9 @@ export interface UpdateTaskContentPromptParams {
  * @param params prompt 參數
  * @returns 生成的 prompt
  */
-export function getUpdateTaskContentPrompt(
+export async function getUpdateTaskContentPrompt(
   params: UpdateTaskContentPromptParams
-): string {
+): Promise<string> {
   const {
     taskId,
     task,
@@ -43,7 +43,7 @@ export function getUpdateTaskContentPrompt(
 
   // 處理任務不存在的情況
   if (!task) {
-    const notFoundTemplate = loadPromptFromTemplate(
+    const notFoundTemplate = await loadPromptFromTemplate(
       "updateTaskContent/notFound.md"
     );
     return generatePrompt(notFoundTemplate, {
@@ -53,7 +53,7 @@ export function getUpdateTaskContentPrompt(
 
   // 處理驗證錯誤的情況
   if (validationError) {
-    const validationTemplate = loadPromptFromTemplate(
+    const validationTemplate = await loadPromptFromTemplate(
       "updateTaskContent/validation.md"
     );
     return generatePrompt(validationTemplate, {
@@ -63,7 +63,7 @@ export function getUpdateTaskContentPrompt(
 
   // 處理空更新的情況
   if (emptyUpdate) {
-    const emptyUpdateTemplate = loadPromptFromTemplate(
+    const emptyUpdateTemplate = await loadPromptFromTemplate(
       "updateTaskContent/emptyUpdate.md"
     );
     return generatePrompt(emptyUpdateTemplate, {});
@@ -75,14 +75,14 @@ export function getUpdateTaskContentPrompt(
 
   // 更新成功且有更新後的任務詳情
   if (success && updatedTask) {
-    const successTemplate = loadPromptFromTemplate(
+    const successTemplate = await loadPromptFromTemplate(
       "updateTaskContent/success.md"
     );
 
     // 編合相關文件信息
     let filesContent = "";
     if (updatedTask.relatedFiles && updatedTask.relatedFiles.length > 0) {
-      const fileDetailsTemplate = loadPromptFromTemplate(
+      const fileDetailsTemplate = await loadPromptFromTemplate(
         "updateTaskContent/fileDetails.md"
       );
 
@@ -130,7 +130,9 @@ export function getUpdateTaskContentPrompt(
     });
   }
 
-  const indexTemplate = loadPromptFromTemplate("updateTaskContent/index.md");
+  const indexTemplate = await loadPromptFromTemplate(
+    "updateTaskContent/index.md"
+  );
   const prompt = generatePrompt(indexTemplate, {
     responseTitle,
     message: content,

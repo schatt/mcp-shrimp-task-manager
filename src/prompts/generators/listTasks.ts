@@ -24,12 +24,16 @@ export interface ListTasksPromptParams {
  * @param params prompt 參數
  * @returns 生成的 prompt
  */
-export function getListTasksPrompt(params: ListTasksPromptParams): string {
+export async function getListTasksPrompt(
+  params: ListTasksPromptParams
+): Promise<string> {
   const { status, tasks, allTasks } = params;
 
   // 如果沒有任務，顯示通知
   if (allTasks.length === 0) {
-    const notFoundTemplate = loadPromptFromTemplate("listTasks/notFound.md");
+    const notFoundTemplate = await loadPromptFromTemplate(
+      "listTasks/notFound.md"
+    );
     const statusText = status === "all" ? "任何" : `任何 ${status} 的`;
     return generatePrompt(notFoundTemplate, {
       statusText: statusText,
@@ -58,7 +62,9 @@ export function getListTasksPrompt(params: ListTasksPromptParams): string {
   }
 
   let taskDetails = "";
-  let taskDetailsTemplate = loadPromptFromTemplate("listTasks/taskDetails.md");
+  let taskDetailsTemplate = await loadPromptFromTemplate(
+    "listTasks/taskDetails.md"
+  );
   // 添加每個狀態下的詳細任務
   for (const statusType of Object.values(TaskStatus)) {
     const tasksWithStatus = tasks[statusType] || [];
@@ -88,7 +94,7 @@ export function getListTasksPrompt(params: ListTasksPromptParams): string {
     }
   }
 
-  const indexTemplate = loadPromptFromTemplate("listTasks/index.md");
+  const indexTemplate = await loadPromptFromTemplate("listTasks/index.md");
   let prompt = generatePrompt(indexTemplate, {
     statusCount: statusCounts,
     taskDetailsTemplate: taskDetails,

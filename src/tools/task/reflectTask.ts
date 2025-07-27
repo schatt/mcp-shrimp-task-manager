@@ -24,7 +24,7 @@ export async function reflectTask({
   analysis,
 }: z.infer<typeof reflectTaskSchema>) {
   // 使用prompt生成器獲取最終prompt
-  const prompt = getReflectTaskPrompt({
+  const prompt = await getReflectTaskPrompt({
     summary,
     analysis,
   });

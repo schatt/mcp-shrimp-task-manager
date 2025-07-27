@@ -22,8 +22,10 @@ export interface ReflectTaskPromptParams {
  * @param params prompt 參數
  * @returns 生成的 prompt
  */
-export function getReflectTaskPrompt(params: ReflectTaskPromptParams): string {
-  const indexTemplate = loadPromptFromTemplate("reflectTask/index.md");
+export async function getReflectTaskPrompt(
+  params: ReflectTaskPromptParams
+): Promise<string> {
+  const indexTemplate = await loadPromptFromTemplate("reflectTask/index.md");
   const prompt = generatePrompt(indexTemplate, {
     summary: params.summary,
     analysis: params.analysis,

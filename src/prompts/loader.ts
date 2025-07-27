@@ -6,6 +6,7 @@
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
+import { getDataDir } from "../utils/paths.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -79,22 +80,22 @@ export function generatePrompt(
  * @returns 模板內容
  * @throws Error 如果找不到模板文件
  */
-export function loadPromptFromTemplate(templatePath: string): string {
+export async function loadPromptFromTemplate(
+  templatePath: string
+): Promise<string> {
   const templateSetName = process.env.TEMPLATES_USE || "en";
-  const dataDir = process.env.DATA_DIR;
+  const dataDir = await getDataDir();
   const builtInTemplatesBaseDir = __dirname;
 
   let finalPath = "";
   const checkedPaths: string[] = []; // 用於更詳細的錯誤報告
 
   // 1. 檢查 DATA_DIR 中的自定義路徑
-  if (dataDir) {
-    // path.resolve 可以處理 templateSetName 是絕對路徑的情況
-    const customFilePath = path.resolve(dataDir, templateSetName, templatePath);
-    checkedPaths.push(`Custom: ${customFilePath}`);
-    if (fs.existsSync(customFilePath)) {
-      finalPath = customFilePath;
-    }
+  // path.resolve 可以處理 templateSetName 是絕對路徑的情況
+  const customFilePath = path.resolve(dataDir, templateSetName, templatePath);
+  checkedPaths.push(`Custom: ${customFilePath}`);
+  if (fs.existsSync(customFilePath)) {
+    finalPath = customFilePath;
   }
 
   // 2. 如果未找到自定義路徑，檢查特定的內建模板目錄

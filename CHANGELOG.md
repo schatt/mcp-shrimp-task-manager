@@ -32,7 +32,6 @@
 - **Node.js HTTP Server**: RESTful API endpoints for task and profile management
 - **HTML5 Drag & Drop**: Native browser API for intuitive tab reordering
 - **CSS Grid & Flexbox**: Responsive layout system with mobile-first approach
-
 ### Changed
 
 - Updated documentation to reflect new configuration options (99baa0f, 8771a5b)
