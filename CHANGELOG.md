@@ -17,6 +17,8 @@
   - Profile management with add/remove capabilities
   - Hot Module Replacement for development
   - Comprehensive documentation with screenshots
+- Added support for ListRoots protocol and optimized DATA_DIR configuration method (99baa0f)
+- Added WEB_PORT environment variable to customize WebGUI port number (8771a5b)
 
 ### Enhanced
 
@@ -30,6 +32,14 @@
 - **Node.js HTTP Server**: RESTful API endpoints for task and profile management
 - **HTML5 Drag & Drop**: Native browser API for intuitive tab reordering
 - **CSS Grid & Flexbox**: Responsive layout system with mobile-first approach
+
+### Changed
+
+- Updated documentation to reflect new configuration options (99baa0f, 8771a5b)
+
+### Fixed
+
+- Fix #56: Added configurable WebGUI port to avoid port conflicts (8771a5b)
 
 ## [1.0.20]
 

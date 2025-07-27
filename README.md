@@ -95,33 +95,6 @@ Due to LLM token limits, context may be lost during lengthy conversations. If th
 
 You can switch the language of system prompts by setting the `TEMPLATES_USE` environment variable. It supports `en` (English) and `zh` (Traditional Chinese) by default. Furthermore, you can copy an existing template directory (e.g., `src/prompts/templates_en`) to the location specified by `DATA_DIR`, modify it, and then point `TEMPLATES_USE` to your custom template directory name. This allows for deeper prompt customization. For detailed instructions.
 
-## 🖥️ <a id="task-viewer-tool"></a>Task Viewer Tool
-
-The Task Viewer is a modern, React-based web interface that provides a professional dashboard for viewing and managing Shrimp Task Manager data across multiple profiles.
-
-### 📸 Interface Preview
-
-![Task Viewer Interface](tools/task-viewer/screenshot.png)
-
-*Modern tabbed interface showing task management with real-time search, configurable auto-refresh, and professional table display*
-
-### ✨ Key Features
-
-- **🏷️ Modern Tab Interface**: Browser-style draggable tabs for switching between profiles
-- **🔍 Advanced Search & Filtering**: Real-time task filtering with sortable columns 
-- **🔄 Intelligent Auto-Refresh**: Configurable intervals from 5 seconds to 5 minutes
-- **📊 Task Statistics**: Live counts for Total, Completed, In Progress, and Pending tasks
-- **🎨 Professional UI/UX**: Dark theme optimized for development environments
-- **📱 Responsive Design**: Works perfectly on desktop, tablet, and mobile devices
-
-### 🚀 Quick Access
-
-- **📁 Tool Directory**: [/tools/task-viewer](tools/task-viewer)
-- **📖 Full Documentation**: [Task Viewer README](tools/task-viewer/README.md)
-- **⚡ Quick Start**: Navigate to the tool directory and run `npm install && npm run build && npm start`
-
-The Task Viewer provides an intuitive way to monitor your task management workflow with professional-grade features and modern web technologies.
-
 ## 🔬 <a id="research-mode"></a>Research Mode
 
 Shrimp Task Manager includes a specialized research mode designed for systematic technical investigation and knowledge gathering.
