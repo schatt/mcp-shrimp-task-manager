@@ -80,6 +80,45 @@ node server.js
 # Access at http://127.0.0.1:9998
 ```
 
+### Running as a System Service (Linux/systemd)
+
+For production deployments, you can run the Task Viewer as a systemd service that starts automatically on boot:
+
+```bash
+# Install as a systemd service
+sudo ./install-service.sh
+
+# The service will now:
+# - Start automatically on system boot
+# - Restart automatically if it crashes
+# - Run on port 9998 (configurable)
+```
+
+#### Service Management Commands
+
+```bash
+# Check service status
+systemctl status shrimp-task-viewer
+
+# Stop the service
+sudo systemctl stop shrimp-task-viewer
+
+# Start the service
+sudo systemctl start shrimp-task-viewer
+
+# Restart the service
+sudo systemctl restart shrimp-task-viewer
+
+# View service logs
+journalctl -u shrimp-task-viewer -f
+
+# Disable auto-start on boot
+sudo systemctl disable shrimp-task-viewer
+
+# Uninstall the service completely
+sudo ./uninstall-service.sh
+```
+
 ## 🖥️ Usage
 
 ### Getting Started

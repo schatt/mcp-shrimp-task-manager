@@ -1,10 +1,15 @@
 #!/usr/bin/env node
 
-const http = require('http');
-const fs = require('fs').promises;
-const path = require('path');
-const os = require('os');
-const Busboy = require('busboy');
+import http from 'http';
+import { promises as fs } from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import os from 'os';
+import Busboy from 'busboy';
+
+// Get __dirname equivalent in ES modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // Version information
 const VERSION = '2.0.0';
@@ -279,11 +284,9 @@ async function startServer() {
 }
 
 // Start the server
-if (require.main === module) {
-    startServer().catch(err => {
-        console.error('Failed to start server:', err);
-        process.exit(1);
-    });
-}
+startServer().catch(err => {
+    console.error('Failed to start server:', err);
+    process.exit(1);
+});
 
-module.exports = { startServer };
+export { startServer };
