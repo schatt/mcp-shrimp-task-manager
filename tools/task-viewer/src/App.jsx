@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import TaskTable from './components/TaskTable';
+import ReleaseNotes from './components/ReleaseNotes';
 
 function App() {
   const [profiles, setProfiles] = useState([]);
@@ -13,6 +14,12 @@ function App() {
   const [showAddProfile, setShowAddProfile] = useState(false);
   const [draggedTabIndex, setDraggedTabIndex] = useState(null);
   const [dragOverIndex, setDragOverIndex] = useState(null);
+  const [projectRoot, setProjectRoot] = useState(null);
+  const [showReleaseNotesTab, setShowReleaseNotesTab] = useState(false);
+  const [showEditProfile, setShowEditProfile] = useState(false);
+  const [editingProfile, setEditingProfile] = useState(null);
+  const [isInDetailView, setIsInDetailView] = useState(false);
+  const [forceResetDetailView, setForceResetDetailView] = useState(0);
 
   // Auto-refresh interval
   useEffect(() => {
@@ -33,12 +40,43 @@ function App() {
     loadProfiles();
   }, []);
 
+  // Save selected profile to localStorage when it changes
+  useEffect(() => {
+    if (selectedProfile) {
+      localStorage.setItem('selectedProfile', selectedProfile);
+      if (selectedProfile === 'release-notes') {
+        localStorage.setItem('showReleaseNotesTab', 'true');
+      }
+    }
+  }, [selectedProfile]);
+
   const loadProfiles = async () => {
     try {
       const response = await fetch('/api/agents');
       if (!response.ok) throw new Error('Failed to load profiles');
       const data = await response.json();
       setProfiles(data);
+      
+      // On initial load, select the appropriate profile
+      if (!selectedProfile && data.length > 0) {
+        // Try to restore the last selected profile
+        const savedProfile = localStorage.getItem('selectedProfile');
+        const savedShowReleaseNotes = localStorage.getItem('showReleaseNotesTab') === 'true';
+        
+        // Check if release notes was the last selected tab
+        if (savedProfile === 'release-notes' && savedShowReleaseNotes) {
+          setShowReleaseNotesTab(true);
+          setSelectedProfile('release-notes');
+          // Clear the flag so it doesn't persist incorrectly
+          localStorage.removeItem('showReleaseNotesTab');
+        } else if (savedProfile && data.some(p => p.id === savedProfile)) {
+          // Restore the last selected profile if it still exists
+          handleProfileChange(savedProfile);
+        } else {
+          // Select the first profile by default
+          handleProfileChange(data[0].id);
+        }
+      }
     } catch (err) {
       setError('Failed to load profiles: ' + err.message);
     }
@@ -61,6 +99,7 @@ function App() {
       
       const data = await response.json();
       setTasks(data.tasks || []);
+      setProjectRoot(data.projectRoot || null);
     } catch (err) {
       setError('❌ Error loading tasks: ' + err.message);
       setTasks([]);
@@ -70,28 +109,64 @@ function App() {
   };
 
   const handleProfileChange = (profileId) => {
+    console.log('handleProfileChange:', profileId, 'selectedProfile:', selectedProfile, 'isInDetailView:', isInDetailView);
+    // If clicking the same tab and we're in detail view, just refresh to go back to list
+    if (profileId === selectedProfile && isInDetailView) {
+      console.log('Resetting detail view...');
+      // Force reset the detail view
+      setForceResetDetailView(prev => {
+        console.log('Setting forceResetDetailView from', prev, 'to', prev + 1);
+        return prev + 1;
+      });
+      setIsInDetailView(false);
+      return;
+    }
+    
+    if (profileId === 'release-notes') {
+      setSelectedProfile('release-notes');
+      return;
+    }
     setSelectedProfile(profileId);
     setGlobalFilter(''); // Clear search when switching profiles
     loadTasks(profileId);
   };
 
-  const handleAddProfile = async (name, file) => {
+  const handleAddProfile = async (name, file, projectRoot) => {
     try {
-      const formData = new FormData();
-      formData.append('name', name);
-      formData.append('taskFile', await file.text());
+      const taskFileContent = await file.text();
 
       const response = await fetch('/api/add-profile', {
         method: 'POST',
-        body: formData
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          name: name,
+          taskFile: taskFileContent,
+          projectRoot: projectRoot
+        })
       });
 
       if (!response.ok) {
         throw new Error('Failed to add profile');
       }
 
-      await loadProfiles();
+      const newProfile = await response.json();
+      console.log('New profile created:', newProfile);
       setShowAddProfile(false);
+      
+      // Load profiles first, then select the new one
+      await loadProfiles();
+      
+      // Use setTimeout to ensure state updates have propagated
+      setTimeout(() => {
+        if (newProfile && newProfile.id) {
+          console.log('Auto-selecting profile:', newProfile.id);
+          setSelectedProfile(newProfile.id);
+          setGlobalFilter(''); // Clear search when switching profiles
+          loadTasks(newProfile.id);
+        }
+      }, 100);
     } catch (err) {
       setError('Failed to add profile: ' + err.message);
     }
@@ -122,6 +197,41 @@ function App() {
       setError('Failed to remove profile: ' + err.message);
     }
   };
+
+  const handleUpdateProfile = async (profileId, updates) => {
+    try {
+      const response = await fetch(`/api/update-profile/${profileId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updates)
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to update profile: ${response.status}`);
+      }
+
+      const updatedProfile = await response.json();
+      
+      // Update profiles in state
+      setProfiles(prev => prev.map(p => 
+        p.id === profileId ? { ...p, ...updatedProfile } : p
+      ));
+
+      // Update projectRoot if it was changed
+      if (updates.projectRoot !== undefined) {
+        setProjectRoot(updates.projectRoot);
+      }
+
+      setShowEditProfile(false);
+      setEditingProfile(null);
+
+      // Reload tasks to reflect any changes
+      loadTasks(profileId);
+    } catch (err) {
+      setError('Failed to update profile: ' + err.message);
+    }
+  };
+
 
   // Drag and drop handlers for tab reordering
   const handleDragStart = (e, index) => {
@@ -179,9 +289,13 @@ function App() {
       <header className="header">
         <h1>🦐 Shrimp Task Manager Viewer</h1>
         <div className="version-info">
-          <span>v1.0.0</span> • 
-          <a href="https://github.com/cjo4m06/mcp-shrimp-task-manager/releases" target="_blank" rel="noopener noreferrer">
-            Release Notes
+          <span>v2.1.0</span> • 
+          <a href="#" onClick={(e) => {
+            e.preventDefault();
+            setShowReleaseNotesTab(true);
+            setSelectedProfile('release-notes');
+          }}>
+            Task Viewer Releases
           </a>
         </div>
         <p>Web-based dashboard for viewing and monitoring task data across multiple profiles</p>
@@ -219,6 +333,30 @@ function App() {
                   </button>
                 </div>
               ))}
+              {showReleaseNotesTab && (
+                <div 
+                  className={`tab ${selectedProfile === 'release-notes' ? 'active' : ''}`}
+                  name="release-notes-tab"
+                  onClick={() => handleProfileChange('release-notes')}
+                  title="View release notes"
+                >
+                  <span className="tab-name">📋 Release Notes</span>
+                  <button 
+                    className="tab-close-btn"
+                    name="close-release-notes-tab-button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setShowReleaseNotesTab(false);
+                      if (selectedProfile === 'release-notes' && profiles.length > 0) {
+                        handleProfileChange(profiles[0].id);
+                      }
+                    }}
+                    title="Close release notes"
+                  >
+                    ×
+                  </button>
+                </div>
+              )}
               <button 
                 className="add-tab-btn"
                 name="add-new-tab-button"
@@ -232,7 +370,11 @@ function App() {
         </div>
       </div>
 
-      {selectedProfile && (
+      {selectedProfile === 'release-notes' ? (
+        <div className="content-container" name="release-notes-content-area">
+          <ReleaseNotes />
+        </div>
+      ) : selectedProfile && (
         <>
           <div className="content-container" name="main-content-area">
             <div className="stats-and-search-container" name="stats-and-search-row">
@@ -268,6 +410,21 @@ function App() {
               </div>
 
               <div className="controls-right" name="right-side-controls">
+                <button 
+                  name="edit-profile-button"
+                  className="edit-profile-button"
+                  onClick={() => {
+                    const currentProfile = profiles.find(p => p.id === selectedProfile);
+                    if (currentProfile) {
+                      setShowEditProfile(true);
+                      setEditingProfile(currentProfile);
+                    }
+                  }}
+                  disabled={!selectedProfile || selectedProfile === 'release-notes'}
+                  title="Edit profile settings (project root, etc.)"
+                >
+                  ⚙️ Edit
+                </button>
                 <button 
                   name="refresh-profile-button"
                   className="refresh-button profile-refresh"
@@ -314,6 +471,9 @@ function App() {
               data={tasks} 
               globalFilter={globalFilter}
               onGlobalFilterChange={setGlobalFilter}
+              projectRoot={projectRoot}
+              onDetailViewChange={setIsInDetailView}
+              resetDetailView={forceResetDetailView}
             />
           </div>
         </>
@@ -344,8 +504,9 @@ function App() {
               const formData = new FormData(e.target);
               const name = formData.get('name');
               const file = formData.get('file');
+              const projectRoot = formData.get('projectRoot');
               if (name && file) {
-                handleAddProfile(name, file);
+                handleAddProfile(name, file, projectRoot);
               }
             }}>
               <div className="form-group" name="profile-name-group">
@@ -370,6 +531,17 @@ function App() {
                   required
                 />
               </div>
+              <div className="form-group" name="project-root-group">
+                <label htmlFor="projectRoot">Project Root Path (optional):</label>
+                <input 
+                  type="text" 
+                  id="projectRoot"
+                  name="projectRoot"
+                  placeholder="e.g., /home/user/my-project"
+                  title="Enter the absolute path to the project root directory"
+                />
+                <small className="form-hint">This enables clickable file links that open in VS Code</small>
+              </div>
               <div className="form-actions" name="modal-form-buttons">
                 <button 
                   type="submit" 
@@ -393,6 +565,77 @@ function App() {
           </div>
         </div>
       )}
+
+{showEditProfile && editingProfile && (
+        <div className="modal-overlay" name="edit-profile-modal-overlay" onClick={() => {
+          setShowEditProfile(false);
+          setEditingProfile(null);
+        }} title="Click outside to close">
+          <div className="modal-content" name="edit-profile-modal" onClick={(e) => e.stopPropagation()} title="Edit profile settings">
+            <h3>Edit Profile Settings</h3>
+            <form name="edit-profile-form" onSubmit={(e) => {
+              e.preventDefault();
+              const formData = new FormData(e.target);
+              const name = formData.get('name');
+              const projectRoot = formData.get('projectRoot');
+              handleUpdateProfile(editingProfile.id, { 
+                name: name.trim(),
+                projectRoot: projectRoot || null 
+              });
+            }}>
+              <div className="form-group" name="profile-name-group">
+                <label htmlFor="editProfileName">Profile Name:</label>
+                <input 
+                  type="text" 
+                  id="editProfileName"
+                  name="name"
+                  defaultValue={editingProfile.name}
+                  placeholder="e.g., Team Alpha Tasks"
+                  title="Edit the profile name"
+                  required
+                />
+              </div>
+              <div className="form-group" name="project-root-group">
+                <label htmlFor="editProjectRoot">Project Root (optional):</label>
+                <input 
+                  type="text" 
+                  id="editProjectRoot"
+                  name="projectRoot"
+                  defaultValue={editingProfile.projectRoot || ''}
+                  placeholder="e.g., /home/user/projects/my-project"
+                  title="Set the project root path to enable VS Code file links"
+                />
+                <span className="form-hint">
+                  Set this to enable clickable VS Code links for task files
+                </span>
+              </div>
+              <div className="form-actions" name="modal-form-buttons">
+                <button 
+                  type="submit" 
+                  name="submit-edit-profile"
+                  className="primary-btn"
+                  title="Save profile settings"
+                >
+                  Save Changes
+                </button>
+                <button 
+                  type="button" 
+                  name="cancel-edit-profile"
+                  className="secondary-btn"
+                  onClick={() => {
+                    setShowEditProfile(false);
+                    setEditingProfile(null);
+                  }}
+                  title="Cancel and close this dialog"
+                >
+                  Cancel
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }

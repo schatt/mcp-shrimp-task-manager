@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import {
   useReactTable,
   getCoreRowModel,
@@ -9,19 +9,47 @@ import {
 } from '@tanstack/react-table';
 import TaskDetailView from './TaskDetailView';
 
-function TaskTable({ data, globalFilter, onGlobalFilterChange }) {
+function TaskTable({ data, globalFilter, onGlobalFilterChange, projectRoot, onDetailViewChange, resetDetailView }) {
   const [selectedTask, setSelectedTask] = useState(null);
+  
+  // Reset selected task when parent requests it
+  useEffect(() => {
+    console.log('TaskTable: resetDetailView changed to:', resetDetailView);
+    if (resetDetailView && resetDetailView > 0) {
+      console.log('TaskTable: Resetting selected task to null');
+      setSelectedTask(null);
+    }
+  }, [resetDetailView]);
+  
+  // Notify parent when detail view changes
+  useEffect(() => {
+    if (onDetailViewChange) {
+      onDetailViewChange(!!selectedTask);
+    }
+  }, [selectedTask, onDetailViewChange]);
   // Define table columns configuration with custom cell renderers
   const columns = useMemo(() => [
     {
       accessorKey: 'taskNumber',
       header: '#',
       cell: ({ row }) => (
-        <span className="task-number">
+        <span 
+          className="task-number clickable"
+          onClick={(e) => {
+            e.stopPropagation();
+            navigator.clipboard.writeText(row.original.id);
+            const element = e.target;
+            element.classList.add('copied');
+            setTimeout(() => {
+              element.classList.remove('copied');
+            }, 2000);
+          }}
+          title={`Click to copy UUID to clipboard: ${row.original.id}`}
+        >
           TASK {row.index + 1}
         </span>
       ),
-      size: 80,
+      size: 120,
     },
     {
       accessorKey: 'name',
@@ -30,11 +58,25 @@ function TaskTable({ data, globalFilter, onGlobalFilterChange }) {
         <div>
           <div className="task-name">{row.original.name}</div>
           <div className="task-meta">
-            ID: {row.original.id.slice(0, 8)}...
+            <span 
+              className="task-id task-id-clickable"
+              onClick={(e) => {
+                e.stopPropagation();
+                navigator.clipboard.writeText(row.original.id);
+                const element = e.target;
+                element.classList.add('copied');
+                setTimeout(() => {
+                  element.classList.remove('copied');
+                }, 2000);
+              }}
+              title="Click to copy UUID to clipboard"
+            >
+              ID: {row.original.id.slice(0, 8)}...
+            </span>
           </div>
         </div>
       ),
-      size: 250,
+      size: 300,
     },
     {
       accessorKey: 'description',
@@ -86,21 +128,82 @@ function TaskTable({ data, globalFilter, onGlobalFilterChange }) {
       size: 120,
     },
     {
-      accessorKey: 'notes',
-      header: 'Notes',
-      cell: ({ getValue }) => {
-        const notes = getValue();
-        if (!notes) return <span style={{ color: '#666' }}>—</span>;
+      accessorKey: 'dependencies',
+      header: 'Dependencies',
+      cell: ({ row }) => {
+        const dependencies = row.original.dependencies;
+        if (!dependencies || !Array.isArray(dependencies) || dependencies.length === 0) {
+          return <span style={{ color: '#666' }}>—</span>;
+        }
         return (
-          <div className="task-description">
-            {notes.slice(0, 100)}
-            {notes.length > 100 ? '...' : ''}
+          <div className="dependencies-list">
+            {dependencies.map((dep, index) => {
+              // Handle both string IDs and object dependencies
+              let depId;
+              if (typeof dep === 'string') {
+                depId = dep;
+              } else if (dep && typeof dep === 'object' && dep.id) {
+                depId = dep.id;
+              } else if (dep && typeof dep === 'object' && dep.taskId) {
+                depId = dep.taskId;
+              } else {
+                // Skip invalid dependencies
+                return null;
+              }
+              
+              return (
+                <span key={depId}>
+                  <a
+                    href="#"
+                    className="dependency-link"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      // Find the task with this ID
+                      const depTask = data.find(t => t.id === depId);
+                      if (depTask) {
+                        setSelectedTask(depTask);
+                      }
+                    }}
+                    title={`View task: ${depId}`}
+                  >
+                    {depId.slice(0, 8)}...
+                  </a>
+                  {index < dependencies.length - 1 && ', '}
+                </span>
+              );
+            }).filter(Boolean)}
           </div>
         );
       },
       size: 200,
     },
-  ], []);
+    {
+      accessorKey: 'actions',
+      header: 'Actions',
+      cell: ({ row }) => (
+        <div className="actions-cell">
+          <button
+            className="copy-button action-button"
+            onClick={(e) => {
+              e.stopPropagation();
+              const instruction = `Use task manager to complete this shrimp task: ${row.original.id}`;
+              navigator.clipboard.writeText(instruction);
+              const button = e.target;
+              button.textContent = '✓';
+              setTimeout(() => {
+                button.textContent = '🤖';
+              }, 2000);
+            }}
+            title={`Copy the following to the clipboard: Use task manager to complete this shrimp task: ${row.original.id}`}
+          >
+            🤖
+          </button>
+        </div>
+      ),
+      size: 100,
+    },
+  ], [data, setSelectedTask]);
 
   const table = useReactTable({
     data,
@@ -134,7 +237,16 @@ function TaskTable({ data, globalFilter, onGlobalFilterChange }) {
     return (
       <TaskDetailView 
         task={selectedTask} 
-        onBack={() => setSelectedTask(null)} 
+        onBack={() => setSelectedTask(null)}
+        projectRoot={projectRoot}
+        onNavigateToTask={(taskId) => {
+          const targetTask = data.find(t => t.id === taskId);
+          if (targetTask) {
+            setSelectedTask(targetTask);
+          }
+        }}
+        taskIndex={data.findIndex(t => t.id === selectedTask.id)}
+        allTasks={data}
       />
     );
   }
