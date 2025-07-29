@@ -1,6 +1,18 @@
 # 🦐 Shrimp Task Manager Viewer
 
-A modern, React-based web interface for viewing and managing Shrimp Task Manager data across multiple profiles. Features a professional tabbed interface, real-time search, configurable auto-refresh, and comprehensive task management capabilities.
+A modern, React-based web interface for viewing and managing [Shrimp Task Manager](https://github.com/paulpreibisch/mcp-shrimp-task-manager) tasks created through the MCP (Model Context Protocol) tool. This visual interface allows you to see detailed task information, track progress across multiple projects, and easily copy task UUIDs for AI agent interactions.
+
+## Why Use Shrimp Task Viewer?
+
+When using Shrimp Task Manager as an MCP server with AI agents like Claude, this viewer provides essential visibility into your task ecosystem:
+
+- **Visual Task Overview**: See all tasks, their status, dependencies, and progress in a clean tabbed interface
+- **UUID Management**: Click any task badge to instantly copy its UUID for commands like `"Use task manager to complete this shrimp task: [UUID]"`
+- **Parallel Execution**: Open multiple terminals and use the AI Actions column (🤖) to copy task instructions for parallel AI agent execution
+- **Live Updates**: Direct file path reading ensures you always see the current task state
+- **Multi-Project Support**: Manage tasks across different projects with draggable profile tabs
+
+For information on setting up Shrimp Task Manager as an MCP server, see the [main repository](https://github.com/paulpreibisch/mcp-shrimp-task-manager).
 
 ## 📸 Screenshot
 
@@ -44,31 +56,42 @@ A modern, React-based web interface for viewing and managing Shrimp Task Manager
 
 ### Installation & Setup
 
+1. **Clone and navigate to the task viewer directory**
+   ```bash
+   cd path/to/mcp-shrimp-task-manager/tools/task-viewer
+   ```
+
+2. **Install dependencies**
+   ```bash
+   npm install
+   ```
+
+3. **Build the React application**
+   ```bash
+   npm run build
+   ```
+
+4. **Start the server**
+   ```bash
+   npm start
+   ```
+
+   The viewer will be available at `http://localhost:9998`
+
+### Development Mode
+
+For development with hot reload:
+
 ```bash
-# Navigate to the task viewer directory
-cd path/to/mcp-shrimp-task-manager/tools/task-viewer
-
-# Install dependencies
-npm install
-
-# Build the React application
-npm run build
-
-# Start the server
-npm start
-```
-
-### Development Mode (with Hot Reload)
-
-```bash
-# Start the development server with hot reload
+# Start the development server
 npm run dev
-
-# The app will be available at http://localhost:3000
-# with automatic rebuilding when you make changes
 ```
 
-### Production Mode
+The app will be available at `http://localhost:3000` with automatic rebuilding on file changes.
+
+### Production Deployment
+
+#### Standard Deployment
 
 ```bash
 # Build for production
@@ -76,48 +99,39 @@ npm run build
 
 # Start the production server
 node server.js
-
-# Access at http://127.0.0.1:9998
 ```
 
-### Running as a System Service (Linux/systemd)
+#### Systemd Service (Linux)
 
-For production deployments, you can run the Task Viewer as a systemd service that starts automatically on boot:
+For automatic startup and process management:
 
-```bash
-# Install as a systemd service
-sudo ./install-service.sh
+1. **Install as a service**
+   ```bash
+   sudo ./install-service.sh
+   ```
 
-# The service will now:
-# - Start automatically on system boot
-# - Restart automatically if it crashes
-# - Run on port 9998 (configurable)
-```
+2. **Manage the service**
+   ```bash
+   # Check status
+   systemctl status shrimp-task-viewer
+   
+   # Start/stop/restart
+   sudo systemctl start shrimp-task-viewer
+   sudo systemctl stop shrimp-task-viewer
+   sudo systemctl restart shrimp-task-viewer
+   
+   # View logs
+   journalctl -u shrimp-task-viewer -f
+   
+   # Disable/enable auto-start
+   sudo systemctl disable shrimp-task-viewer
+   sudo systemctl enable shrimp-task-viewer
+   ```
 
-#### Service Management Commands
-
-```bash
-# Check service status
-systemctl status shrimp-task-viewer
-
-# Stop the service
-sudo systemctl stop shrimp-task-viewer
-
-# Start the service
-sudo systemctl start shrimp-task-viewer
-
-# Restart the service
-sudo systemctl restart shrimp-task-viewer
-
-# View service logs
-journalctl -u shrimp-task-viewer -f
-
-# Disable auto-start on boot
-sudo systemctl disable shrimp-task-viewer
-
-# Uninstall the service completely
-sudo ./uninstall-service.sh
-```
+3. **Uninstall the service**
+   ```bash
+   sudo ./uninstall-service.sh
+   ```
 
 ## 🖥️ Usage
 
@@ -129,12 +143,13 @@ sudo ./uninstall-service.sh
    ```
 
 2. **Open your browser**:
-   Navigate to http://127.0.0.1:9998
+   Navigate to `http://127.0.0.1:9998`
 
 3. **Add your first profile**:
-   - Click the teal "**+ Add Tab**" button
+   - Click the "**+ Add Tab**" button
    - Enter a descriptive profile name (e.g., "Team Alpha Tasks")
-   - Upload your tasks.json file
+   - Enter the path to your shrimp data folder containing tasks.json
+   - **Tip:** Navigate to your folder in terminal and type `pwd` to get the full path
    - Click "**Add Profile**"
 
 4. **Manage your tasks**:
@@ -143,25 +158,12 @@ sudo ./uninstall-service.sh
    - Sort columns by clicking headers
    - Configure auto-refresh as needed
 
-### Interface Overview
-
-```
-[Profile Tab 1] [Profile Tab 2] [Active Tab] [+ Add Tab] | [🔄] [Auto-refresh ▼30s]
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-┌──────────────────────────────────────────────────────────────────────────┐
-│ [🔍 Search tasks...] [Total: 6] [Completed: 5] [In Progress: 1] [Pending: 0] │
-├──────────────────────────────────────────────────────────────────────────┤
-│ #  │ Task Name              │ Status      │ Created    │ Updated    │ Notes│
-│ T1 │ Setup authentication  │ Completed   │ 2025-01-12 │ 2025-01-13 │ ... │
-│ T2 │ Implement dashboard    │ In Progress │ 2025-01-13 │ 2025-01-13 │ ... │
-└──────────────────────────────────────────────────────────────────────────┘
-```
 
 ### Tab Management
 
 - **Switch Profiles**: Click any tab to switch to that profile
 - **Reorder Tabs**: Drag tabs to rearrange them in your preferred order
-- **Add New Profile**: Click the teal "**+ Add Tab**" button
+- **Add New Profile**: Click the "**+ Add Tab**" button
 - **Remove Profile**: Click the × on any tab (with confirmation)
 
 ### Search & Filtering
@@ -189,18 +191,20 @@ export SHRIMP_VIEWER_HOST=127.0.0.1      # Server host (localhost only)
 
 ### Development Configuration
 
-```bash
-# Development server with hot reload (Vite)
-npm run dev                              # Runs on port 3000
+- **Development server with hot reload (Vite)**:
+  ```bash
+  npm run dev  # Runs on port 3000
+  ```
 
-# Production build and serve
-npm run build && npm start               # Runs on port 9998
-```
+- **Production build and serve**:
+  ```bash
+  npm run build && npm start  # Runs on port 9998
+  ```
 
 ### Profile Data Storage
 
 - **Settings File**: `~/.shrimp-task-viewer-settings.json`
-- **Uploaded Files**: Stored in system temp directory
+- **Task Files**: Read directly from specified folder paths (no uploads)
 - **Hot Reload**: Development changes rebuild automatically
 
 ## 🏗️ Technical Architecture
@@ -234,8 +238,13 @@ task-viewer/
 - `GET /` - Serves the React application
 - `GET /api/agents` - Lists all configured profiles
 - `GET /api/tasks/{profileId}` - Returns tasks for specific profile
-- `POST /api/add-profile` - Adds new profile with file upload
+- `POST /api/add-profile` - Adds new profile with folder path
 - `DELETE /api/remove-profile/{profileId}` - Removes profile
+- `PUT /api/rename-profile/{profileId}` - Rename profile
+- `PUT /api/update-profile/{profileId}` - Update profile settings
+- `GET /api/readme` - Returns README content for help tab
+- `GET /releases/*.md` - Serves release notes markdown files
+- `GET /releases/*.png` - Serves release notes images
 
 ## 🛠️ Development
 
@@ -277,7 +286,7 @@ The modular React architecture makes it easy to extend:
 ### Security Features
 
 - **Localhost Binding**: Server only accessible from local machine
-- **File Upload Validation**: JSON validation and safe file handling
+- **Direct File Access**: Reads task files directly from filesystem paths
 - **No External Dependencies**: Self-contained with minimal attack surface
 - **CORS Protection**: API endpoints protected with CORS headers
 
@@ -305,6 +314,13 @@ pkill -f "node.*server.js"
 SHRIMP_VIEWER_PORT=8080 node server.js
 ```
 
+**Help/Readme Tab Shows HTML**
+If the Help tab displays HTML instead of the README content, the server needs to be restarted to load the new API endpoints:
+```bash
+# Stop the server (Ctrl+C) and restart
+npm start
+```
+
 **Hot Reload Not Working**
 ```bash
 # Ensure development dependencies are installed
@@ -315,7 +331,7 @@ npm run dev
 ```
 
 **Tasks Not Loading**
-1. Check that tasks.json files contain valid JSON
+1. Check that `tasks.json` files contain valid JSON
 2. Verify file permissions are readable
 3. Check browser console for error messages
 4. Use manual refresh button to reload data
@@ -333,7 +349,22 @@ npm run build
 
 ## 📋 Changelog
 
-### Version 1.0.3 (Latest) - 2025-01-13
+### Version 2.1.0 (Latest) - 2025-07-29
+
+#### 🚀 Major Features
+- **Direct File Path Support**: Replaced file upload with direct folder path input for live updates
+- **Help/Readme Tab**: Added documentation tab with markdown rendering
+- **Release Notes Tab**: In-app release notes viewer with image support  
+- **Clickable Dependencies**: Navigate between dependent tasks easily
+- **AI Actions Column**: Copy AI instructions for task completion
+- **Enhanced UUID Management**: Click task badges to copy UUIDs
+- **Profile Editing**: Rename profiles and configure project roots
+- **ES Module Support**: Converted to ES modules for better compatibility
+
+#### 🐛 Critical Fix
+- **Fixed Static File Copy Issue**: Files are now read directly from specified paths instead of creating static copies in `/tmp/`
+
+### Version 1.0.3 - 2025-07-26
 
 #### 🧪 Testing & Reliability
 - **Comprehensive Test Suite**: Added full test coverage with Vitest
@@ -341,14 +372,14 @@ npm run build
 - **Integration Tests**: End-to-end testing of server and API endpoints
 - **Bug Fixes**: Resolved multipart form data handling in profile management
 
-### Version 1.0.2 - 2025-01-13
+### Version 1.0.2 - 2025-07-26
 
 #### 🎨 Task Detail View
 - **In-Tab Navigation**: Replaced modal with seamless in-tab task details
 - **Back Button**: Easy navigation back to task list
 - **Improved UX**: Better workflow without popup interruptions
 
-### Version 1.0.1 - 2025-01-13
+### Version 1.0.1 - 2025-07-13
 
 #### 🎨 Major UI Overhaul
 - **Modern Tab Interface**: Professional browser-style tabs with drag & drop reordering
@@ -367,13 +398,13 @@ npm run build
 - **Responsive Design**: Mobile-first approach with breakpoint optimization
 - **Performance**: Optimized rendering and efficient state management
 
-### Version 1.0.0 - 2025-01-12
+### Version 1.0.0 - 2025-07-01
 
 #### 🚀 Initial Release
-- **Basic Viewer**: Initial implementation with vanilla JavaScript
+- **Basic Viewer**: Initial implementation with basic web interface
 - **Profile Management**: Add and remove task profiles
 - **Server API**: RESTful endpoints for task data
-- **Auto-Discovery**: Automatic detection of task files
+- **Task Display**: View tasks from multiple projects
 
 ## 📄 License
 

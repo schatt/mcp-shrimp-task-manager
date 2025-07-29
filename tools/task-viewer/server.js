@@ -314,6 +314,22 @@ async function startServer() {
                 res.end('Error reading task file: ' + err.message);
             }
             
+        } else if (url.pathname === '/api/readme' && req.method === 'GET') {
+            // Serve README.md file
+            try {
+                const readmePath = path.join(__dirname, 'README.md');
+                const data = await fs.readFile(readmePath, 'utf8');
+                res.writeHead(200, { 
+                    'Content-Type': 'text/markdown; charset=utf-8',
+                    'Cache-Control': 'no-cache, no-store, must-revalidate'
+                });
+                res.end(data);
+            } catch (err) {
+                console.error('Error reading README:', err);
+                res.writeHead(404, { 'Content-Type': 'text/plain' });
+                res.end('README not found');
+            }
+            
         } else if (url.pathname.startsWith('/releases/')) {
             // Serve release files (markdown and images)
             const fileName = url.pathname.split('/').pop();

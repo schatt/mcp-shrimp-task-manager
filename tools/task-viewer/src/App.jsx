@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import TaskTable from './components/TaskTable';
 import ReleaseNotes from './components/ReleaseNotes';
+import Help from './components/Help';
 
 function App() {
   const [profiles, setProfiles] = useState([]);
@@ -15,7 +16,8 @@ function App() {
   const [draggedTabIndex, setDraggedTabIndex] = useState(null);
   const [dragOverIndex, setDragOverIndex] = useState(null);
   const [projectRoot, setProjectRoot] = useState(null);
-  const [showReleaseNotesTab, setShowReleaseNotesTab] = useState(false);
+  const [showReleaseNotesTab, setShowReleaseNotesTab] = useState(true);
+  const [showHelpTab, setShowHelpTab] = useState(true);
   const [showEditProfile, setShowEditProfile] = useState(false);
   const [editingProfile, setEditingProfile] = useState(null);
   const [isInDetailView, setIsInDetailView] = useState(false);
@@ -46,6 +48,8 @@ function App() {
       localStorage.setItem('selectedProfile', selectedProfile);
       if (selectedProfile === 'release-notes') {
         localStorage.setItem('showReleaseNotesTab', 'true');
+      } else if (selectedProfile === 'help') {
+        localStorage.setItem('showHelpTab', 'true');
       }
     }
   }, [selectedProfile]);
@@ -129,6 +133,9 @@ function App() {
     
     if (profileId === 'release-notes') {
       setSelectedProfile('release-notes');
+      return;
+    } else if (profileId === 'help') {
+      setSelectedProfile('help');
       return;
     }
     setSelectedProfile(profileId);
@@ -313,7 +320,14 @@ function App() {
             setShowReleaseNotesTab(true);
             setSelectedProfile('release-notes');
           }}>
-            Task Viewer Releases
+            Releases
+          </a> • 
+          <a href="#" onClick={(e) => {
+            e.preventDefault();
+            setShowHelpTab(true);
+            setSelectedProfile('help');
+          }}>
+            Readme
           </a>
         </div>
         <p>Web-based dashboard for viewing and monitoring task data across multiple profiles</p>
@@ -323,7 +337,7 @@ function App() {
         <div className="tab-border-line" name="tab-border-separator"></div>
         <div className="profile-controls" name="profile-selection-controls">
           <div className="profile-tabs" name="profile-tabs-container">
-            <div className="tabs-list" name="profile-tabs-list">
+            <div className="tabs-list" name="profile-tabs-list" style={{ display: 'flex', width: '100%' }}>
               {profiles.map((profile, index) => (
                 <div 
                   key={profile.id} 
@@ -351,30 +365,6 @@ function App() {
                   </button>
                 </div>
               ))}
-              {showReleaseNotesTab && (
-                <div 
-                  className={`tab ${selectedProfile === 'release-notes' ? 'active' : ''}`}
-                  name="release-notes-tab"
-                  onClick={() => handleProfileChange('release-notes')}
-                  title="View release notes"
-                >
-                  <span className="tab-name">📋 Release Notes</span>
-                  <button 
-                    className="tab-close-btn"
-                    name="close-release-notes-tab-button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setShowReleaseNotesTab(false);
-                      if (selectedProfile === 'release-notes' && profiles.length > 0) {
-                        handleProfileChange(profiles[0].id);
-                      }
-                    }}
-                    title="Close release notes"
-                  >
-                    ×
-                  </button>
-                </div>
-              )}
               <button 
                 className="add-tab-btn"
                 name="add-new-tab-button"
@@ -383,6 +373,56 @@ function App() {
               >
                 + Add Tab
               </button>
+              <div style={{ marginLeft: 'auto', display: 'flex' }}>
+                {showReleaseNotesTab && (
+                  <div 
+                    className={`tab ${selectedProfile === 'release-notes' ? 'active' : ''}`}
+                    name="release-notes-tab"
+                    onClick={() => handleProfileChange('release-notes')}
+                    title="View release notes"
+                  >
+                    <span className="tab-name">📋 Release Notes</span>
+                    <button 
+                      className="tab-close-btn"
+                      name="close-release-notes-tab-button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setShowReleaseNotesTab(false);
+                        if (selectedProfile === 'release-notes' && profiles.length > 0) {
+                          handleProfileChange(profiles[0].id);
+                        }
+                      }}
+                      title="Close release notes"
+                    >
+                      ×
+                    </button>
+                  </div>
+                )}
+                {showHelpTab && (
+                  <div 
+                    className={`tab ${selectedProfile === 'help' ? 'active' : ''}`}
+                    name="help-tab"
+                    onClick={() => handleProfileChange('help')}
+                    title="View README documentation"
+                  >
+                    <span className="tab-name">📚 Readme</span>
+                    <button 
+                      className="tab-close-btn"
+                      name="close-help-tab-button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setShowHelpTab(false);
+                        if (selectedProfile === 'help' && profiles.length > 0) {
+                          handleProfileChange(profiles[0].id);
+                        }
+                      }}
+                      title="Close readme"
+                    >
+                      ×
+                    </button>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </div>
@@ -391,6 +431,10 @@ function App() {
       {selectedProfile === 'release-notes' ? (
         <div className="content-container" name="release-notes-content-area">
           <ReleaseNotes />
+        </div>
+      ) : selectedProfile === 'help' ? (
+        <div className="content-container" name="help-content-area">
+          <Help />
         </div>
       ) : selectedProfile && (
         <>

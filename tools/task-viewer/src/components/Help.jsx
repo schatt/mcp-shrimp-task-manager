@@ -1,37 +1,31 @@
 import React, { useState, useEffect } from 'react';
-import { releaseMetadata, getReleaseFile } from '../data/releases';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 // @ts-ignore
 import { dark } from 'react-syntax-highlighter/dist/cjs/styles/prism';
 
-function ReleaseNotes() {
-  const [selectedVersion, setSelectedVersion] = useState(releaseMetadata[0]?.version || '');
-  const [releaseContent, setReleaseContent] = useState('');
+function Help() {
+  const [readmeContent, setReadmeContent] = useState('');
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (selectedVersion) {
-      loadReleaseContent(selectedVersion);
-    }
-  }, [selectedVersion]);
+    loadReadmeContent();
+  }, []);
 
-  const loadReleaseContent = async (version) => {
+  const loadReadmeContent = async () => {
     setLoading(true);
-    setReleaseContent('');
     
     try {
-      const releaseFile = getReleaseFile(version);
-      const response = await fetch(releaseFile);
+      const response = await fetch('/api/readme');
       
       if (response.ok) {
         const content = await response.text();
-        setReleaseContent(content);
+        setReadmeContent(content);
       } else {
-        setReleaseContent(`# ${version}\n\nRelease notes not found.`);
+        setReadmeContent('# Help\n\nREADME not found.');
       }
     } catch (error) {
-      console.error('Error loading release content:', error);
-      setReleaseContent(`# ${version}\n\nError loading release notes.`);
+      console.error('Error loading README:', error);
+      setReadmeContent('# Help\n\nError loading README.');
     } finally {
       setLoading(false);
     }
@@ -70,12 +64,12 @@ function ReleaseNotes() {
         }
         // Add code text
         parts.push(
-          <span
+          <code
             className="inline-code"
             key={`code-${key++}`}
           >
             {codeMatch[1]}
-          </span>
+          </code>
         );
         remaining = remaining.substring(codeMatch.index + codeMatch[0].length);
         continue;
@@ -144,14 +138,20 @@ function ReleaseNotes() {
           </h4>
         );
         i++;
-      } else if (line.startsWith('```')) {
-        // Handle code blocks
-        const language = line.substring(3).trim() || 'text';
+      } else if (line.match(/^\s*```/)) {
+        // Handle code blocks (including indented ones)
+        const indent = line.match(/^(\s*)/)[1].length;
+        const language = line.trim().substring(3).trim() || 'text';
         const codeLines = [];
         i++; // Move past the opening ```
         
-        while (i < lines.length && !lines[i].startsWith('```')) {
-          codeLines.push(lines[i]);
+        while (i < lines.length && !lines[i].match(/^\s*```/)) {
+          // Remove the base indentation from code lines
+          if (indent > 0 && lines[i].startsWith(' '.repeat(indent))) {
+            codeLines.push(lines[i].substring(indent));
+          } else {
+            codeLines.push(lines[i]);
+          }
           i++;
         }
         
@@ -223,7 +223,7 @@ function ReleaseNotes() {
               <img 
                 src={imgUrl} 
                 alt={altText} 
-                style={{ maxWidth: '60%', height: 'auto', margin: '1rem 0' }}
+                style={{ maxWidth: '80%', height: 'auto', margin: '1rem 0' }}
               />
             </div>
           );
@@ -234,14 +234,6 @@ function ReleaseNotes() {
         i++;
       } else if (line.trim() === '---') {
         elements.push(<hr key={i} className="release-divider" />);
-        i++;
-      } else if (line.match(/^\*[^*]+\*$/)) {
-        // Italic line
-        elements.push(
-          <p key={i} className="release-text italic">
-            {parseInlineMarkdown(line)}
-          </p>
-        );
         i++;
       } else {
         elements.push(
@@ -260,37 +252,16 @@ function ReleaseNotes() {
     <div className="release-notes-tab-content">
       <div className="release-notes-inner">
         <div className="release-notes-header">
-          <h2>📋 Release Notes</h2>
+          <h2>📚 Help & Documentation</h2>
         </div>
         
-        <div className="release-notes-content">
-          <div className="release-sidebar">
-            <h3>Versions</h3>
-            <ul className="version-list">
-              {releaseMetadata.map((release) => (
-                <li key={release.version}>
-                  <button
-                    className={`version-button ${selectedVersion === release.version ? 'active' : ''}`}
-                    onClick={() => setSelectedVersion(release.version)}
-                    title={release.summary}
-                  >
-                    <span className="version-number">{release.version}</span>
-                    <span className="version-date">{release.date}</span>
-                    {release.title && (
-                      <span className="version-title">{release.title}</span>
-                    )}
-                  </button>
-                </li>
-              ))}
-            </ul>
-          </div>
-          
-          <div className="release-details">
+        <div className="release-notes-content" style={{ maxWidth: '100%' }}>
+          <div className="release-details" style={{ maxWidth: '100%' }}>
             {loading ? (
-              <div className="release-loading">Loading release notes...</div>
+              <div className="release-loading">Loading documentation...</div>
             ) : (
               <div className="release-markdown-content">
-                {renderMarkdown(releaseContent)}
+                {renderMarkdown(readmeContent)}
               </div>
             )}
           </div>
@@ -300,4 +271,4 @@ function ReleaseNotes() {
   );
 }
 
-export default ReleaseNotes;
+export default Help;
