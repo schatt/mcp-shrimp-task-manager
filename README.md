@@ -46,7 +46,7 @@ Shrimp Task Manager guides Agents through structured workflows for systematic pr
 - **<a id="web-gui"></a>Web GUI**: Provides an optional web-based graphical user interface for task management. Enable by setting `ENABLE_GUI=true` in your `.env` file. When enabled, a `WebGUI.md` file containing the access address will be created in your `DATA_DIR`. You can customize the web port by setting `WEB_PORT` (if not specified, an available port will be automatically selected).
 - **<a id="task-viewer"></a>Task Viewer**: A modern, React-based web interface for viewing and managing task data across multiple profiles with advanced features like drag & drop tabs, real-time search, and configurable auto-refresh. See the [Task Viewer documentation](tools/task-viewer) for setup and usage instructions.
 
-  ![Task Viewer Interface](tools/task-viewer/screenshot.png)
+  ![Task Viewer Interface](tools/task-viewer/task-viewer-interface.png)
   
   ![Task Viewer in Action](tools/task-viewer/taskview.png)
 
