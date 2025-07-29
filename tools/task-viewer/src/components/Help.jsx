@@ -31,13 +31,36 @@ function Help() {
     }
   };
 
-  // Parse inline markdown (bold, italic, code)
+  // Parse inline markdown (bold, italic, code, links)
   const parseInlineMarkdown = (text) => {
     const parts = [];
     let remaining = text;
     let key = 0;
 
     while (remaining.length > 0) {
+      // Check for links [text](url)
+      const linkMatch = remaining.match(/\[([^\]]+)\]\(([^)]+)\)/);
+      if (linkMatch && linkMatch.index !== undefined) {
+        // Add text before the match
+        if (linkMatch.index > 0) {
+          parts.push(remaining.substring(0, linkMatch.index));
+        }
+        // Add link
+        parts.push(
+          <a
+            key={`link-${key++}`}
+            href={linkMatch[2]}
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{ color: '#3b82f6', textDecoration: 'underline' }}
+          >
+            {linkMatch[1]}
+          </a>
+        );
+        remaining = remaining.substring(linkMatch.index + linkMatch[0].length);
+        continue;
+      }
+
       // Check for bold text **text**
       const boldMatch = remaining.match(/\*\*([^*]+)\*\*/);
       if (boldMatch && boldMatch.index !== undefined) {

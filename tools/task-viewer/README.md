@@ -98,7 +98,7 @@ The app will be available at `http://localhost:3000` with automatic rebuilding o
 npm run build
 
 # Start the production server
-node server.js
+npm start
 ```
 
 #### Systemd Service (Linux)
@@ -139,7 +139,7 @@ For automatic startup and process management:
 
 1. **Start the server**:
    ```bash
-   node server.js
+   npm start
    ```
 
 2. **Open your browser**:
@@ -184,9 +184,37 @@ For automatic startup and process management:
 
 ### Environment Variables
 
+To make environment variables persistent across terminal sessions, add them to your shell configuration file:
+
+**For macOS/Linux with Zsh** (default on modern macOS):
 ```bash
-export SHRIMP_VIEWER_PORT=9998           # Server port (default: 9998)
-export SHRIMP_VIEWER_HOST=127.0.0.1      # Server host (localhost only)
+# Add to ~/.zshrc
+echo 'export SHRIMP_VIEWER_PORT=9998' >> ~/.zshrc
+echo 'export SHRIMP_VIEWER_HOST=127.0.0.1' >> ~/.zshrc
+
+# Reload configuration
+source ~/.zshrc
+```
+
+**For Linux/Unix with Bash**:
+```bash
+# Add to ~/.bashrc
+echo 'export SHRIMP_VIEWER_PORT=9998' >> ~/.bashrc
+echo 'export SHRIMP_VIEWER_HOST=127.0.0.1' >> ~/.bashrc
+
+# Reload configuration
+source ~/.bashrc
+```
+
+**Why add to shell configuration?**
+- **Persistence**: Variables set with `export` in terminal only last for that session
+- **Consistency**: All new terminal windows will have these settings
+- **Convenience**: No need to set variables every time you start the server
+
+**Available Variables**:
+```bash
+SHRIMP_VIEWER_PORT=9998           # Server port (default: 9998)
+SHRIMP_VIEWER_HOST=127.0.0.1      # Server host (localhost only)
 ```
 
 ### Development Configuration
@@ -195,17 +223,31 @@ export SHRIMP_VIEWER_HOST=127.0.0.1      # Server host (localhost only)
   ```bash
   npm run dev  # Runs on port 3000
   ```
+  
+  **Why use the development server?** During active development, the Vite dev server provides instant hot module replacement (HMR), meaning your changes appear immediately in the browser without manual refreshing. This dramatically speeds up development by preserving component state between edits and providing instant feedback on your code changes. The dev server also provides better error messages and debugging capabilities.
 
 - **Production build and serve**:
   ```bash
   npm run build && npm start  # Runs on port 9998
   ```
+  
+  **Why build for production?** The production build optimizes your code by minifying JavaScript, removing dead code, and bundling assets efficiently. This results in faster load times and better performance for end users. Always use the production build when deploying or when you need to test real-world performance.
 
 ### Profile Data Storage
 
+**Understanding Profile Data Management**: The Task Viewer uses a hybrid approach to data storage that prioritizes both persistence and real-time accuracy. Profile configurations (like tab names, folder paths, and tab order) are stored locally in a JSON settings file in your home directory, while task data is read directly from your project folders in real-time.
+
 - **Settings File**: `~/.shrimp-task-viewer-settings.json`
+  
+  This hidden file in your home directory stores all your profile configurations including tab names, folder paths, tab ordering, and other preferences. It's automatically created when you add your first profile and updated whenever you make changes. You can manually edit this file if needed, but be careful to maintain valid JSON formatting.
+
 - **Task Files**: Read directly from specified folder paths (no uploads)
+  
+  Unlike traditional web applications that upload and store file copies, the Task Viewer reads `tasks.json` files directly from your specified folder paths. This ensures you always see the current state of your tasks without needing to re-upload or sync. When you add a profile, you're simply telling the viewer where to look for the tasks.json file.
+
 - **Hot Reload**: Development changes rebuild automatically
+  
+  When running in development mode (`npm run dev`), any changes to the source code trigger automatic rebuilds and browser refreshes. This applies to React components, styles, and server code, making development faster and more efficient.
 
 ## 🏗️ Technical Architecture
 
@@ -219,19 +261,39 @@ export SHRIMP_VIEWER_HOST=127.0.0.1      # Server host (localhost only)
 
 ### File Structure
 
+**Project Organization**: The Task Viewer follows a clean, modular structure that separates concerns and makes the codebase easy to navigate and extend. Each directory and file has a specific purpose in the application architecture.
+
 ```
 task-viewer/
-├── src/
-│   ├── App.jsx                 # Main React application
-│   ├── components/
-│   │   └── TaskTable.jsx       # TanStack table component
-│   └── index.css              # Complete styling system
-├── dist/                      # Built React application (generated)
-├── server.js                  # Node.js backend server
-├── vite.config.js            # Vite configuration
-├── package.json              # Dependencies and scripts
-└── README.md                 # This documentation
+├── src/                       # React application source code
+│   ├── App.jsx               # Main React component - manages state, profiles, and tabs
+│   ├── components/           # Reusable React components
+│   │   ├── TaskTable.jsx     # TanStack table for displaying and sorting tasks
+│   │   ├── Help.jsx          # README viewer with markdown rendering
+│   │   └── ReleaseNotes.jsx  # Version history with syntax highlighting
+│   ├── data/                 # Static data and configuration
+│   │   └── releases.js       # Release metadata and version information
+│   └── index.css             # Complete styling system with dark theme
+├── releases/                  # Release notes markdown files and images
+│   ├── v*.md                 # Individual release note files
+│   └── *.png                 # Screenshots and images for releases
+├── dist/                     # Production build output (auto-generated)
+│   ├── index.html            # Optimized HTML entry point
+│   └── assets/               # Bundled JS, CSS, and other assets
+├── server.js                 # Express-like Node.js API server
+├── cli.js                    # Command-line interface for service management
+├── vite.config.js            # Build tool configuration for development/production
+├── package.json              # Project metadata, dependencies, and npm scripts
+├── install-service.sh        # Linux systemd service installer
+└── README.md                 # Comprehensive documentation (this file)
 ```
+
+**Key Directories Explained**:
+
+- **`src/`**: Contains all React source code. This is where you'll make most UI changes.
+- **`dist/`**: Auto-generated production build. Never edit these files directly.
+- **`releases/`**: Stores release notes in markdown format with associated images.
+- **Root files**: Configuration and server files that handle building, serving, and deployment.
 
 ### API Endpoints
 
