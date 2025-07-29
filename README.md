@@ -48,7 +48,7 @@ Shrimp Task Manager guides Agents through structured workflows for systematic pr
 
   ![Task Viewer Interface](tools/task-viewer/task-viewer-interface.png)
   
-  ![Task Viewer in Action](tools/task-viewer/taskview.png)
+  ![Task Details View](tools/task-viewer/task-details-view.png)
 
 ## 🧭 <a id="usage-guide"></a>Usage Guide
 
