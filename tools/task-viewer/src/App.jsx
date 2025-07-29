@@ -405,7 +405,7 @@ function App() {
                     onClick={() => handleProfileChange('help')}
                     title="View README documentation"
                   >
-                    <span className="tab-name">📚 Readme</span>
+                    <span className="tab-name">ℹ️ Readme</span>
                     <button 
                       className="tab-close-btn"
                       name="close-help-tab-button"

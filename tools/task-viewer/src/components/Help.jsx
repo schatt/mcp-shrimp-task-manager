@@ -252,7 +252,7 @@ function Help() {
     <div className="release-notes-tab-content">
       <div className="release-notes-inner">
         <div className="release-notes-header">
-          <h2>📚 Help & Documentation</h2>
+          <h2>ℹ️ Help & Documentation</h2>
         </div>
         
         <div className="release-notes-content" style={{ maxWidth: '100%' }}>
