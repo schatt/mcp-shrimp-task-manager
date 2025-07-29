@@ -1,6 +1,6 @@
 # 🦐 Shrimp Task Manager Viewer
 
-A modern, React-based web interface for viewing and managing [Shrimp Task Manager](https://github.com/cline/mcp-shrimp-task-manager) tasks created through the MCP (Model Context Protocol) tool. This visual interface allows you to see detailed task information, track progress across multiple projects, and easily copy task UUIDs for AI agent interactions.
+A modern, React-based web interface for viewing and managing [Shrimp Task Manager](https://github.com/cjo4m06/mcp-shrimp-task-manager) tasks created through the MCP (Model Context Protocol) tool. This visual interface allows you to see detailed task information, track progress across multiple projects, and easily copy task UUIDs for AI agent interactions.
 
 ## Why Use Shrimp Task Viewer?
 
@@ -12,7 +12,7 @@ When using Shrimp Task Manager as an MCP server with AI agents like Claude, this
 - **Live Updates**: Direct file path reading ensures you always see the current task state
 - **Multi-Project Support**: Manage tasks across different projects with draggable profile tabs
 
-For information on setting up Shrimp Task Manager as an MCP server, see the [main repository](https://github.com/cline/mcp-shrimp-task-manager).
+For information on setting up Shrimp Task Manager as an MCP server, see the [main repository](https://github.com/cjo4m06/mcp-shrimp-task-manager).
 
 ## 📸 Screenshot
 
