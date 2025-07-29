@@ -98,6 +98,11 @@ function App() {
       }
       
       const data = await response.json();
+      console.log('Received tasks data:', data.tasks?.length, 'tasks');
+      const task880f = data.tasks?.find(t => t.id === '880f4dd8-a603-4bb9-8d4d-5033887d0e0f');
+      if (task880f) {
+        console.log('Task 880f4dd8 status from API:', task880f.status);
+      }
       setTasks(data.tasks || []);
       setProjectRoot(data.projectRoot || null);
     } catch (err) {
@@ -131,20 +136,33 @@ function App() {
     loadTasks(profileId);
   };
 
-  const handleAddProfile = async (name, file, projectRoot) => {
+  const handleAddProfile = async (name, file, projectRoot, filePath) => {
     try {
-      const taskFileContent = await file.text();
+      let body;
+      
+      if (filePath) {
+        // Direct file path method
+        body = JSON.stringify({ 
+          name, 
+          filePath,
+          projectRoot: projectRoot || null
+        });
+      } else {
+        // File upload method
+        const taskFileContent = await file.text();
+        body = JSON.stringify({ 
+          name, 
+          taskFile: taskFileContent,
+          projectRoot: projectRoot || null
+        });
+      }
 
       const response = await fetch('/api/add-profile', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({
-          name: name,
-          taskFile: taskFileContent,
-          projectRoot: projectRoot
-        })
+        body
       });
 
       if (!response.ok) {
@@ -503,10 +521,15 @@ function App() {
               e.preventDefault();
               const formData = new FormData(e.target);
               const name = formData.get('name');
-              const file = formData.get('file');
+              const folderPath = formData.get('folderPath');
               const projectRoot = formData.get('projectRoot');
-              if (name && file) {
-                handleAddProfile(name, file, projectRoot);
+              
+              if (name && folderPath) {
+                // Auto-append tasks.json to the folder path
+                const filePath = folderPath.endsWith('/') 
+                  ? folderPath + 'tasks.json' 
+                  : folderPath + '/tasks.json';
+                handleAddProfile(name, null, projectRoot, filePath);
               }
             }}>
               <div className="form-group" name="profile-name-group">
@@ -520,16 +543,20 @@ function App() {
                   required
                 />
               </div>
-              <div className="form-group" name="task-file-group">
-                <label htmlFor="taskFile">Select tasks.json file:</label>
+              <div className="form-group" name="task-folder-group">
+                <label htmlFor="folderPath">Task Folder Path:</label>
                 <input 
-                  type="file" 
-                  id="taskFile"
-                  name="file"
-                  accept=".json"
-                  title="Choose a tasks.json file from your computer"
+                  type="text" 
+                  id="folderPath"
+                  name="folderPath"
+                  placeholder="/path/to/shrimp_data_folder"
+                  title="Enter the path to your shrimp data folder containing tasks.json"
                   required
                 />
+                <span className="form-hint">
+                  <strong>Tip:</strong> Navigate to your shrimp data folder in terminal and <strong style={{ color: '#f59e0b' }}>type <code>pwd</code> to get the full path</strong><br />
+                  Example: /home/user/project/shrimp_data_team
+                </span>
               </div>
               <div className="form-group" name="project-root-group">
                 <label htmlFor="projectRoot">Project Root Path (optional):</label>

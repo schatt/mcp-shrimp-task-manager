@@ -150,6 +150,22 @@ function ReleaseNotes() {
       } else if (line.trim() === '---') {
         // Handle horizontal rules
         return <hr key={index} className="release-divider" />;
+      } else if (line.match(/^!\[([^\]]*)\]\(([^)]+)\)$/)) {
+        // Handle images ![alt text](url)
+        const imgMatch = line.match(/^!\[([^\]]*)\]\(([^)]+)\)$/);
+        if (imgMatch) {
+          const altText = imgMatch[1];
+          const imgUrl = imgMatch[2];
+          return (
+            <div key={index} className="release-image">
+              <img 
+                src={imgUrl} 
+                alt={altText} 
+                style={{ maxWidth: '60%', height: 'auto', margin: '1rem 0' }}
+              />
+            </div>
+          );
+        }
       } else if (line.match(/^\*[^*]+\*$/)) {
         // Italic line
         return (

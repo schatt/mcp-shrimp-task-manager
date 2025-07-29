@@ -283,8 +283,18 @@ async function startServer() {
             }
             
             try {
+                console.log(`Reading tasks from: ${agent.path}`);
+                const stats = await fs.stat(agent.path);
+                console.log(`File last modified: ${stats.mtime}`);
+                
                 const data = await fs.readFile(agent.path, 'utf8');
                 const tasksData = JSON.parse(data);
+                
+                // Log task status for debugging
+                const task880f = tasksData.tasks?.find(t => t.id === '880f4dd8-a603-4bb9-8d4d-5033887d0e0f');
+                if (task880f) {
+                    console.log(`Task 880f4dd8 status: ${task880f.status}`);
+                }
                 
                 // Add projectRoot to the response
                 if (agent.projectRoot) {
@@ -304,22 +314,34 @@ async function startServer() {
                 res.end('Error reading task file: ' + err.message);
             }
             
-        } else if (url.pathname.startsWith('/releases/') && url.pathname.endsWith('.md')) {
-            // Serve release markdown files
+        } else if (url.pathname.startsWith('/releases/')) {
+            // Serve release files (markdown and images)
             const fileName = url.pathname.split('/').pop();
             try {
                 const releasePath = path.join(__dirname, 'releases', fileName);
                 console.log('Attempting to read release file:', releasePath);
-                const data = await fs.readFile(releasePath, 'utf8');
-                res.writeHead(200, { 
-                    'Content-Type': 'text/markdown; charset=utf-8',
-                    'Cache-Control': 'no-cache, no-store, must-revalidate'
-                });
-                res.end(data);
+                
+                if (fileName.endsWith('.md')) {
+                    const data = await fs.readFile(releasePath, 'utf8');
+                    res.writeHead(200, { 
+                        'Content-Type': 'text/markdown; charset=utf-8',
+                        'Cache-Control': 'no-cache, no-store, must-revalidate'
+                    });
+                    res.end(data);
+                } else {
+                    // Serve images and other files
+                    const data = await fs.readFile(releasePath);
+                    const mimeType = getMimeType(releasePath);
+                    res.writeHead(200, { 
+                        'Content-Type': mimeType,
+                        'Cache-Control': 'public, max-age=31536000' // Cache images for 1 year
+                    });
+                    res.end(data);
+                }
             } catch (err) {
                 console.error('Error reading release file:', err);
                 res.writeHead(404, { 'Content-Type': 'text/plain' });
-                res.end('Release notes not found');
+                res.end('Release file not found');
             }
             
         } else {
