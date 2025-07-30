@@ -4,7 +4,7 @@ const http = require('http');
 const fs = require('fs').promises;
 const path = require('path');
 const os = require('os');
-const Busboy = require('busboy');
+const busboy = require('busboy');
 
 // Version information
 const VERSION = '2.0.0';
@@ -140,11 +140,11 @@ async function startServer() {
             
             if (contentType.includes('multipart/form-data')) {
                 // Handle multipart form data with busboy
-                const busboy = new Busboy({ headers: req.headers });
+                const bb = busboy({ headers: req.headers });
                 let name = null;
                 let taskFileContent = null;
                 
-                busboy.on('field', (fieldname, value) => {
+                bb.on('field', (fieldname, value) => {
                     if (fieldname === 'name') {
                         name = value;
                     } else if (fieldname === 'taskFile') {
@@ -152,7 +152,7 @@ async function startServer() {
                     }
                 });
                 
-                busboy.on('finish', async () => {
+                bb.on('finish', async () => {
                     if (!name || !taskFileContent) {
                         res.writeHead(400, { 'Content-Type': 'text/plain' });
                         res.end('Missing name or taskFile');
@@ -175,7 +175,7 @@ async function startServer() {
                     }
                 });
                 
-                req.pipe(busboy);
+                req.pipe(bb);
             } else {
                 // Handle URL-encoded form data
                 let body = '';

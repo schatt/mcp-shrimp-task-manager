@@ -1,6 +1,6 @@
 {
   "name": "shrimp-task-viewer",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Web-based viewer for Shrimp Task Manager data with comprehensive testing suite (port 9998)",
   "main": "server.js",
   "bin": {
