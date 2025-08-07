@@ -1479,7 +1479,7 @@ function AppContent() {
         <ChatAgent
           currentPage={
             selectedOuterTab === 'projects' 
-              ? (isInDetailView ? 'task-detail' : (projectInnerTab === 'history' ? 'history' : 'task-list'))
+              ? (isInDetailView ? 'task-detail' : (projectInnerTab === 'history' ? 'history' : projectInnerTab === 'settings' ? 'project-settings' : 'task-list'))
               : selectedOuterTab
           }
           currentTask={currentTask}
@@ -1488,6 +1488,8 @@ function AppContent() {
           profileName={profiles.find(p => p.id === selectedProfile)?.name}
           projectRoot={projectRoot}
           showToast={showToast}
+          projectInnerTab={projectInnerTab}
+          isInDetailView={isInDetailView}
           onTaskUpdate={async (taskId, updates) => {
             // Handle task updates from chat
             try {

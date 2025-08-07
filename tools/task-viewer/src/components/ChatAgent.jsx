@@ -8,6 +8,8 @@ function ChatAgent({
   profileId,
   profileName,
   projectRoot,
+  projectInnerTab,
+  isInDetailView,
   showToast,
   onTaskUpdate 
 }) {
@@ -65,6 +67,31 @@ function ChatAgent({
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
+  
+  // Store previous context to detect significant changes
+  const prevContextRef = useRef({ profileId, projectInnerTab, isInDetailView });
+  
+  // Handle context changes (tab switches, detail view changes)
+  useEffect(() => {
+    const prevContext = prevContextRef.current;
+    const contextChanged = 
+      prevContext.projectInnerTab !== projectInnerTab ||
+      prevContext.isInDetailView !== isInDetailView;
+    
+    if (contextChanged && messages.length > 0) {
+      // Add a system message about context change
+      const contextMessage = {
+        id: Date.now(),
+        role: 'system',
+        content: `Context switched to: ${currentPage}${currentTask ? ' - ' + currentTask.name : ''}`,
+        timestamp: new Date().toISOString()
+      };
+      setMessages(prev => [...prev, contextMessage]);
+    }
+    
+    // Update ref for next comparison
+    prevContextRef.current = { profileId, projectInnerTab, isInDetailView };
+  }, [projectInnerTab, isInDetailView, currentPage, currentTask, messages.length]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -118,7 +145,8 @@ function ChatAgent({
     }
   };
 
-  const getPageContext = () => {
+  // Memoize the context to avoid unnecessary recomputation
+  const getPageContext = React.useCallback(() => {
     const context = {
       currentPage,
       timestamp: new Date().toISOString()
@@ -186,7 +214,7 @@ function ChatAgent({
     }
 
     return context;
-  };
+  }, [currentPage, currentTask, tasks]);
 
   const handleSendMessage = async () => {
     if (!inputMessage.trim() || isLoading) return;
@@ -391,10 +419,18 @@ function ChatAgent({
               <div className="chat-welcome">
                 <p>Welcome! I can help you with:</p>
                 <ul>
-                  <li>• Understanding and analyzing tasks</li>
+                  {currentPage === 'task-list' && (
+                    <li>• Summarizing all tasks and their statuses</li>
+                  )}
+                  {currentPage === 'task-detail' && currentTask && (
+                    <li>• Analyzing the current task: "{currentTask.name}"</li>
+                  )}
+                  {currentPage === 'history' && (
+                    <li>• Reviewing historical task data</li>
+                  )}
                   <li>• Suggesting task assignments to agents</li>
                   <li>• Answering questions about your project</li>
-                  <li>• Modifying current task details</li>
+                  {currentTask && <li>• Modifying current task details</li>}
                 </ul>
                 <p className="chat-context-info">
                   <strong>Project:</strong> {profileName || profileId}<br/>
@@ -407,22 +443,31 @@ function ChatAgent({
             
             {messages.map(message => (
               <div key={message.id} className={`chat-message ${message.role}`}>
-                <div className="message-header">
-                  <span className="message-role">
-                    {message.role === 'user' ? '👤 You' : '🤖 AI'}
-                  </span>
-                  {message.agents && message.agents.length > 0 && (
-                    <span className="message-agents">
-                      ({message.agents.join(', ')})
-                    </span>
-                  )}
-                </div>
-                <div className="message-content">
-                  {message.content}
-                </div>
-                <div className="message-timestamp">
-                  {new Date(message.timestamp).toLocaleTimeString()}
-                </div>
+                {message.role === 'system' ? (
+                  <div className="system-message">
+                    <span className="system-icon">ℹ️</span>
+                    <span className="system-text">{message.content}</span>
+                  </div>
+                ) : (
+                  <>
+                    <div className="message-header">
+                      <span className="message-role">
+                        {message.role === 'user' ? '👤 You' : '🤖 AI'}
+                      </span>
+                      {message.agents && message.agents.length > 0 && (
+                        <span className="message-agents">
+                          ({message.agents.join(', ')})
+                        </span>
+                      )}
+                    </div>
+                    <div className="message-content">
+                      {message.content}
+                    </div>
+                    <div className="message-timestamp">
+                      {new Date(message.timestamp).toLocaleTimeString()}
+                    </div>
+                  </>
+                )}
               </div>
             ))}
             
