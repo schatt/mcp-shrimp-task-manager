@@ -1,5 +1,6 @@
 /* Import nested tabs styles */
 @import './styles/nested-tabs.css';
+@import './styles/chat-agent.css';
 
 /* Force reload test */
 * {
