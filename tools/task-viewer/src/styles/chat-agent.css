@@ -95,14 +95,43 @@
 /* Agent Selection */
 .chat-agent-agents {
   padding: 12px;
-  background: #f8f9fa;
+  background: linear-gradient(to bottom, #ffffff, #f8f9fa);
   border-bottom: 1px solid #e0e0e0;
 }
 
 .agents-selection-header {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+}
+
+.agents-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 4px 0;
+  cursor: pointer;
+  user-select: none;
+  transition: opacity 0.2s;
+}
+
+.agents-header-row:hover {
+  opacity: 0.8;
+}
+
+.expand-chevron {
+  display: inline-block;
+  margin-right: 4px;
+  font-size: 10px;
+  transition: transform 0.2s;
+}
+
+.agents-count {
+  font-size: 12px;
+  color: #666;
+  background: #e0e0e0;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-weight: 500;
 }
 
 .agents-label {
@@ -114,7 +143,22 @@
 .agents-checkboxes {
   display: flex;
   flex-wrap: wrap;
-  gap: 12px;
+  gap: 8px;
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid #e5e5e5;
+  animation: slideDown 0.2s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .agent-checkbox {
@@ -135,17 +179,38 @@
   user-select: none;
 }
 
-.agent-checkbox:hover span {
+.agent-checkbox:hover span:not([style]) {
   color: #667eea;
 }
 
+.agent-checkbox:hover span[style] {
+  opacity: 0.85;
+  transform: scale(1.02);
+  transition: all 0.2s ease;
+}
+
+.agent-name {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  transition: all 0.2s ease;
+  font-size: 13px;
+}
+
 .agent-name.project {
-  color: #4a5568;
   font-weight: 500;
 }
 
 .agent-name.global {
-  color: #2d3748;
+  font-weight: 500;
+}
+
+.agent-name.openai-agent {
+  background: linear-gradient(135deg, #10a37f20, #10a37f10);
+  color: #10a37f;
+  padding: 2px 6px;
+  border-radius: 4px;
+  border: 1px solid #10a37f40;
   font-weight: 500;
 }
 
@@ -371,8 +436,23 @@
   }
 
   .chat-agent-agents {
-    background: #2a2a2a;
+    background: linear-gradient(to bottom, #2a2a2a, #1f1f1f);
     border-bottom-color: #3a3a3a;
+  }
+  
+  .agent-name.openai-agent {
+    background: linear-gradient(135deg, #10a37f30, #10a37f20);
+    color: #10a37f;
+    border-color: #10a37f60;
+  }
+  
+  .agents-count {
+    background: #3a3a3a;
+    color: #b0b0b0;
+  }
+  
+  .agents-checkboxes {
+    border-top-color: #3a3a3a;
   }
 
   .chat-agent-messages {

@@ -16,24 +16,49 @@ function ChatAgent({
   const [isMinimized, setIsMinimized] = useState(false);
   const [messages, setMessages] = useState([]);
   const [inputMessage, setInputMessage] = useState('');
-  const [selectedAgents, setSelectedAgents] = useState({ openai: true });
+  const [selectedAgents, setSelectedAgents] = useState({});
   const [availableAgents, setAvailableAgents] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [agentsLoading, setAgentsLoading] = useState(false);
   const [openAIKey, setOpenAIKey] = useState('');
+  const [agentsExpanded, setAgentsExpanded] = useState(() => {
+    // Load expanded state from localStorage
+    const saved = localStorage.getItem('chatAgentsExpanded');
+    return saved !== null ? JSON.parse(saved) : true;
+  });
   const messagesEndRef = useRef(null);
   const chatInputRef = useRef(null);
 
+  // Load saved agent selections for this project
+  const loadSavedSelections = () => {
+    const saved = localStorage.getItem(`chatAgentSelections_${profileId}`);
+    if (saved) {
+      try {
+        const selections = JSON.parse(saved);
+        setSelectedAgents(selections);
+      } catch {
+        setSelectedAgents({ openai: true });
+      }
+    } else {
+      setSelectedAgents({ openai: true });
+    }
+  };
+
+  // Save agent selections for this project
+  const saveSelections = (selections) => {
+    localStorage.setItem(`chatAgentSelections_${profileId}`, JSON.stringify(selections));
+  };
+
   // Load available agents and OpenAI key when profile changes
   useEffect(() => {
-    loadAvailableAgents();
-    loadOpenAIKey();
-    
-    // Reset selected agents when switching projects (keep OpenAI selected)
-    setSelectedAgents({ openai: true });
-    
-    // Clear messages when switching projects to avoid confusion
-    setMessages([]);
+    if (profileId) {
+      loadAvailableAgents();
+      loadOpenAIKey();
+      loadSavedSelections();
+      
+      // Clear messages when switching projects to avoid confusion
+      setMessages([]);
+    }
   }, [profileId]);
 
   // Auto-scroll to bottom when new messages arrive
@@ -74,6 +99,7 @@ function ChatAgent({
           name: agent.metadata?.name || agent.name.replace(/\.(md|yaml|yml)$/, '').replace(/-/g, ' '),
           description: agent.metadata?.description || '',
           type: agent.type,
+          color: agent.metadata?.color || null,
           tools: agent.metadata?.tools || []
         }));
         
@@ -211,10 +237,20 @@ function ChatAgent({
   };
 
   const toggleAgent = (agentId) => {
-    setSelectedAgents(prev => ({
-      ...prev,
-      [agentId]: !prev[agentId]
-    }));
+    setSelectedAgents(prev => {
+      const newSelections = {
+        ...prev,
+        [agentId]: !prev[agentId]
+      };
+      saveSelections(newSelections);
+      return newSelections;
+    });
+  };
+
+  const toggleAgentsExpanded = () => {
+    const newState = !agentsExpanded;
+    setAgentsExpanded(newState);
+    localStorage.setItem('chatAgentsExpanded', JSON.stringify(newState));
   };
 
   if (!isOpen) {
@@ -258,28 +294,51 @@ function ChatAgent({
         <>
           <div className="chat-agent-agents">
             <div className="agents-selection-header">
-              <span className="agents-label">
-                Chat with:
-                {agentsLoading && <span className="agents-loading"> (Loading agents...)</span>}
-              </span>
-              <div className="agents-checkboxes">
-                <label className="agent-checkbox">
+              <div className="agents-header-row" onClick={toggleAgentsExpanded}>
+                <span className="agents-label">
+                  <span className="expand-chevron">{agentsExpanded ? '▼' : '▶'}</span>
+                  Chat with:
+                  {agentsLoading && <span className="agents-loading"> (Loading agents...)</span>}
+                </span>
+                <span className="agents-count">
+                  {Object.values(selectedAgents).filter(v => v).length} selected
+                </span>
+              </div>
+              {agentsExpanded && (
+                <div className="agents-checkboxes">
+                <label className="agent-checkbox" title="OpenAI GPT-4 - General purpose AI assistant">
                   <input
                     type="checkbox"
                     checked={selectedAgents.openai || false}
                     onChange={() => toggleAgent('openai')}
                   />
-                  <span>OpenAI</span>
+                  <span className="agent-name openai-agent">
+                    🤖 OpenAI GPT-4
+                  </span>
                 </label>
                 {availableAgents.map(agent => (
-                  <label key={agent.id} className="agent-checkbox" title={`${agent.type === 'project' ? '📁 Project' : '🌐 Global'} Agent: ${agent.description || 'No description'}`}>
+                  <label 
+                    key={agent.id} 
+                    className="agent-checkbox" 
+                    title={`${agent.description || 'No description'}\n(${agent.type === 'project' ? 'Project' : 'Global'} agent)`}
+                  >
                     <input
                       type="checkbox"
                       checked={selectedAgents[agent.id] || false}
                       onChange={() => toggleAgent(agent.id)}
                     />
-                    <span className={`agent-name ${agent.type}`}>
-                      {agent.type === 'project' ? '📁' : '🌐'} {agent.name || agent.id}
+                    <span 
+                      className={`agent-name ${agent.type}`}
+                      style={agent.color ? { 
+                        backgroundColor: agent.color + '20',
+                        color: agent.color,
+                        padding: '2px 6px',
+                        borderRadius: '4px',
+                        border: `1px solid ${agent.color}40`,
+                        fontWeight: '500'
+                      } : {}}
+                    >
+                      🤖 {agent.name || agent.id}
                     </span>
                   </label>
                 ))}
@@ -287,6 +346,7 @@ function ChatAgent({
                   <span className="no-agents-message">No project agents found</span>
                 )}
               </div>
+              )}
             </div>
           </div>
 
