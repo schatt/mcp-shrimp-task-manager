@@ -94,14 +94,19 @@ function ChatAgent({
         console.log('Loaded agents for chat:', agents);
         
         // Transform agent data for display
-        const formattedAgents = agents.map(agent => ({
-          id: agent.name.replace(/\.(md|yaml|yml)$/, ''), // Remove file extension for ID
-          name: agent.metadata?.name || agent.name.replace(/\.(md|yaml|yml)$/, '').replace(/-/g, ' '),
-          description: agent.metadata?.description || '',
-          type: agent.type,
-          color: agent.metadata?.color || null,
-          tools: agent.metadata?.tools || []
-        }));
+        const formattedAgents = agents.map(agent => {
+          // Debug log to see what we're getting
+          console.log('Agent metadata:', agent.name, agent.metadata);
+          
+          return {
+            id: agent.name.replace(/\.(md|yaml|yml)$/, ''), // Remove file extension for ID
+            name: agent.metadata?.name || agent.name.replace(/\.(md|yaml|yml)$/, '').replace(/-/g, ' '),
+            description: agent.metadata?.description || '',
+            type: agent.type,
+            color: agent.metadata?.color || null,
+            tools: agent.metadata?.tools || []
+          };
+        });
         
         setAvailableAgents(formattedAgents);
       }
@@ -320,7 +325,7 @@ function ChatAgent({
                   <label 
                     key={agent.id} 
                     className="agent-checkbox" 
-                    title={`${agent.description || 'No description'}\n(${agent.type === 'project' ? 'Project' : 'Global'} agent)`}
+                    title={`${agent.name}\n${agent.description || 'No description available'}\nType: ${agent.type === 'project' ? 'Project' : 'Global'} agent${agent.tools && agent.tools.length > 0 ? '\nTools: ' + agent.tools.join(', ') : ''}`}
                   >
                     <input
                       type="checkbox"
@@ -330,11 +335,11 @@ function ChatAgent({
                     <span 
                       className={`agent-name ${agent.type}`}
                       style={agent.color ? { 
-                        backgroundColor: agent.color + '20',
+                        backgroundColor: `${agent.color}33`,  // 20% opacity
                         color: agent.color,
                         padding: '2px 6px',
                         borderRadius: '4px',
-                        border: `1px solid ${agent.color}40`,
+                        border: `1px solid ${agent.color}66`,  // 40% opacity
                         fontWeight: '500'
                       } : {}}
                     >

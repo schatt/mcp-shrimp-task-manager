@@ -65,24 +65,59 @@ function parseAgentMetadata(content) {
     
     if (match) {
         const yamlContent = match[1];
-        // Simple YAML parsing for the fields we need
+        // Improved YAML parsing for the fields we need
         const lines = yamlContent.split('\n');
         
-        for (const line of lines) {
+        let currentField = null;
+        let multilineValue = [];
+        
+        for (let i = 0; i < lines.length; i++) {
+            const line = lines[i];
             const trimmedLine = line.trim();
-            if (trimmedLine.startsWith('name:')) {
-                metadata.name = trimmedLine.substring(5).trim().replace(/^["']|["']$/g, '');
-            } else if (trimmedLine.startsWith('description:')) {
-                metadata.description = trimmedLine.substring(12).trim().replace(/^["']|["']$/g, '');
-            } else if (trimmedLine.startsWith('tools:')) {
-                const toolsStr = trimmedLine.substring(6).trim();
-                if (toolsStr) {
-                    // Split by comma and trim each tool name
-                    metadata.tools = toolsStr.split(',').map(t => t.trim()).filter(t => t.length > 0);
+            
+            // Check if this is a field definition
+            if (trimmedLine.includes(':') && !line.startsWith('  ')) {
+                // Save any previous multiline field
+                if (currentField === 'description' && multilineValue.length > 0) {
+                    metadata.description = multilineValue.join(' ').trim().replace(/^["']|["']$/g, '');
+                    multilineValue = [];
                 }
-            } else if (trimmedLine.startsWith('color:')) {
-                metadata.color = trimmedLine.substring(6).trim().replace(/^["']|["']$/g, '');
+                
+                if (trimmedLine.startsWith('name:')) {
+                    currentField = 'name';
+                    metadata.name = trimmedLine.substring(5).trim().replace(/^["']|["']$/g, '');
+                } else if (trimmedLine.startsWith('description:')) {
+                    currentField = 'description';
+                    const value = trimmedLine.substring(12).trim();
+                    if (value) {
+                        metadata.description = value.replace(/^["']|["']$/g, '');
+                    }
+                } else if (trimmedLine.startsWith('tools:')) {
+                    currentField = 'tools';
+                    const toolsStr = trimmedLine.substring(6).trim();
+                    if (toolsStr && !toolsStr.startsWith('[')) {
+                        // Single line tools
+                        metadata.tools = toolsStr.split(',').map(t => t.trim()).filter(t => t.length > 0);
+                    }
+                } else if (trimmedLine.startsWith('color:')) {
+                    currentField = 'color';
+                    metadata.color = trimmedLine.substring(6).trim().replace(/^["']|["']$/g, '');
+                } else {
+                    currentField = null;
+                }
+            } else if (currentField === 'description' && trimmedLine && trimmedLine !== '-') {
+                // Multiline description
+                multilineValue.push(trimmedLine.replace(/^-\s*/, ''));
+            } else if (currentField === 'tools' && trimmedLine.startsWith('-')) {
+                // Array format tools
+                if (!metadata.tools) metadata.tools = [];
+                metadata.tools.push(trimmedLine.substring(1).trim());
             }
+        }
+        
+        // Handle any remaining multiline field
+        if (currentField === 'description' && multilineValue.length > 0) {
+            metadata.description = multilineValue.join(' ').trim().replace(/^["']|["']$/g, '');
         }
     }
     
