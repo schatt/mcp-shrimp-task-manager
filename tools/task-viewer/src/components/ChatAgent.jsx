@@ -28,6 +28,11 @@ function ChatAgent({
     const saved = localStorage.getItem('chatAgentsExpanded');
     return saved !== null ? JSON.parse(saved) : true;
   });
+  const [chatMode, setChatMode] = useState('normal'); // 'normal', 'expanded', 'floating'
+  const [floatingPosition, setFloatingPosition] = useState({ x: 100, y: 100 });
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
+  const chatRef = useRef(null);
   const messagesEndRef = useRef(null);
   const chatInputRef = useRef(null);
 
@@ -365,6 +370,52 @@ function ChatAgent({
     localStorage.setItem('chatAgentsExpanded', JSON.stringify(newState));
   };
 
+  // Handle chat mode changes
+  const handleModeChange = (mode) => {
+    setChatMode(mode);
+    if (mode === 'floating') {
+      setIsOpen(true);
+      setIsMinimized(false);
+    }
+  };
+
+  // Drag functionality for floating mode
+  const handleMouseDown = (e) => {
+    if (chatMode === 'floating' && e.target.closest('.chat-agent-header')) {
+      setIsDragging(true);
+      const rect = chatRef.current.getBoundingClientRect();
+      setDragOffset({
+        x: e.clientX - rect.left,
+        y: e.clientY - rect.top
+      });
+    }
+  };
+
+  const handleMouseMove = (e) => {
+    if (isDragging && chatMode === 'floating') {
+      setFloatingPosition({
+        x: e.clientX - dragOffset.x,
+        y: e.clientY - dragOffset.y
+      });
+    }
+  };
+
+  const handleMouseUp = () => {
+    setIsDragging(false);
+  };
+
+  // Add global mouse event listeners for dragging
+  useEffect(() => {
+    if (isDragging) {
+      document.addEventListener('mousemove', handleMouseMove);
+      document.addEventListener('mouseup', handleMouseUp);
+      return () => {
+        document.removeEventListener('mousemove', handleMouseMove);
+        document.removeEventListener('mouseup', handleMouseUp);
+      };
+    }
+  }, [isDragging, dragOffset]);
+
   if (!isOpen) {
     return (
       <button
@@ -378,13 +429,42 @@ function ChatAgent({
   }
 
   return (
-    <div className={`chat-agent-container ${isMinimized ? 'minimized' : ''}`}>
-      <div className="chat-agent-header">
+    <div 
+      ref={chatRef}
+      className={`chat-agent-container ${isMinimized ? 'minimized' : ''} ${chatMode}`}
+      style={chatMode === 'floating' ? {
+        position: 'fixed',
+        left: floatingPosition.x,
+        top: floatingPosition.y,
+        right: 'auto',
+        bottom: 'auto'
+      } : {}}
+      onMouseDown={handleMouseDown}
+    >
+      <div className={`chat-agent-header ${chatMode === 'floating' ? 'draggable' : ''}`}>
         <div className="chat-agent-title">
           <span className="chat-icon">🤖</span>
           <span>AI Chat Assistant</span>
+          <span className="chat-mode-indicator">
+            {chatMode === 'expanded' && '📐'}
+            {chatMode === 'floating' && '🪟'}
+          </span>
         </div>
         <div className="chat-agent-controls">
+          <button
+            className="chat-control-btn"
+            onClick={() => handleModeChange(chatMode === 'normal' ? 'expanded' : 'normal')}
+            title={chatMode === 'normal' ? 'Expand Width' : 'Normal Width'}
+          >
+            {chatMode === 'normal' ? '⟷' : '⟵'}
+          </button>
+          <button
+            className="chat-control-btn"
+            onClick={() => handleModeChange(chatMode === 'floating' ? 'normal' : 'floating')}
+            title={chatMode === 'floating' ? 'Dock to Corner' : 'Pop Out Window'}
+          >
+            {chatMode === 'floating' ? '📌' : '🪟'}
+          </button>
           <button
             className="chat-control-btn"
             onClick={() => setIsMinimized(!isMinimized)}
