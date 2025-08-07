@@ -1485,6 +1485,7 @@ function AppContent() {
           currentTask={currentTask}
           tasks={tasks}
           profileId={selectedProfile}
+          profileName={profiles.find(p => p.id === selectedProfile)?.name}
           projectRoot={projectRoot}
           showToast={showToast}
           onTaskUpdate={async (taskId, updates) => {

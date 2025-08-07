@@ -6,6 +6,7 @@ function ChatAgent({
   currentTask, 
   tasks, 
   profileId,
+  profileName,
   projectRoot,
   showToast,
   onTaskUpdate 
@@ -18,14 +19,21 @@ function ChatAgent({
   const [selectedAgents, setSelectedAgents] = useState({ openai: true });
   const [availableAgents, setAvailableAgents] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [agentsLoading, setAgentsLoading] = useState(false);
   const [openAIKey, setOpenAIKey] = useState('');
   const messagesEndRef = useRef(null);
   const chatInputRef = useRef(null);
 
-  // Load available agents and OpenAI key
+  // Load available agents and OpenAI key when profile changes
   useEffect(() => {
     loadAvailableAgents();
     loadOpenAIKey();
+    
+    // Reset selected agents when switching projects (keep OpenAI selected)
+    setSelectedAgents({ openai: true });
+    
+    // Clear messages when switching projects to avoid confusion
+    setMessages([]);
   }, [profileId]);
 
   // Auto-scroll to bottom when new messages arrive
@@ -52,14 +60,30 @@ function ChatAgent({
   const loadAvailableAgents = async () => {
     if (!profileId) return;
     
+    setAgentsLoading(true);
     try {
-      const response = await fetch(`/api/agents/${profileId}`);
+      // Load combined list of global and project agents
+      const response = await fetch(`/api/agents/combined/${profileId}`);
       if (response.ok) {
         const agents = await response.json();
-        setAvailableAgents(agents);
+        console.log('Loaded agents for chat:', agents);
+        
+        // Transform agent data for display
+        const formattedAgents = agents.map(agent => ({
+          id: agent.name.replace(/\.(md|yaml|yml)$/, ''), // Remove file extension for ID
+          name: agent.metadata?.name || agent.name.replace(/\.(md|yaml|yml)$/, '').replace(/-/g, ' '),
+          description: agent.metadata?.description || '',
+          type: agent.type,
+          tools: agent.metadata?.tools || []
+        }));
+        
+        setAvailableAgents(formattedAgents);
       }
     } catch (err) {
       console.error('Error loading agents:', err);
+      setAvailableAgents([]);
+    } finally {
+      setAgentsLoading(false);
     }
   };
 
@@ -139,11 +163,7 @@ function ChatAgent({
           context: getPageContext(),
           profileId,
           openAIKey,
-          availableAgents: availableAgents.map(a => ({
-            id: a.id,
-            name: a.name,
-            description: a.description
-          }))
+          availableAgents: availableAgents
         })
       });
 
@@ -238,7 +258,10 @@ function ChatAgent({
         <>
           <div className="chat-agent-agents">
             <div className="agents-selection-header">
-              <span className="agents-label">Chat with:</span>
+              <span className="agents-label">
+                Chat with:
+                {agentsLoading && <span className="agents-loading"> (Loading agents...)</span>}
+              </span>
               <div className="agents-checkboxes">
                 <label className="agent-checkbox">
                   <input
@@ -249,17 +272,20 @@ function ChatAgent({
                   <span>OpenAI</span>
                 </label>
                 {availableAgents.map(agent => (
-                  <label key={agent.id} className="agent-checkbox">
+                  <label key={agent.id} className="agent-checkbox" title={`${agent.type === 'project' ? '📁 Project' : '🌐 Global'} Agent: ${agent.description || 'No description'}`}>
                     <input
                       type="checkbox"
                       checked={selectedAgents[agent.id] || false}
                       onChange={() => toggleAgent(agent.id)}
                     />
-                    <span title={agent.description}>
-                      {agent.name || agent.id}
+                    <span className={`agent-name ${agent.type}`}>
+                      {agent.type === 'project' ? '📁' : '🌐'} {agent.name || agent.id}
                     </span>
                   </label>
                 ))}
+                {!agentsLoading && availableAgents.length === 0 && (
+                  <span className="no-agents-message">No project agents found</span>
+                )}
               </div>
             </div>
           </div>
@@ -275,8 +301,10 @@ function ChatAgent({
                   <li>• Modifying current task details</li>
                 </ul>
                 <p className="chat-context-info">
-                  Current context: <strong>{currentPage}</strong>
-                  {currentTask && ` - Task: ${currentTask.name}`}
+                  <strong>Project:</strong> {profileName || profileId}<br/>
+                  <strong>Context:</strong> {currentPage}
+                  {currentTask && ` - Task: ${currentTask.name}`}<br/>
+                  <strong>Available Agents:</strong> {availableAgents.length + 1} (OpenAI + {availableAgents.length} project agents)
                 </p>
               </div>
             )}
