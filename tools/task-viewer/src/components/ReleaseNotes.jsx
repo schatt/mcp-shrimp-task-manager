@@ -27,24 +27,27 @@ function ReleaseNotes() {
     setReleaseContent('');
     
     try {
-      // First check if we have translated content
+      // First check if we have translated content in the language files
       const translatedContent = getReleaseContent(version, currentLanguage);
       if (translatedContent && translatedContent.content) {
         setReleaseContent(translatedContent.content);
-      } else if (currentLanguage === 'en') {
-        // Load from markdown file for English
-        const releaseFile = getReleaseFile(version);
-        const response = await fetch(releaseFile);
-        
-        if (response.ok) {
-          const content = await response.text();
-          setReleaseContent(content);
-        } else {
-          setReleaseContent(`# ${version}\n\n${uiStrings.notFound}`);
-        }
       } else {
-        // Fallback to English if translation not available
-        const releaseFile = getReleaseFile(version);
+        // Try to load language-specific markdown file
+        let releaseFile;
+        if (currentLanguage !== 'en') {
+          // Check for language-specific file first (e.g., v3.0.0-zh.md)
+          releaseFile = `/releases/${version}-${currentLanguage}.md`;
+          const response = await fetch(releaseFile);
+          
+          if (response.ok) {
+            const content = await response.text();
+            setReleaseContent(content);
+            return; // Exit early if language-specific file found
+          }
+        }
+        
+        // Fallback to English version
+        releaseFile = getReleaseFile(version);
         const response = await fetch(releaseFile);
         
         if (response.ok) {

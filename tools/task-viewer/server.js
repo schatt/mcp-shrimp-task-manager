@@ -1792,18 +1792,34 @@ ${availableAgents.map(a => `- ${a.name}: ${a.description || 'No description'}`).
 
 Current context:
 - Page: ${context.currentPage}
-${context.currentTask ? `- Current Task: ${context.currentTask.name}
-  - Status: ${context.currentTask.status}
-  - Description: ${context.currentTask.description || 'No description'}
-  - Dependencies: ${context.currentTask.dependencies?.join(', ') || 'None'}` : ''}
-${context.tasksSummary ? `- Tasks Summary: ${context.tasksSummary.total} total (${context.tasksSummary.completed} completed, ${context.tasksSummary.inProgress} in progress, ${context.tasksSummary.pending} pending)` : ''}
+${context.currentTask ? `
+Current Task Details:
+- Name: ${context.currentTask.name}
+- Status: ${context.currentTask.status}
+- Description: ${context.currentTask.description || 'No description'}
+- Dependencies: ${context.currentTask.dependencies?.join(', ') || 'None'}` : ''}
 
-When suggesting agent assignments, consider:
-1. The agent's capabilities and description
-2. The task requirements and complexity
-3. Dependencies between tasks
-4. Current task status
+${context.tasksSummary ? `
+Tasks Overview:
+- Total tasks: ${context.tasksSummary.total}
+- Completed: ${context.tasksSummary.completed}
+- In Progress: ${context.tasksSummary.inProgress}
+- Pending: ${context.tasksSummary.pending}` : ''}
 
+${context.completedTasks && context.completedTasks.length > 0 ? `
+Completed Tasks:
+${context.completedTasks.map(t => `- ${t.name}${t.description ? ': ' + t.description : ''}`).join('\n')}` : ''}
+
+${context.inProgressTasks && context.inProgressTasks.length > 0 ? `
+In Progress Tasks:
+${context.inProgressTasks.map(t => `- ${t.name}${t.description ? ': ' + t.description : ''}`).join('\n')}` : ''}
+
+${context.pendingTasks && context.pendingTasks.length > 0 ? `
+Pending Tasks:
+${context.pendingTasks.map(t => `- ${t.name}${t.description ? ': ' + t.description : ''}`).join('\n')}` : ''}
+
+When the user asks for summaries or information about tasks, use the detailed task information provided in the context.
+When suggesting agent assignments, consider the agent's capabilities and the task requirements.
 Be helpful, concise, and specific in your responses.`;
 
                     // Call OpenAI API

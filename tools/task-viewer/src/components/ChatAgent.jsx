@@ -146,14 +146,42 @@ function ChatAgent({
         pending: tasks.filter(t => t.status === 'pending').length
       };
       
-      // Include task list for list page
-      if (currentPage === 'task-list') {
+      // Include full task list for list page
+      if (currentPage === 'task-list' || currentPage === 'history') {
         context.tasks = tasks.map(t => ({
           id: t.id,
           name: t.name,
+          description: t.description || '',
           status: t.status,
-          dependencies: t.dependencies?.length || 0
+          dependencies: t.dependencies || [],
+          implementationGuide: t.implementationGuide || '',
+          verificationCriteria: t.verificationCriteria || '',
+          notes: t.notes || '',
+          relatedFiles: t.relatedFiles || []
         }));
+        
+        // Add specific completed tasks details for better summaries
+        context.completedTasks = tasks
+          .filter(t => t.status === 'completed')
+          .map(t => ({
+            name: t.name,
+            description: t.description || '',
+            summary: t.summary || ''
+          }));
+          
+        context.inProgressTasks = tasks
+          .filter(t => t.status === 'in_progress')
+          .map(t => ({
+            name: t.name,
+            description: t.description || ''
+          }));
+          
+        context.pendingTasks = tasks
+          .filter(t => t.status === 'pending')
+          .map(t => ({
+            name: t.name,
+            description: t.description || ''
+          }));
       }
     }
 
@@ -183,6 +211,9 @@ function ChatAgent({
         throw new Error('Please select at least one agent to chat with');
       }
 
+      const contextData = getPageContext();
+      console.log('Sending context to AI:', contextData);
+
       const response = await fetch('/api/chat', {
         method: 'POST',
         headers: {
@@ -191,7 +222,7 @@ function ChatAgent({
         body: JSON.stringify({
           message: inputMessage,
           agents: selectedAgentsList,
-          context: getPageContext(),
+          context: contextData,
           profileId,
           openAIKey,
           availableAgents: availableAgents
