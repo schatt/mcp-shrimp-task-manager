@@ -1797,6 +1797,7 @@ Current Task Details:
 - Name: ${context.currentTask.name}
 - Status: ${context.currentTask.status}
 - Description: ${context.currentTask.description || 'No description'}
+- Assigned Agent: ${context.currentTask.assignedAgent || 'Unassigned'}
 - Dependencies: ${context.currentTask.dependencies?.join(', ') || 'None'}` : ''}
 
 ${context.tasksSummary ? `
@@ -1817,6 +1818,19 @@ ${context.inProgressTasks.map(t => `- ${t.name}${t.description ? ': ' + t.descri
 ${context.pendingTasks && context.pendingTasks.length > 0 ? `
 Pending Tasks:
 ${context.pendingTasks.map(t => `- ${t.name}${t.description ? ': ' + t.description : ''}`).join('\n')}` : ''}
+
+${context.availableAgents && context.availableAgents.length > 0 ? `
+Available Agents:
+${context.availableAgents.map(a => `- ${a.name} (${a.type}): ${a.description}${a.tools && a.tools.length > 0 ? ' | Tools: ' + a.tools.join(', ') : ''}`).join('\n')}` : ''}
+
+${context.agentAssignments && Object.keys(context.agentAssignments).length > 0 ? `
+Agent Assignment Statistics:
+${Object.entries(context.agentAssignments).map(([agent, stats]) => 
+  `- ${agent}: ${stats.total} tasks (${stats.completed} completed, ${stats.inProgress} in progress, ${stats.pending} pending)`
+).join('\n')}` : ''}
+
+${context.unassignedTasks && context.unassignedTasks.total > 0 ? `
+Unassigned Tasks: ${context.unassignedTasks.total} total (${context.unassignedTasks.completed} completed, ${context.unassignedTasks.inProgress} in progress, ${context.unassignedTasks.pending} pending)` : ''}
 
 When the user asks for summaries or information about tasks, use the detailed task information provided in the context.
 When suggesting agent assignments, consider the agent's capabilities and the task requirements.

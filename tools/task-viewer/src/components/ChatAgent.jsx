@@ -158,6 +158,7 @@ function ChatAgent({
         name: currentTask.name,
         description: currentTask.description,
         status: currentTask.status,
+        assignedAgent: currentTask.assignedAgent || null,
         dependencies: currentTask.dependencies,
         relatedFiles: currentTask.relatedFiles,
         implementationGuide: currentTask.implementationGuide,
@@ -181,6 +182,7 @@ function ChatAgent({
           name: t.name,
           description: t.description || '',
           status: t.status,
+          assignedAgent: t.assignedAgent || null,
           dependencies: t.dependencies || [],
           implementationGuide: t.implementationGuide || '',
           verificationCriteria: t.verificationCriteria || '',
@@ -210,11 +212,57 @@ function ChatAgent({
             name: t.name,
             description: t.description || ''
           }));
+          
+        // Add agent assignment statistics
+        const agentStats = {};
+        tasks.forEach(task => {
+          if (task.assignedAgent) {
+            if (!agentStats[task.assignedAgent]) {
+              agentStats[task.assignedAgent] = {
+                total: 0,
+                completed: 0,
+                inProgress: 0,
+                pending: 0,
+                tasks: []
+              };
+            }
+            agentStats[task.assignedAgent].total++;
+            agentStats[task.assignedAgent][task.status === 'in_progress' ? 'inProgress' : task.status]++;
+            agentStats[task.assignedAgent].tasks.push({
+              name: task.name,
+              status: task.status
+            });
+          }
+        });
+        
+        context.agentAssignments = agentStats;
+        
+        // Count unassigned tasks
+        const unassignedTasks = tasks.filter(t => !t.assignedAgent);
+        context.unassignedTasks = {
+          total: unassignedTasks.length,
+          completed: unassignedTasks.filter(t => t.status === 'completed').length,
+          inProgress: unassignedTasks.filter(t => t.status === 'in_progress').length,
+          pending: unassignedTasks.filter(t => t.status === 'pending').length,
+          tasks: unassignedTasks.map(t => ({ name: t.name, status: t.status }))
+        };
       }
+    }
+    
+    // Always include available agents information
+    if (availableAgents && availableAgents.length > 0) {
+      context.availableAgents = availableAgents.map(agent => ({
+        id: agent.id,
+        name: agent.name,
+        description: agent.description || 'No description available',
+        type: agent.type,
+        color: agent.color,
+        tools: agent.tools || []
+      }));
     }
 
     return context;
-  }, [currentPage, currentTask, tasks]);
+  }, [currentPage, currentTask, tasks, availableAgents]);
 
   const handleSendMessage = async () => {
     if (!inputMessage.trim() || isLoading) return;
@@ -429,6 +477,7 @@ function ChatAgent({
                     <li>• Reviewing historical task data</li>
                   )}
                   <li>• Suggesting task assignments to agents</li>
+                  <li>• Analyzing agent workloads and assignments</li>
                   <li>• Answering questions about your project</li>
                   {currentTask && <li>• Modifying current task details</li>}
                 </ul>
