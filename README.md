@@ -582,12 +582,134 @@ After configuration, you can use the following tools:
 | **Task Execution**           | `execute_task`       | Execute specific tasks                           |
 |                              | `verify_task`        | Verify task completion                           |
 
+## 🏗️ Architecture Overview
+
+### Core Architecture
+
+The MCP Shrimp Task Manager is built as a Model Context Protocol (MCP) server that provides structured task management capabilities for AI agents through guided workflows and systematic task decomposition.
+
+#### 1. **MCP Server Foundation**
+- Built on `@modelcontextprotocol/sdk` for MCP protocol compliance
+- Uses stdio transport for communication with AI clients
+- Exposes 16 specialized tools via JSON Schema definitions
+- Supports both synchronous and asynchronous operations
+
+#### 2. **Task Data Model** (`src/types/index.ts`, `src/models/taskModel.ts`)
+- **Task Entity**: Core data structure with unique ID, name, description, status, and dependencies
+- **Task States**: PENDING → IN_PROGRESS → COMPLETED (or BLOCKED)
+- **Dependency Graph**: Manages task relationships and execution order
+- **Related Files**: Tracks files associated with each task (TO_MODIFY, REFERENCE, CREATE, etc.)
+- **Persistence**: JSON file storage with Git versioning for complete history
+- **Memory System**: Automatic backups and long-term task history preservation
+
+#### 3. **Tool System Architecture** (`src/tools/`)
+The system provides specialized tools organized into three main categories:
+
+**Task Management Tools:**
+- `plan_task`: Converts natural language into structured development plans
+- `analyze_task`: Deep technical analysis with complexity assessment
+- `split_tasks`: Intelligent decomposition of complex tasks into manageable subtasks
+- `execute_task`: Guided implementation with step-by-step instructions
+- `verify_task`: Completion verification and quality assurance
+- `list_tasks`, `query_task`, `get_task_detail`: Task inspection and retrieval
+- `update_task`, `delete_task`, `clear_all_tasks`: Task manipulation
+
+**Cognitive Tools:**
+- `process_thought`: Chain-of-thought reasoning framework for complex problem solving
+- `reflect_task`: Post-completion analysis and learning extraction
+- `research_mode`: Systematic technical investigation with guided workflows
+
+**Project Tools:**
+- `init_project_rules`: Establishes project-specific conventions and standards
+
+#### 4. **Prompt Template System** (`src/prompts/`)
+- **Multi-language Support**: English and Traditional Chinese templates
+- **Template-based Generation**: Modular prompt construction
+- **Context-aware Prompts**: Dynamic prompt generation based on task state
+- **Customizable Templates**: Override or extend via environment variables
+- **Template Loading**: Dynamic template selection based on configuration
+
+#### 5. **Agent Integration System** (`src/utils/agentLoader.ts`)
+- **Agent Assignment**: Tasks can be assigned to specialized AI agents
+- **Agent Metadata**: Stores agent capabilities and specializations
+- **Agent Matching**: Intelligent agent selection based on task requirements
+- **Claude Integration**: Seamless integration with Claude's agent system
+
+### Data Flow & Workflow
+
+#### 1. **Task Planning Phase**
+```
+User Request → plan_task → analyze_task → split_tasks (if complex)
+```
+- Natural language is parsed and converted to structured tasks
+- Complexity assessment determines if task splitting is needed
+- Dependencies are automatically identified and mapped
+
+#### 2. **Execution Phase**
+```
+execute_task → Implementation Guide → Status Updates → File Tracking
+```
+- Step-by-step implementation guidance generated
+- Related files tracked and monitored
+- Progress status updated in real-time
+- Git commits created for version control
+
+#### 3. **Verification Phase**
+```
+verify_task → reflect_task → Task Summary → Memory Storage
+```
+- Completion verified against acceptance criteria
+- Lessons learned extracted for future reference
+- Task summary generated and stored
+- Memory system preserves knowledge for future tasks
+
+#### 4. **Memory & Persistence**
+- **Primary Storage**: `tasks.json` in DATA_DIR
+- **Version Control**: Git repository tracks all changes
+- **Backup System**: Automatic timestamped backups
+- **Memory Directory**: Long-term storage of completed tasks
+- **Project Isolation**: ListRoots protocol enables per-project data separation
+
+### Key Design Principles
+
+1. **Chain-of-Thought Reasoning**: Tools guide AI through structured thinking processes
+2. **Iterative Refinement**: Tasks can be analyzed, split, and refined multiple times
+3. **Context Preservation**: Git history and memory system prevent context loss across sessions
+4. **Language Flexibility**: Bilingual support with customizable templates
+5. **Stateful Management**: Persistent storage maintains task state between conversations
+6. **Guided Workflows**: System guides rather than commands, ensuring consistency
+
+### Web Interfaces
+
+#### 1. **Built-in Web GUI** (`src/web/webServer.ts`)
+- Optional Express.js server (ENABLE_GUI=true)
+- Real-time task visualization
+- Auto-port selection with fallback
+- Generates WebGUI.md with access URL
+
+#### 2. **Task Viewer Tool** (`tools/task-viewer/`)
+- Standalone React application
+- Multi-profile support for different projects
+- Real-time task monitoring with auto-refresh
+- Drag-and-drop interface for organization
+- Agent management integration
+
+### Integration Points
+
+- **MCP Protocol**: Standard protocol for AI model interaction
+- **File System**: Direct file manipulation for task data
+- **Git Integration**: Version control for task history
+- **Environment Variables**: Extensive configuration options
+- **Web APIs**: RESTful endpoints for GUI interaction
+
 ## 🔧 Technical Implementation
 
 - **Node.js**: High-performance JavaScript runtime environment
 - **TypeScript**: Provides type-safe development environment
 - **MCP SDK**: Interface for seamless interaction with large language models
 - **UUID**: Generate unique and reliable task identifiers
+- **Express.js**: Web server for optional GUI
+- **Git**: Version control for task history
 
 ## 📄 <a id="license"></a>License
 
