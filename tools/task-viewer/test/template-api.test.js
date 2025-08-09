@@ -20,9 +20,14 @@ const mockFs = {
   unlink: vi.fn()
 };
 
-vi.mock('fs', () => ({
-  promises: mockFs
-}));
+vi.mock('fs', async () => {
+  const actual = await vi.importActual('fs');
+  return {
+    ...actual,
+    promises: mockFs,
+    default: actual
+  };
+});
 
 // Mock glob module
 vi.mock('glob', () => ({
