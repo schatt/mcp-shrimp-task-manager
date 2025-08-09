@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { useLanguage } from '../i18n/LanguageContext';
+import { useTranslation } from 'react-i18next';
 
 function GlobalSettingsView({ showToast }) {
-  const { t } = useLanguage();
+  const { t } = useTranslation();
   const [claudeFolderPath, setClaudeFolderPath] = useState('');
   const [openAIKey, setOpenAIKey] = useState('');
   const [showApiKey, setShowApiKey] = useState(false);

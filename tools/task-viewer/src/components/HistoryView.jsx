@@ -7,7 +7,7 @@ import {
   getSortedRowModel,
   flexRender,
 } from '@tanstack/react-table';
-import { useLanguage } from '../i18n/LanguageContext';
+import { useTranslation } from 'react-i18next';
 
 function HistoryView({ 
   data = [], 
@@ -17,7 +17,7 @@ function HistoryView({
   onBack,
   profileId
 }) {
-  const { t } = useLanguage();
+  const { t } = useTranslation();
   const [showNotesModal, setShowNotesModal] = useState(false);
   const [editingEntry, setEditingEntry] = useState(null);
   const [notesText, setNotesText] = useState('');

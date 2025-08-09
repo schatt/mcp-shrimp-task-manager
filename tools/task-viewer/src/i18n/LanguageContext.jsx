@@ -17,7 +17,8 @@ export const LanguageProvider = ({ children }) => {
     // Check URL first
     const params = new URLSearchParams(window.location.search);
     const urlLang = params.get('lang');
-    if (urlLang && ['en', 'zh', 'es'].includes(urlLang)) {
+    const supportedLanguages = ['en', 'zh', 'es', 'ko', 'ja', 'th', 'vi', 'pt', 'tr', 'hi', 'it', 'fr', 'de', 'ru'];
+    if (urlLang && supportedLanguages.includes(urlLang)) {
       return urlLang;
     }
     
@@ -62,7 +63,18 @@ export const LanguageProvider = ({ children }) => {
     availableLanguages: [
       { code: 'en', name: 'English', flag: '🇺🇸' },
       { code: 'zh', name: '中文', flag: '🇨🇳' },
-      { code: 'es', name: 'Español', flag: '🇪🇸' }
+      { code: 'es', name: 'Español', flag: '🇪🇸' },
+      { code: 'ko', name: '한국어', flag: '🇰🇷' },
+      { code: 'ja', name: '日本語', flag: '🇯🇵' },
+      { code: 'th', name: 'ไทย', flag: '🇹🇭' },
+      { code: 'vi', name: 'Tiếng Việt', flag: '🇻🇳' },
+      { code: 'pt', name: 'Português', flag: '🇵🇹' },
+      { code: 'tr', name: 'Türkçe', flag: '🇹🇷' },
+      { code: 'hi', name: 'हिंदी', flag: '🇮🇳' },
+      { code: 'it', name: 'Italiano', flag: '🇮🇹' },
+      { code: 'fr', name: 'Français', flag: '🇫🇷' },
+      { code: 'de', name: 'Deutsch', flag: '🇩🇪' },
+      { code: 'ru', name: 'Русский', flag: '🇷🇺' }
     ]
   };
 

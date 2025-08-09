@@ -1642,30 +1642,16 @@ async function startServer() {
                     }
                     
                     // Prepare the prompt for OpenAI
-                    const prompt = `You are an AI assistant helping to assign specialized agents to tasks.
-
-Available Agents:
-${availableAgents.map(agent => {
-    const desc = agent.metadata?.description || agent.content?.slice(0, 200) || 'No description';
-    return `- ${agent.name}: ${desc}`;
-}).join('\n')}
-
-Tasks to Assign:
-${selectedTasks.map(task => {
-    return `- Task ID: ${task.id}
-  Name: ${task.name}
-  Description: ${task.description || 'No description'}
-  Dependencies: ${task.dependencies?.join(', ') || 'None'}`;
-}).join('\n\n')}
-
-For each task, select the most appropriate agent based on the task requirements and agent capabilities. If no agent is particularly suitable, you may assign "No agent".
-
-Return ONLY a JSON object mapping task IDs to agent names, like this:
-{
-  "task-id-1": "agent-name.md",
-  "task-id-2": "No agent",
-  "task-id-3": "another-agent.yaml"
-}`;
+                    const agentsList = availableAgents.map(agent => {
+                        const desc = agent.metadata?.description || agent.content?.slice(0, 200) || 'No description';
+                        return '- ' + agent.name + ': ' + desc;
+                    }).join('\n');
+                    
+                    const tasksList = selectedTasks.map(task => {
+                        return '- Task ID: ' + task.id + '\n  Name: ' + task.name + '\n  Description: ' + (task.description || 'No description') + '\n  Dependencies: ' + (task.dependencies?.join(', ') || 'None');
+                    }).join('\n\n');
+                    
+                    const prompt = 'You are an AI assistant helping to assign specialized agents to tasks.\n\nAvailable Agents:\n' + agentsList + '\n\nTasks to Assign:\n' + tasksList + '\n\nFor each task, select the most appropriate agent based on the task requirements and agent capabilities. If no agent is particularly suitable, you may assign "No agent".\n\nReturn ONLY a JSON object mapping task IDs to agent names, like this:\n{\n  "task-id-1": "agent-name.md",\n  "task-id-2": "No agent",\n  "task-id-3": "another-agent.yaml"\n}';
 
                     // Call OpenAI API using https module
                     
@@ -1708,7 +1694,7 @@ Return ONLY a JSON object mapping task IDs to agent names, like this:
                                         reject(new Error('Invalid JSON from OpenAI'));
                                     }
                                 } else {
-                                    reject(new Error(`OpenAI API error: ${res.statusCode} - ${data}`));
+                                    reject(new Error('OpenAI API error: ' + res.statusCode + ' - ' + data));
                                 }
                             });
                         });
@@ -1784,57 +1770,103 @@ Return ONLY a JSON object mapping task IDs to agent names, like this:
                     }
                     
                     // Build context-aware prompt
-                    let systemPrompt = `You are an AI assistant helping with task management in the Shrimp Task Manager. 
-You have access to information about available agents and can help users understand tasks, suggest agent assignments, and provide task-related insights.
-
-Available agents for this project:
-${availableAgents.map(a => `- ${a.name}: ${a.description || 'No description'}`).join('\n')}
-
-Current context:
-- Page: ${context.currentPage}
-${context.currentTask ? `
-Current Task Details:
-- Name: ${context.currentTask.name}
-- Status: ${context.currentTask.status}
-- Description: ${context.currentTask.description || 'No description'}
-- Assigned Agent: ${context.currentTask.assignedAgent || 'Unassigned'}
-- Dependencies: ${context.currentTask.dependencies?.join(', ') || 'None'}` : ''}
-
-${context.tasksSummary ? `
-Tasks Overview:
-- Total tasks: ${context.tasksSummary.total}
-- Completed: ${context.tasksSummary.completed}
-- In Progress: ${context.tasksSummary.inProgress}
-- Pending: ${context.tasksSummary.pending}` : ''}
-
-${context.completedTasks && context.completedTasks.length > 0 ? `
-Completed Tasks:
-${context.completedTasks.map(t => `- ${t.name}${t.description ? ': ' + t.description : ''}`).join('\n')}` : ''}
-
-${context.inProgressTasks && context.inProgressTasks.length > 0 ? `
-In Progress Tasks:
-${context.inProgressTasks.map(t => `- ${t.name}${t.description ? ': ' + t.description : ''}`).join('\n')}` : ''}
-
-${context.pendingTasks && context.pendingTasks.length > 0 ? `
-Pending Tasks:
-${context.pendingTasks.map(t => `- ${t.name}${t.description ? ': ' + t.description : ''}`).join('\n')}` : ''}
-
-${context.availableAgents && context.availableAgents.length > 0 ? `
-Available Agents:
-${context.availableAgents.map(a => `- ${a.name} (${a.type}): ${a.description}${a.tools && a.tools.length > 0 ? ' | Tools: ' + a.tools.join(', ') : ''}`).join('\n')}` : ''}
-
-${context.agentAssignments && Object.keys(context.agentAssignments).length > 0 ? `
-Agent Assignment Statistics:
-${Object.entries(context.agentAssignments).map(([agent, stats]) => 
-  `- ${agent}: ${stats.total} tasks (${stats.completed} completed, ${stats.inProgress} in progress, ${stats.pending} pending)`
-).join('\n')}` : ''}
-
-${context.unassignedTasks && context.unassignedTasks.total > 0 ? `
-Unassigned Tasks: ${context.unassignedTasks.total} total (${context.unassignedTasks.completed} completed, ${context.unassignedTasks.inProgress} in progress, ${context.unassignedTasks.pending} pending)` : ''}
-
-When the user asks for summaries or information about tasks, use the detailed task information provided in the context.
-When suggesting agent assignments, consider the agent's capabilities and the task requirements.
-Be helpful, concise, and specific in your responses.`;
+                    let systemPrompt = 'You are an AI assistant helping with task management in the Shrimp Task Manager. You have access to information about available agents and can help users understand tasks, suggest agent assignments, and provide task-related insights.\n\n';
+                    
+                    // Add available agents
+                    systemPrompt += 'Available agents for this project:\n';
+                    systemPrompt += availableAgents.map(a => '- ' + a.name + ': ' + (a.description || 'No description')).join('\n');
+                    systemPrompt += '\n\n';
+                    
+                    // Add current context
+                    systemPrompt += 'Current context:\n- Page: ' + context.currentPage + '\n';
+                    
+                    // Add current task details if available
+                    if (context.currentTask) {
+                        systemPrompt += 'Current Task Details:\n';
+                        systemPrompt += '- Name: ' + context.currentTask.name + '\n';
+                        systemPrompt += '- Status: ' + context.currentTask.status + '\n';
+                        systemPrompt += '- Description: ' + (context.currentTask.description || 'No description') + '\n';
+                        systemPrompt += '- Assigned Agent: ' + (context.currentTask.assignedAgent || 'Unassigned') + '\n';
+                        systemPrompt += '- Dependencies: ' + (context.currentTask.dependencies?.join(', ') || 'None') + '\n';
+                    }
+                    
+                    // Add tasks summary
+                    if (context.tasksSummary) {
+                        systemPrompt += '\nTasks Overview:\n';
+                        systemPrompt += '- Total tasks: ' + context.tasksSummary.total + '\n';
+                        systemPrompt += '- Completed: ' + context.tasksSummary.completed + '\n';
+                        systemPrompt += '- In Progress: ' + context.tasksSummary.inProgress + '\n';
+                        systemPrompt += '- Pending: ' + context.tasksSummary.pending + '\n';
+                    }
+                    
+                    // Add completed tasks
+                    if (context.completedTasks && context.completedTasks.length > 0) {
+                        systemPrompt += '\nCompleted Tasks:\n';
+                        systemPrompt += context.completedTasks.map(t => '- ' + t.name + (t.description ? ': ' + t.description : '')).join('\n');
+                        systemPrompt += '\n';
+                    }
+                    
+                    // Add in progress tasks
+                    if (context.inProgressTasks && context.inProgressTasks.length > 0) {
+                        systemPrompt += '\nIn Progress Tasks:\n';
+                        systemPrompt += context.inProgressTasks.map(t => '- ' + t.name + (t.description ? ': ' + t.description : '')).join('\n');
+                        systemPrompt += '\n';
+                    }
+                    
+                    // Add pending tasks
+                    if (context.pendingTasks && context.pendingTasks.length > 0) {
+                        systemPrompt += '\nPending Tasks:\n';
+                        systemPrompt += context.pendingTasks.map(t => '- ' + t.name + (t.description ? ': ' + t.description : '')).join('\n');
+                        systemPrompt += '\n';
+                    }
+                    
+                    // Add available agents details
+                    if (context.availableAgents && context.availableAgents.length > 0) {
+                        systemPrompt += '\nAvailable Agents:\n';
+                        systemPrompt += context.availableAgents.map(a => '- ' + a.name + ' (' + a.type + '): ' + a.description + (a.tools && a.tools.length > 0 ? ' | Tools: ' + a.tools.join(', ') : '')).join('\n');
+                        systemPrompt += '\n';
+                    }
+                    
+                    // Add agent assignments
+                    if (context.agentAssignments && Object.keys(context.agentAssignments).length > 0) {
+                        systemPrompt += '\nAgent Assignment Statistics:\n';
+                        systemPrompt += Object.entries(context.agentAssignments).map(([agent, stats]) => 
+                            '- ' + agent + ': ' + stats.total + ' tasks (' + stats.completed + ' completed, ' + stats.inProgress + ' in progress, ' + stats.pending + ' pending)'
+                        ).join('\n');
+                        systemPrompt += '\n';
+                    }
+                    
+                    // Add unassigned tasks
+                    if (context.unassignedTasks && context.unassignedTasks.total > 0) {
+                        systemPrompt += '\nUnassigned Tasks: ' + context.unassignedTasks.total + ' total (' + context.unassignedTasks.completed + ' completed, ' + context.unassignedTasks.inProgress + ' in progress, ' + context.unassignedTasks.pending + ' pending)\n';
+                    }
+                    
+                    systemPrompt += '\nWhen the user asks for summaries or information about tasks, use the detailed task information provided in the context.\n';
+                    systemPrompt += 'When suggesting agent assignments, consider the agent\'s capabilities and the task requirements.\n\n';
+                    systemPrompt += 'IMPORTANT: If the user asks to modify/edit a task and there is a currentTask in the context, respond with the modification in this EXACT format:\n';
+                    systemPrompt += 'TASK_MODIFICATION: {JSON object with the fields to update}\n\n';
+                    systemPrompt += 'Available task fields you can modify:\n';
+                    systemPrompt += '- name: The task title/name\n';
+                    systemPrompt += '- description: The task description\n';
+                    systemPrompt += '- notes: Additional notes about the task\n';
+                    systemPrompt += '- status: Task status (pending, in_progress, completed)\n';
+                    systemPrompt += '- assignedAgent: Which agent is assigned to the task\n';
+                    systemPrompt += '- implementationGuide: Implementation guidance\n';
+                    systemPrompt += '- verificationCriteria: How to verify completion\n';
+                    systemPrompt += '- dependencies: Task dependencies (array)\n';
+                    systemPrompt += '- relatedFiles: Related files (array)\n\n';
+                    systemPrompt += 'Examples:\n';
+                    systemPrompt += 'TASK_MODIFICATION: {"notes": "Updated notes with hello world"}\n';
+                    systemPrompt += 'TASK_MODIFICATION: {"description": "New description", "status": "in_progress"}\n';
+                    systemPrompt += 'TASK_MODIFICATION: {"assignedAgent": "gpt-engineer"}\n\n';
+                    systemPrompt += 'Be helpful, concise, and specific in your responses.\n\n';
+                    systemPrompt += 'FORMATTING: Use markdown formatting and emojis to make your responses more readable:\n';
+                    systemPrompt += '- Use **bold** for important points\n';
+                    systemPrompt += '- Use \'code\' for technical terms\n';
+                    systemPrompt += '- Use ✅ for completed/positive items in lists\n';
+                    systemPrompt += '- Use ❌ for failed/negative items in lists\n';
+                    systemPrompt += '- Use emojis (📋 📝 ⚠️ 🔧 💡 🎯) to add visual context\n';
+                    systemPrompt += '- Use headers (##) for section organization\n';
 
                     // Call OpenAI API
                     const openAIData = JSON.stringify({
@@ -1854,7 +1886,7 @@ Be helpful, concise, and specific in your responses.`;
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json',
-                                'Authorization': `Bearer ${apiKey}`,
+                                'Authorization': 'Bearer ' + apiKey,
                                 'Content-Length': Buffer.byteLength(openAIData)
                             }
                         };
@@ -1870,7 +1902,7 @@ Be helpful, concise, and specific in your responses.`;
                                         reject(new Error('Invalid JSON from OpenAI'));
                                     }
                                 } else {
-                                    reject(new Error(`OpenAI API error: ${res.statusCode} - ${data}`));
+                                    reject(new Error('OpenAI API error: ' + res.statusCode + ' - ' + data));
                                 }
                             });
                         });
@@ -1880,17 +1912,28 @@ Be helpful, concise, and specific in your responses.`;
                         req.end();
                     });
                     
-                    const aiResponse = openAIResponse.choices[0].message.content;
+                    let aiResponse = openAIResponse.choices[0].message.content;
                     
                     // Check if response suggests task modification
                     let taskModification = null;
-                    if (context.currentTask && aiResponse.toLowerCase().includes('modify') || aiResponse.toLowerCase().includes('update')) {
-                        // Extract potential modifications (this is a simplified example)
-                        // In a real implementation, you might want to use structured output from the AI
-                        taskModification = {
-                            suggested: true,
-                            // Add modification details here based on AI response parsing
-                        };
+                    if (context.currentTask && aiResponse.includes('TASK_MODIFICATION:')) {
+                        try {
+                            // Extract the JSON from the response
+                            const modificationMatch = aiResponse.match(/TASK_MODIFICATION:\s*(\{[^}]+\})/);
+                            if (modificationMatch) {
+                                const modifications = JSON.parse(modificationMatch[1]);
+                                taskModification = {
+                                    suggested: true,
+                                    ...modifications
+                                };
+                                console.log('Parsed task modification:', taskModification);
+                                
+                                // Remove the TASK_MODIFICATION line from the response
+                                aiResponse = aiResponse.replace(/TASK_MODIFICATION:\s*\{[^}]+\}\s*/, '').trim();
+                            }
+                        } catch (err) {
+                            console.error('Error parsing task modification:', err);
+                        }
                     }
                     
                     res.writeHead(200, { 'Content-Type': 'application/json' });

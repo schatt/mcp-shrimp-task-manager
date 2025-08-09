@@ -1,5 +1,16 @@
 import { zhDocumentation } from './zh.js';
 import { esDocumentation } from './es.js';
+import { koDocumentation } from './ko.js';
+import { jaDocumentation } from './ja.js';
+import { thDocumentation } from './th.js';
+import { viDocumentation } from './vi.js';
+import { ptDocumentation } from './pt.js';
+import { trDocumentation } from './tr.js';
+import { hiDocumentation } from './hi.js';
+import { itDocumentation } from './it.js';
+import { frDocumentation } from './fr.js';
+import { deDocumentation } from './de.js';
+import { ruDocumentation } from './ru.js';
 
 // English documentation will be loaded dynamically from the actual files
 const enDocumentation = {
@@ -25,7 +36,18 @@ const enDocumentation = {
 export const documentation = {
   en: enDocumentation,
   zh: zhDocumentation,
-  es: esDocumentation
+  es: esDocumentation,
+  ko: koDocumentation,
+  ja: jaDocumentation,
+  th: thDocumentation,
+  vi: viDocumentation,
+  pt: ptDocumentation,
+  tr: trDocumentation,
+  hi: hiDocumentation,
+  it: itDocumentation,
+  fr: frDocumentation,
+  de: deDocumentation,
+  ru: ruDocumentation
 };
 
 export const getUIStrings = (component, language = 'en') => {

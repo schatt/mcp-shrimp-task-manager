@@ -15,7 +15,7 @@ import ProjectAgentsView from './components/ProjectAgentsView';
 import ToastContainer from './components/ToastContainer';
 import LanguageSelector from './components/LanguageSelector';
 import ChatAgent from './components/ChatAgent';
-import { LanguageProvider, useLanguage } from './i18n/LanguageContext';
+import { LanguageProvider, useLanguage } from './i18n/NewLanguageContext';
 import { parseUrlState, updateUrl, pushUrlState, getInitialUrlState, cleanUrlStateForTab } from './utils/urlStateSync';
 import NestedTabs from './components/NestedTabs';
 
@@ -1492,6 +1492,9 @@ function AppContent() {
           isInDetailView={isInDetailView}
           onTaskUpdate={async (taskId, updates) => {
             // Handle task updates from chat
+            console.log('onTaskUpdate called with:', taskId, updates);
+            console.log('Current task:', currentTask?.id);
+            
             try {
               const response = await fetch(`/api/tasks/${selectedProfile}/update`, {
                 method: 'PUT',
@@ -1501,8 +1504,33 @@ function AppContent() {
                 body: JSON.stringify({ taskId, updates })
               });
               
+              console.log('Update response:', response.ok, response.status);
+              
               if (response.ok) {
-                await loadTasks(selectedProfile);
+                // Update local state immediately for better UX
+                if (currentTask && currentTask.id === taskId) {
+                  console.log('Updating current task with:', updates);
+                  setCurrentTask(prev => {
+                    const updated = {
+                      ...prev,
+                      ...updates,
+                      updatedAt: new Date().toISOString()
+                    };
+                    console.log('Updated current task:', updated);
+                    return updated;
+                  });
+                }
+                
+                // Update the tasks list as well
+                console.log('Updating tasks list');
+                setTasks(prevTasks => 
+                  prevTasks.map(task => 
+                    task.id === taskId 
+                      ? { ...task, ...updates, updatedAt: new Date().toISOString() }
+                      : task
+                  )
+                );
+                
                 return true;
               }
               return false;

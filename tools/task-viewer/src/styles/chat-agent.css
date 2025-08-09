@@ -33,7 +33,7 @@
   max-width: 90vw;
   height: 600px;
   max-height: 80vh;
-  background: rgba(255, 255, 255, 0.95);
+  background: rgba(255, 255, 255, 0.90);
   backdrop-filter: blur(10px);
   border-radius: 12px;
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
@@ -380,6 +380,71 @@
   word-wrap: break-word;
 }
 
+/* Markdown content styling within messages */
+.message-content .w-md-editor-text-area,
+.message-content .w-md-editor-text {
+  background: transparent !important;
+  color: inherit !important;
+  font-size: 14px !important;
+  line-height: 1.5 !important;
+  padding: 0 !important;
+  border: none !important;
+}
+
+.message-content .w-md-editor-text * {
+  color: inherit !important;
+  background: transparent !important;
+}
+
+.message-content .w-md-editor-text h1,
+.message-content .w-md-editor-text h2,
+.message-content .w-md-editor-text h3 {
+  margin-top: 8px !important;
+  margin-bottom: 4px !important;
+  color: inherit !important;
+}
+
+.message-content .w-md-editor-text p {
+  margin: 4px 0 !important;
+  color: inherit !important;
+}
+
+.message-content .w-md-editor-text ul,
+.message-content .w-md-editor-text ol {
+  margin: 4px 0 4px 16px !important;
+  color: inherit !important;
+}
+
+.message-content .w-md-editor-text li {
+  margin: 2px 0 !important;
+  color: inherit !important;
+}
+
+.message-content .w-md-editor-text code {
+  background: rgba(0, 0, 0, 0.1) !important;
+  color: inherit !important;
+  padding: 2px 4px !important;
+  border-radius: 3px !important;
+  font-size: 13px !important;
+}
+
+.message-content .w-md-editor-text strong {
+  color: inherit !important;
+  font-weight: 600 !important;
+}
+
+.message-content .w-md-editor-text em {
+  color: inherit !important;
+}
+
+.message-content .w-md-editor-text blockquote {
+  border-left: 3px solid rgba(255, 255, 255, 0.3);
+  padding-left: 8px;
+  margin: 4px 0;
+  color: inherit !important;
+  background: transparent !important;
+}
+
 .message-timestamp {
   font-size: 11px;
   color: #999;
@@ -483,7 +548,7 @@
 /* Dark Theme Support */
 @media (prefers-color-scheme: dark) {
   .chat-agent-container {
-    background: rgba(26, 26, 26, 0.95);
+    background: rgba(26, 26, 26, 0.90);
     color: #e0e0e0;
     border: 1px solid rgba(255, 255, 255, 0.1);
   }

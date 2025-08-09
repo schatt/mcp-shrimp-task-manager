@@ -1,8 +1,8 @@
 import React, { useEffect } from 'react';
-import { useLanguage } from '../i18n/LanguageContext';
+import { useTranslation } from 'react-i18next';
 
 function TaskDetailView({ task, onBack, projectRoot, onNavigateToTask, taskIndex, allTasks, isHistorical = false, onEdit }) {
-  const { t } = useLanguage();
+  const { t } = useTranslation();
   
   // Keyboard navigation
   useEffect(() => {

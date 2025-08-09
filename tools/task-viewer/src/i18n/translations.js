@@ -790,6 +790,790 @@ export const translations = {
     noAgentsFound: "No se encontraron agentes",
     agentSavedSuccess: "Agente guardado exitosamente",
     aiInstruction: "Instrucción IA"
+  },
+
+  pt: {
+    // Header
+    appTitle: "🦐 Visualizador do Gerenciador de Tarefas Shrimp",
+    version: "Versão",
+    releaseNotes: "Notas de Lançamento",
+    help: "Ajuda",
+    language: "Idioma",
+    
+    // Navigation tabs
+    tasks: "Tarefas",
+    templates: "Templates",
+    projects: "Projetos",
+    
+    // Template Management
+    templateManagement: "🎨 Gerenciamento de Templates",
+    templateManagementDesc: "Gerencie templates de prompts para todas as funções do gerenciador de tarefas. Edite, duplique ou redefina templates para personalizar o comportamento da IA.",
+    exportTemplates: "📤 Exportar Templates",
+    exportTemplatesDesc: "Exporte suas configurações de templates para compartilhar com sua equipe ou fazer backup para uso posterior",
+    
+    // Template columns
+    function: "Função",
+    description: "Descrição",
+    status: "Status",
+    actions: "Ações",
+    
+    // Template statuses
+    statusDefault: "Padrão",
+    statusCustom: "Personalizado",
+    statusCustomAppend: "Personalizado+Anexar",
+    
+    // Template actions
+    edit: "Editar",
+    editTemplate: "✏️ Editar Template",
+    preview: "Visualizar",
+    previewTemplate: "Visualizar: {name}",
+    duplicate: "Duplicar",
+    duplicateTemplate: "📋 Duplicar Template",
+    activate: "Ativar",
+    activateTemplate: "🚀 Ativar Template",
+    reset: "Redefinir",
+    resetToDefault: "Redefinir para template padrão",
+    
+    // Common actions
+    save: "Salvar",
+    cancel: "Cancelar",
+    back: "Voltar",
+    backToTemplates: "← Voltar aos Templates",
+    close: "Fechar",
+    
+    // Project management
+    readme: "Leia-me",
+    addTab: "Adicionar Projeto",
+    history: "Histórico",
+    viewProjectHistory: "Ver histórico do projeto",
+    totalTasks: "Total de Tarefas",
+    completed: "Concluídas",
+    inProgress: "Em Progresso",
+    pending: "Pendentes",
+    autoRefresh: "Atualização automática",
+    
+    // History management
+    backToTasks: "Voltar às Tarefas",
+    backToHistory: "Voltar ao Histórico",
+    projectHistory: "Histórico do Projeto",
+    dateTime: "Data/Hora",
+    taskCount: "Quantidade de Tarefas",
+    notes: "Anotações",
+    statusSummary: "Resumo do Status",
+    viewTasks: "Ver Tarefas",
+    noHistoryFound: "Nenhum Histórico Encontrado",
+    noHistoryDescription: "Nenhum snapshot histórico de tarefas está disponível para este projeto",
+    historyRowTitle: "Entrada de histórico - clique em Ver Tarefas para ver detalhes",
+    historyEntries: "entradas de histórico",
+    tasksFrom: "Tarefas de",
+    taskName: "Nome da Tarefa",
+    noDependencies: "Nenhuma",
+    created: "Criado",
+    noTasksFound: "Nenhuma Tarefa Encontrada",
+    noTasksMessage: "O arquivo tasks.json ainda não foi criado. Execute shrimp nesta pasta para gerar tarefas.",
+    noTasksInHistory: "Este snapshot histórico não contém tarefas",
+    taskRowTitle: "Detalhes da tarefa do snapshot histórico",
+    
+    // Search and UI
+    searchTemplatesPlaceholder: "🔍 Procurar templates...",
+    searchTemplatesTitle: "Pesquisar e filtrar templates por nome de função ou descrição",
+    refreshTemplateData: "Atualizar dados dos templates",
+    searchTasksPlaceholder: "🔍 Procurar tarefas...",
+    searchTasksTitle: "Pesquisar e filtrar tarefas por qualquer conteúdo de texto",
+    refreshCurrentProfile: "Atualizar dados do projeto atual - recarregar tarefas do arquivo",
+    
+    // Project management
+    editProjectSettings: "Editar Configurações do Projeto",
+    chooseProfileTitle: "Escolha um projeto no menu suspenso acima",
+    selectProfileToViewTasks: "Selecione um projeto para ver as tarefas",
+    noProfilesAvailable: "Nenhum projeto disponível",
+    noProfilesClickAddTab: "Nenhum projeto disponível. Clique em \"Adicionar Projeto\" para criar um.",
+    loadingTasksFromFile: "Carregando tarefas do arquivo",
+    loadingTasks: "Carregando tarefas... ⏳",
+    
+    // Add/Edit Project forms
+    addNewProfile: "Adicionar Novo Projeto",
+    profileName: "Nome do Projeto",
+    profileNamePlaceholder: "ex., Tarefas da Equipe Alpha",
+    profileNameTitle: "Digite um nome descritivo para este projeto",
+    taskFolderPath: "Caminho da Pasta de Tarefas",
+    taskFolderPathPlaceholder: "/caminho/para/pasta_dados_shrimp",
+    taskFolderPathTitle: "Digite o caminho para sua pasta de dados shrimp contendo tasks.json",
+    tip: "Dica",
+    navigateToFolder: "Navegue até sua pasta de dados shrimp no terminal e",
+    typePwd: "digite pwd para obter o caminho completo",
+    example: "Exemplo",
+    projectRootPath: "Caminho Raiz do Projeto",
+    projectRootPlaceholder: "ex., /home/usuario/meu-projeto",
+    projectRootTitle: "Digite o caminho absoluto para o diretório raiz do projeto",
+    projectRootHint: "Isso habilita links de arquivos clicáveis que abrem no VS Code",
+    optional: "opcional",
+    addProfile: "Adicionar Projeto",
+    cancelAndCloseDialog: "Cancelar e fechar este diálogo",
+    addProject: "Adicionar Projeto",
+    
+    // Edit Project specific
+    projectRoot: "Raiz do Projeto",
+    taskPath: "Caminho da Tarefa",
+    editProfileNameTitle: "Editar o nome do projeto",
+    projectRootEditPlaceholder: "ex., /home/usuario/projetos/meu-projeto",
+    projectRootEditTitle: "Definir o caminho raiz do projeto para habilitar links de arquivos do VS Code",
+    projectRootEditHint: "Configure isso para habilitar links clicáveis do VS Code para arquivos de tarefas",
+    taskPathPlaceholder: "/caminho/para/pasta_dados_shrimp/tasks.json",
+    taskPathTitle: "Editar o caminho para o arquivo tasks.json para este projeto",
+    taskPathHint: "Caminho para o arquivo tasks.json contendo os dados de tarefas do projeto",
+    saveChanges: "Salvar Alterações",
+    
+    // Toast messages with parameters
+    profileAddedSuccess: "Projeto \"{name}\" adicionado com sucesso!",
+    profileRemovedSuccess: "Projeto \"{name}\" removido com sucesso!",
+    templateSavedSuccess: "Template \"{name}\" salvo com sucesso!",
+    templateResetSuccess: "Template \"{name}\" redefinido para padrão!",
+    templateDuplicatedSuccess: "Template duplicado como \"{name}\"!",
+    rememberToRestartClaude: "💡 Lembre-se de reiniciar o Claude Code após definir variáveis de ambiente",
+    
+    // Confirmation dialogs
+    confirmRemoveProfile: "Tem certeza de que deseja remover este projeto? Esta ação não pode ser desfeita.",
+    confirmResetTemplate: "Tem certeza de que deseja redefinir {name} para padrão? Isso removerá qualquer personalização.",
+    
+    // Template activation
+    defaultTemplateAlreadyActive: "Template padrão já está ativo - não precisa de ativação",
+    
+    // Task Table
+    task: "TAREFA",
+    taskName: "Nome da Tarefa",
+    created: "Criado",
+    updated: "Atualizado",
+    dependencies: "Dependências",
+    noTasksFound: "Nenhuma tarefa encontrada neste projeto",
+    noDescriptionProvided: "Nenhuma descrição fornecida",
+    viewTask: "Ver tarefa",
+    clickToCopyUuid: "Clique para copiar UUID para área de transferência",
+    copyTaskInstruction: "Copiar o seguinte para a área de transferência: Use o gerenciador de tarefas para completar esta tarefa shrimp",
+    useTaskManager: "Use o gerenciador de tarefas para completar esta tarefa shrimp",
+    clickToViewTaskDetails: "Clique para ver detalhes da tarefa",
+    
+    // Template Editor
+    saving: "Salvando...",
+    saveTemplate: "Salvar Template",
+    
+    // Project Settings
+    projectSettings: "Configurações do Projeto",
+    settingsSaved: "Configurações salvas com sucesso",
+    settings: "Configurações",
+    
+    // Global Settings
+    globalSettings: "Configurações Globais",
+    claudeFolderPath: "Caminho da Pasta Claude",
+    claudeFolderPathDesc: "Se você especificar o caminho da sua pasta Claude, terá acesso às configurações de sub-agentes e hooks",
+    claudeFolderPathPlaceholder: "ex., ~/.config/claude",
+    
+    // Task messages
+    taskSavedSuccess: "Tarefa salva com sucesso",
+    confirmDeleteTask: "Tem certeza de que deseja excluir esta tarefa?",
+    taskDeletedSuccess: "Tarefa excluída com sucesso",
+    deleteTask: "Excluir tarefa",
+    
+    // Agent functionality
+    subAgents: "Sub-Agentes",
+    agents: "Agentes",
+    agentName: "Nome do Agente",
+    type: "Tipo",
+    viewAgent: "Ver Agente",
+    editAgent: "Editar Agente",
+    noAgentsFound: "Nenhum agente encontrado",
+    agentSavedSuccess: "Agente salvo com sucesso",
+    aiInstruction: "Instrução de IA",
+    
+    // Messages
+    loading: "Carregando...",
+    error: "Erro",
+    success: "Sucesso",
+    noTemplatesFound: "Nenhum template encontrado",
+    failedToLoad: "Falha ao carregar",
+    
+    // Pagination
+    showing: "Mostrando",
+    to: "até",
+    of: "de",
+    page: "Página",
+    filteredFrom: "filtrados de",
+    total: "total",
+    
+    // Statistics
+    totalTemplates: "Total de Templates",
+    totalNumberOfTemplates: "Número total de templates",
+    numberOfDefaultTemplates: "Número de templates padrão",
+    numberOfCustomTemplates: "Número de templates personalizados",
+    numberOfEnvOverrideTemplates: "Número de templates sobrescritos por ambiente",
+    default: "Padrão",
+    custom: "Personalizado", 
+    envOverride: "Sobrescrito por Ambiente"
+  },
+
+  tr: {
+    // Header
+    appTitle: "🦐 Shrimp Görev Yöneticisi Görüntüleyici",
+    version: "Sürüm",
+    releaseNotes: "Sürüm Notları",
+    help: "Yardım",
+    language: "Dil",
+    
+    // Navigation tabs
+    tasks: "Görevler",
+    templates: "Şablonlar",
+    projects: "Projeler",
+    
+    // Template Management
+    templateManagement: "🎨 Şablon Yönetimi",
+    templateManagementDesc: "Tüm görev yöneticisi işlevleri için prompt şablonlarını yönetin. AI davranışını özelleştirmek için şablonları düzenleyin, çoğaltın veya sıfırlayın.",
+    exportTemplates: "📤 Şablonları Dışa Aktar",
+    exportTemplatesDesc: "Ekibinizle paylaşmak veya daha sonra kullanmak üzere yedeklemek için şablon yapılandırmalarınızı dışa aktarın",
+    
+    // Template columns
+    function: "İşlev",
+    description: "Açıklama",
+    status: "Durum",
+    actions: "Eylemler",
+    
+    // Template statuses
+    statusDefault: "Varsayılan",
+    statusCustom: "Özel",
+    statusCustomAppend: "Özel+Ekle",
+    
+    // Template actions
+    edit: "Düzenle",
+    editTemplate: "✏️ Şablonu Düzenle",
+    preview: "Önizleme",
+    previewTemplate: "Önizleme: {name}",
+    duplicate: "Çoğalt",
+    duplicateTemplate: "📋 Şablonu Çoğalt",
+    activate: "Etkinleştir",
+    activateTemplate: "🚀 Şablonu Etkinleştir",
+    reset: "Sıfırla",
+    resetToDefault: "Varsayılan şablona sıfırla",
+    
+    // Common actions
+    save: "Kaydet",
+    cancel: "İptal",
+    back: "Geri",
+    backToTemplates: "← Şablonlara Geri Dön",
+    close: "Kapat",
+    
+    // Project management
+    readme: "Beni Oku",
+    addTab: "Proje Ekle",
+    history: "Geçmiş",
+    viewProjectHistory: "Proje geçmişini görüntüle",
+    totalTasks: "Toplam Görevler",
+    completed: "Tamamlanmış",
+    inProgress: "Devam Eden",
+    pending: "Bekleyen",
+    autoRefresh: "Otomatik yenileme",
+    
+    // History management
+    backToTasks: "Görevlere Geri Dön",
+    backToHistory: "Geçmişe Geri Dön",
+    projectHistory: "Proje Geçmişi",
+    dateTime: "Tarih/Saat",
+    taskCount: "Görev Sayısı",
+    notes: "Notlar",
+    statusSummary: "Durum Özeti",
+    viewTasks: "Görevleri Görüntüle",
+    noHistoryFound: "Geçmiş Bulunamadı",
+    noHistoryDescription: "Bu proje için mevcut geçmiş görev anlık görüntüleri yok",
+    historyRowTitle: "Geçmiş girişi - detayları görmek için Görevleri Görüntüle'ye tıklayın",
+    historyEntries: "geçmiş girişleri",
+    tasksFrom: "Görevler şundan:",
+    taskName: "Görev Adı",
+    noDependencies: "Yok",
+    created: "Oluşturuldu",
+    noTasksFound: "Görev Bulunamadı",
+    noTasksMessage: "tasks.json dosyası henüz oluşturulmadı. Görevler oluşturmak için bu klasörde shrimp çalıştırın.",
+    noTasksInHistory: "Bu geçmiş anlık görüntüsü görev içermiyor",
+    taskRowTitle: "Geçmiş anlık görüntüsünden görev detayları",
+    
+    // Search and UI
+    searchTemplatesPlaceholder: "🔍 Şablonları ara...",
+    searchTemplatesTitle: "İşlev adı veya açıklamaya göre şablonları ara ve filtrele",
+    refreshTemplateData: "Şablon verilerini yenile",
+    searchTasksPlaceholder: "🔍 Görevleri ara...",
+    searchTasksTitle: "Herhangi bir metin içeriğine göre görevleri ara ve filtrele",
+    refreshCurrentProfile: "Mevcut proje verilerini yenile - dosyadan görevleri yeniden yükle",
+    
+    // Project management
+    editProjectSettings: "Proje Ayarlarını Düzenle",
+    chooseProfileTitle: "Yukarıdaki açılır menüden bir proje seçin",
+    selectProfileToViewTasks: "Görevleri görüntülemek için bir proje seçin",
+    noProfilesAvailable: "Mevcut proje yok",
+    noProfilesClickAddTab: "Mevcut proje yok. Bir tane oluşturmak için \"Proje Ekle\"ye tıklayın.",
+    loadingTasksFromFile: "Dosyadan görevler yükleniyor",
+    loadingTasks: "Görevler yükleniyor... ⏳",
+    
+    // Add/Edit Project forms
+    addNewProfile: "Yeni Proje Ekle",
+    profileName: "Proje Adı",
+    profileNamePlaceholder: "örn., Takım Alpha Görevleri",
+    profileNameTitle: "Bu proje için açıklayıcı bir ad girin",
+    taskFolderPath: "Görev Klasörü Yolu",
+    taskFolderPathPlaceholder: "/yol/to/shrimp_veri_klasoru",
+    taskFolderPathTitle: "tasks.json içeren shrimp veri klasörünüzün yolunu girin",
+    tip: "İpucu",
+    navigateToFolder: "Terminalde shrimp veri klasörünüze gidin ve",
+    typePwd: "tam yolu almak için pwd yazın",
+    example: "Örnek",
+    projectRootPath: "Proje Kök Yolu",
+    projectRootPlaceholder: "örn., /home/kullanici/projem",
+    projectRootTitle: "Proje kök dizininin mutlak yolunu girin",
+    projectRootHint: "Bu, VS Code'da açılan tıklanabilir dosya bağlantılarını etkinleştirir",
+    optional: "isteğe bağlı",
+    addProfile: "Proje Ekle",
+    cancelAndCloseDialog: "İptal et ve bu diyalogu kapat",
+    addProject: "Proje Ekle",
+    
+    // Edit Project specific
+    projectRoot: "Proje Kökü",
+    taskPath: "Görev Yolu",
+    editProfileNameTitle: "Proje adını düzenle",
+    projectRootEditPlaceholder: "örn., /home/kullanici/projeler/projem",
+    projectRootEditTitle: "VS Code dosya bağlantılarını etkinleştirmek için proje kök yolunu ayarla",
+    projectRootEditHint: "Görev dosyaları için tıklanabilir VS Code bağlantılarını etkinleştirmek için bunu ayarlayın",
+    taskPathPlaceholder: "/yol/to/shrimp_veri_klasoru/tasks.json",
+    taskPathTitle: "Bu proje için tasks.json dosyasının yolunu düzenle",
+    taskPathHint: "Projenin görev verilerini içeren tasks.json dosyasının yolu",
+    saveChanges: "Değişiklikleri Kaydet",
+    
+    // Toast messages with parameters
+    profileAddedSuccess: "Proje \"{name}\" başarıyla eklendi!",
+    profileRemovedSuccess: "Proje \"{name}\" başarıyla kaldırıldı!",
+    templateSavedSuccess: "Şablon \"{name}\" başarıyla kaydedildi!",
+    templateResetSuccess: "Şablon \"{name}\" varsayılana sıfırlandı!",
+    templateDuplicatedSuccess: "Şablon \"{name}\" olarak çoğaltıldı!",
+    rememberToRestartClaude: "💡 Çevre değişkenlerini ayarladıktan sonra Claude Code'u yeniden başlatmayı unutmayın",
+    
+    // Confirmation dialogs
+    confirmRemoveProfile: "Bu projeyi kaldırmak istediğinizden emin misiniz? Bu eylem geri alınamaz.",
+    confirmResetTemplate: "{name} şablonunu varsayılana sıfırlamak istediğinizden emin misiniz? Bu, tüm özelleştirmeleri kaldıracak.",
+    
+    // Template activation
+    defaultTemplateAlreadyActive: "Varsayılan şablon zaten etkin - etkinleştirme gerekmiyor",
+    
+    // Task Table
+    task: "GÖREV",
+    taskName: "Görev Adı",
+    created: "Oluşturuldu",
+    updated: "Güncellendi",
+    dependencies: "Bağımlılıklar",
+    noTasksFound: "Bu projede görev bulunamadı",
+    noDescriptionProvided: "Açıklama sağlanmadı",
+    viewTask: "Görevi görüntüle",
+    clickToCopyUuid: "UUID'yi panoya kopyalamak için tıklayın",
+    copyTaskInstruction: "Aşağıdakini panoya kopyala: Bu shrimp görevini tamamlamak için görev yöneticisini kullan",
+    useTaskManager: "Bu shrimp görevini tamamlamak için görev yöneticisini kullan",
+    clickToViewTaskDetails: "Görev detaylarını görüntülemek için tıklayın",
+    
+    // Template Editor
+    saving: "Kaydediliyor...",
+    saveTemplate: "Şablonu Kaydet",
+    
+    // Project Settings
+    projectSettings: "Proje Ayarları",
+    settingsSaved: "Ayarlar başarıyla kaydedildi",
+    settings: "Ayarlar",
+    
+    // Global Settings
+    globalSettings: "Genel Ayarlar",
+    claudeFolderPath: "Claude Klasör Yolu",
+    claudeFolderPathDesc: "Claude klasör yolunuzu belirtirseniz, alt ajan ve hook ayarlarına erişiminiz olacak",
+    claudeFolderPathPlaceholder: "örn., ~/.config/claude",
+    
+    // Task messages
+    taskSavedSuccess: "Görev başarıyla kaydedildi",
+    confirmDeleteTask: "Bu görevi silmek istediğinizden emin misiniz?",
+    taskDeletedSuccess: "Görev başarıyla silindi",
+    deleteTask: "Görevi sil",
+    
+    // Agent functionality
+    subAgents: "Alt Ajanlar",
+    agents: "Ajanlar",
+    agentName: "Ajan Adı",
+    type: "Tip",
+    viewAgent: "Ajanı Görüntüle",
+    editAgent: "Ajanı Düzenle",
+    noAgentsFound: "Ajan bulunamadı",
+    agentSavedSuccess: "Ajan başarıyla kaydedildi",
+    aiInstruction: "AI Talimatı",
+    
+    // Messages
+    loading: "Yükleniyor...",
+    error: "Hata",
+    success: "Başarılı",
+    noTemplatesFound: "Şablon bulunamadı",
+    failedToLoad: "Yükleme başarısız",
+    
+    // Pagination
+    showing: "Gösteriliyor",
+    to: "ile",
+    of: "arasında",
+    page: "Sayfa",
+    filteredFrom: "filtrelendi",
+    total: "toplam",
+    
+    // Statistics
+    totalTemplates: "Toplam Şablonlar",
+    totalNumberOfTemplates: "Toplam şablon sayısı",
+    numberOfDefaultTemplates: "Varsayılan şablon sayısı",
+    numberOfCustomTemplates: "Özel şablon sayısı",
+    numberOfEnvOverrideTemplates: "Çevre tarafından geçersiz kılınmış şablon sayısı",
+    default: "Varsayılan",
+    custom: "Özel", 
+    envOverride: "Çevre Geçersiz Kılma"
+  },
+  
+  ko: {
+    // Header
+    appTitle: "🦐 새우 작업 관리자 뷰어",
+    version: "버전",
+    releaseNotes: "릴리스 노트",
+    help: "도움말",
+    language: "언어",
+    
+    // Navigation tabs
+    tasks: "작업",
+    templates: "템플릿",
+    projects: "프로젝트",
+    
+    // Template Management
+    templateManagement: "🎨 템플릿 관리",
+    templateManagementDesc: "모든 작업 관리자 기능에 대한 프롬프트 템플릿을 관리합니다. 템플릿을 편집, 복제 또는 재설정하여 AI 동작을 사용자 정의하세요.",
+    exportTemplates: "📤 템플릿 내보내기",
+    exportTemplatesDesc: "팀과 공유하거나 나중에 사용하기 위해 백업할 템플릿 구성을 내보냅니다",
+    
+    // Template columns
+    function: "기능",
+    description: "설명",
+    status: "상태",
+    actions: "작업",
+    
+    // Template statuses
+    statusDefault: "기본",
+    statusCustom: "사용자 정의",
+    statusCustomAppend: "사용자 정의+추가",
+    
+    // Template actions
+    edit: "편집",
+    editTemplate: "✏️ 템플릿 편집",
+    preview: "미리보기",
+    previewTemplate: "미리보기: {name}",
+    duplicate: "복제",
+    duplicateTemplate: "📋 템플릿 복제",
+    activate: "활성화",
+    activateTemplate: "🚀 템플릿 활성화",
+    reset: "재설정",
+    resetToDefault: "기본 템플릿으로 재설정",
+    
+    // Common actions
+    save: "저장",
+    cancel: "취소",
+    back: "뒤로",
+    backToTemplates: "← 템플릿으로 돌아가기",
+    close: "닫기",
+    
+    // Common UI elements
+    loading: "로딩 중...",
+    error: "오류",
+    success: "성공",
+    warning: "경고",
+    info: "정보",
+    
+    // Profile Management
+    profileManagement: "🔧 프로필 관리",
+    profileManagementDesc: "작업 파일 프로필을 관리합니다. 새 프로필을 생성하거나 기존 프로필을 편집하세요.",
+    taskFolderPath: "작업 폴더 경로",
+    taskFolderPathPlaceholder: "작업 파일이 포함된 폴더 경로 입력",
+    profileName: "프로필 이름",
+    profileNamePlaceholder: "프로필 이름 입력",
+    projectRootPath: "프로젝트 루트 경로",
+    projectRootPathPlaceholder: "프로젝트 루트 경로 입력 (선택사항)",
+    addProfile: "프로필 추가",
+    editProfile: "프로필 편집",
+    deleteProfile: "프로필 삭제",
+    
+    // Task Table
+    taskNumber: "작업 번호",
+    taskName: "작업 이름",
+    taskStatus: "상태",
+    dependencies: "의존성",
+    assignedAgent: "할당된 에이전트",
+    
+    // Task statuses
+    pending: "대기 중",
+    inProgress: "진행 중",
+    completed: "완료됨",
+    
+    // Task actions
+    viewDetails: "세부정보 보기",
+    editTask: "작업 편집",
+    copyUUID: "UUID 복사",
+    copyAIInstruction: "AI 지시 복사",
+    
+    // Bulk operations
+    bulkOperations: "일괄 작업",
+    selectAll: "모두 선택",
+    deselectAll: "모두 선택 해제",
+    bulkAssignAgent: "에이전트 일괄 할당",
+    bulkDelete: "일괄 삭제",
+    
+    // Task Detail View
+    taskDetails: "작업 세부정보",
+    relatedFiles: "관련 파일",
+    verificationCriteria: "검증 기준",
+    implementationGuide: "구현 가이드",
+    notes: "메모",
+    
+    // Agent Management
+    agentManagement: "🤖 에이전트 관리",
+    agentManagementDesc: "AI 에이전트를 관리하고 작업에 할당합니다.",
+    availableAgents: "사용 가능한 에이전트",
+    assignAgent: "에이전트 할당",
+    unassignAgent: "에이전트 할당 해제",
+    agentInstructions: "에이전트 지시사항",
+    
+    // Project History
+    projectHistory: "📊 프로젝트 기록",
+    projectHistoryDesc: "프로젝트 작업 기록과 통계를 확인합니다.",
+    historyEntries: "기록 항목",
+    commitHistory: "커밋 기록",
+    
+    // Global Settings
+    globalSettings: "⚙️ 전역 설정",
+    globalSettingsDesc: "애플리케이션 전역 설정을 구성합니다.",
+    settings: "설정",
+    readme: "읽어보기",
+    projectSettings: "프로젝트 설정",
+    editProjectSettings: "프로젝트 설정 편집",
+    settingsSaved: "설정이 성공적으로 저장되었습니다",
+    openaiApiKey: "OpenAI API 키",
+    openaiApiKeyPlaceholder: "OpenAI API 키 입력",
+    
+    // Notifications
+    profileCreatedSuccess: "프로필이 성공적으로 생성되었습니다",
+    profileUpdatedSuccess: "프로필이 성공적으로 업데이트되었습니다",
+    profileDeletedSuccess: "프로필이 성공적으로 삭제되었습니다",
+    taskUpdatedSuccess: "작업이 성공적으로 업데이트되었습니다",
+    settingsSavedSuccess: "설정이 성공적으로 저장되었습니다",
+    copiedToClipboard: "클립보드에 복사되었습니다",
+    
+    // Empty states
+    noTasksFound: "작업을 찾을 수 없습니다",
+    noProfilesFound: "프로필을 찾을 수 없습니다",
+    noTemplatesFound: "템플릿을 찾을 수 없습니다",
+    noHistoryFound: "기록을 찾을 수 없습니다",
+    
+    // File operations
+    selectFolder: "폴더 선택",
+    browseFolder: "폴더 찾아보기",
+    invalidPath: "잘못된 경로입니다",
+    pathNotFound: "경로를 찾을 수 없습니다",
+    
+    // Search and filters
+    search: "검색",
+    searchPlaceholder: "검색...",
+    filter: "필터",
+    filterByStatus: "상태별 필터",
+    filterByAgent: "에이전트별 필터",
+    
+    // Pagination
+    page: "페이지",
+    of: "의",
+    itemsPerPage: "페이지당 항목",
+    showingItems: "{start}-{end} 항목 표시 (총 {total}개)",
+    
+    // Statistics
+    totalTasks: "총 작업",
+    completedTasks: "완료된 작업",
+    pendingTasks: "대기 중 작업",
+    inProgressTasks: "진행 중 작업",
+    
+    // Agent related
+    viewAgent: "에이전트 보기",
+    editAgent: "에이전트 편집",
+    noAgentsFound: "에이전트를 찾을 수 없습니다",
+    agentSavedSuccess: "에이전트가 성공적으로 저장되었습니다",
+    aiInstruction: "AI 지시사항"
+  },
+  
+  ja: {
+    // Header
+    appTitle: "🦐 シュリンプタスクマネージャービューア",
+    version: "バージョン",
+    releaseNotes: "リリースノート",
+    help: "ヘルプ",
+    language: "言語",
+    
+    // Navigation tabs
+    tasks: "タスク",
+    templates: "テンプレート",
+    projects: "プロジェクト",
+    
+    // Template Management
+    templateManagement: "🎨 テンプレート管理",
+    templateManagementDesc: "すべてのタスクマネージャー機能のプロンプトテンプレートを管理します。テンプレートを編集、複製、またはリセットしてAIの動作をカスタマイズします。",
+    exportTemplates: "📤 テンプレートエクスポート",
+    exportTemplatesDesc: "チームと共有したり、後で使用するためにバックアップするテンプレート設定をエクスポートします",
+    
+    // Template columns
+    function: "機能",
+    description: "説明",
+    status: "ステータス",
+    actions: "操作",
+    
+    // Template statuses
+    statusDefault: "デフォルト",
+    statusCustom: "カスタム",
+    statusCustomAppend: "カスタム+追加",
+    
+    // Template actions
+    edit: "編集",
+    editTemplate: "✏️ テンプレート編集",
+    preview: "プレビュー",
+    previewTemplate: "プレビュー: {name}",
+    duplicate: "複製",
+    duplicateTemplate: "📋 テンプレート複製",
+    activate: "アクティベート",
+    activateTemplate: "🚀 テンプレートアクティベート",
+    reset: "リセット",
+    resetToDefault: "デフォルトテンプレートにリセット",
+    
+    // Common actions
+    save: "保存",
+    cancel: "キャンセル",
+    back: "戻る",
+    backToTemplates: "← テンプレートに戻る",
+    close: "閉じる",
+    
+    // Common UI elements
+    loading: "読み込み中...",
+    error: "エラー",
+    success: "成功",
+    warning: "警告",
+    info: "情報",
+    
+    // Profile Management
+    profileManagement: "🔧 プロファイル管理",
+    profileManagementDesc: "タスクファイルプロファイルを管理します。新しいプロファイルを作成するか、既存のプロファイルを編集します。",
+    taskFolderPath: "タスクフォルダパス",
+    taskFolderPathPlaceholder: "タスクファイルを含むフォルダパスを入力",
+    profileName: "プロファイル名",
+    profileNamePlaceholder: "プロファイル名を入力",
+    projectRootPath: "プロジェクトルートパス",
+    projectRootPathPlaceholder: "プロジェクトルートパスを入力（オプション）",
+    addProfile: "プロファイル追加",
+    editProfile: "プロファイル編集",
+    deleteProfile: "プロファイル削除",
+    
+    // Task Table
+    taskNumber: "タスク番号",
+    taskName: "タスク名",
+    taskStatus: "ステータス",
+    dependencies: "依存関係",
+    assignedAgent: "割り当てられたエージェント",
+    
+    // Task statuses
+    pending: "保留中",
+    inProgress: "進行中",
+    completed: "完了",
+    
+    // Task actions
+    viewDetails: "詳細表示",
+    editTask: "タスク編集",
+    copyUUID: "UUID をコピー",
+    copyAIInstruction: "AI指示をコピー",
+    
+    // Bulk operations
+    bulkOperations: "一括操作",
+    selectAll: "すべて選択",
+    deselectAll: "すべて選択解除",
+    bulkAssignAgent: "エージェント一括割り当て",
+    bulkDelete: "一括削除",
+    
+    // Task Detail View
+    taskDetails: "タスク詳細",
+    relatedFiles: "関連ファイル",
+    verificationCriteria: "検証基準",
+    implementationGuide: "実装ガイド",
+    notes: "メモ",
+    
+    // Agent Management
+    agentManagement: "🤖 エージェント管理",
+    agentManagementDesc: "AIエージェントを管理し、タスクに割り当てます。",
+    availableAgents: "利用可能なエージェント",
+    assignAgent: "エージェント割り当て",
+    unassignAgent: "エージェント割り当て解除",
+    agentInstructions: "エージェント指示",
+    
+    // Project History
+    projectHistory: "📊 プロジェクト履歴",
+    projectHistoryDesc: "プロジェクトタスク履歴と統計を確認します。",
+    historyEntries: "履歴エントリ",
+    commitHistory: "コミット履歴",
+    
+    // Global Settings
+    globalSettings: "⚙️ グローバル設定",
+    globalSettingsDesc: "アプリケーションのグローバル設定を構成します。",
+    settings: "設定",
+    readme: "リードミー",
+    projectSettings: "プロジェクト設定",
+    editProjectSettings: "プロジェクト設定を編集",
+    settingsSaved: "設定が正常に保存されました",
+    openaiApiKey: "OpenAI APIキー",
+    openaiApiKeyPlaceholder: "OpenAI APIキーを入力",
+    
+    // Notifications
+    profileCreatedSuccess: "プロファイルが正常に作成されました",
+    profileUpdatedSuccess: "プロファイルが正常に更新されました",
+    profileDeletedSuccess: "プロファイルが正常に削除されました",
+    taskUpdatedSuccess: "タスクが正常に更新されました",
+    settingsSavedSuccess: "設定が正常に保存されました",
+    copiedToClipboard: "クリップボードにコピーされました",
+    
+    // Empty states
+    noTasksFound: "タスクが見つかりません",
+    noProfilesFound: "プロファイルが見つかりません",
+    noTemplatesFound: "テンプレートが見つかりません",
+    noHistoryFound: "履歴が見つかりません",
+    
+    // File operations
+    selectFolder: "フォルダ選択",
+    browseFolder: "フォルダを参照",
+    invalidPath: "無効なパスです",
+    pathNotFound: "パスが見つかりません",
+    
+    // Search and filters
+    search: "検索",
+    searchPlaceholder: "検索...",
+    filter: "フィルター",
+    filterByStatus: "ステータス別フィルター",
+    filterByAgent: "エージェント別フィルター",
+    
+    // Pagination
+    page: "ページ",
+    of: "の",
+    itemsPerPage: "ページあたりのアイテム",
+    showingItems: "{start}-{end}項目を表示中（合計{total}件）",
+    
+    // Statistics
+    totalTasks: "総タスク数",
+    completedTasks: "完了タスク",
+    pendingTasks: "保留中タスク",
+    inProgressTasks: "進行中タスク",
+    
+    // Agent related
+    viewAgent: "エージェント表示",
+    editAgent: "エージェント編集",
+    noAgentsFound: "エージェントが見つかりません",
+    agentSavedSuccess: "エージェントが正常に保存されました",
+    aiInstruction: "AI指示"
   }
 };
 

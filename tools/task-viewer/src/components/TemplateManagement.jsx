@@ -7,7 +7,7 @@ import {
   getSortedRowModel,
   flexRender,
 } from '@tanstack/react-table';
-import { useLanguage } from '../i18n/LanguageContext';
+import { useTranslation } from 'react-i18next';
 
 function TemplateManagement({ 
   data = [], 
@@ -21,7 +21,7 @@ function TemplateManagement({
   onPreviewTemplate,
   onActivateTemplate
 }) {
-  const { t } = useLanguage();
+  const { t } = useTranslation();
 
   
   // Define table columns configuration with custom cell renderers

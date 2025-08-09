@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { useLanguage } from '../i18n/LanguageContext';
+import { useTranslation } from 'react-i18next';
 
 function AgentInfoModal({ agent, isOpen, onClose, availableAgents = [], onSelectAgent }) {
-  const { t } = useLanguage();
+  const { t } = useTranslation();
   const [currentAgentIndex, setCurrentAgentIndex] = useState(0);
   
   // Initialize current agent index when modal opens or agent changes

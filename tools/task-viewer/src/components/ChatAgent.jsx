@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useLanguage } from '../i18n/LanguageContext';
+import { useTranslation } from 'react-i18next';
+import MDEditor from '@uiw/react-md-editor';
 
 function ChatAgent({ 
   currentPage, 
@@ -13,7 +14,7 @@ function ChatAgent({
   showToast,
   onTaskUpdate 
 }) {
-  const { t } = useLanguage();
+  const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
   const [isMinimized, setIsMinimized] = useState(false);
   const [messages, setMessages] = useState([]);
@@ -88,7 +89,7 @@ function ChatAgent({
       const contextMessage = {
         id: Date.now(),
         role: 'system',
-        content: `Context switched to: ${currentPage}${currentTask ? ' - ' + currentTask.name : ''}`,
+        content: t('chat.contextSwitched', { context: `${currentPage}${currentTask ? ' - ' + currentTask.name : ''}` }),
         timestamp: new Date().toISOString()
       };
       setMessages(prev => [...prev, contextMessage]);
@@ -289,7 +290,7 @@ function ChatAgent({
         .map(([agentId, _]) => agentId);
 
       if (selectedAgentsList.length === 0) {
-        throw new Error('Please select at least one agent to chat with');
+        throw new Error(t('chat.selectAgentError'));
       }
 
       const contextData = getPageContext();
@@ -311,7 +312,7 @@ function ChatAgent({
       });
 
       if (!response.ok) {
-        throw new Error('Failed to get response from agents');
+        throw new Error(t('chat.responseError'));
       }
 
       const data = await response.json();
@@ -328,19 +329,26 @@ function ChatAgent({
 
       // Handle task modifications if suggested
       if (data.taskModification && currentTask) {
+        console.log('Task modification received:', data.taskModification);
+        
         const shouldModify = window.confirm(
-          'The AI suggests modifying the current task. Would you like to apply these changes?'
+          t('chat.modifyConfirm')
         );
         
         if (shouldModify && onTaskUpdate) {
-          await onTaskUpdate(currentTask.id, data.taskModification);
-          showToast('Task updated successfully', 'success');
+          console.log('Applying task modification:', currentTask.id, data.taskModification);
+          const success = await onTaskUpdate(currentTask.id, data.taskModification);
+          if (success) {
+            showToast(t('chat.taskUpdatedSuccess'), 'success');
+          } else {
+            showToast(t('chat.taskUpdateFailed'), 'error');
+          }
         }
       }
 
     } catch (err) {
       console.error('Error sending message:', err);
-      showToast(err.message || 'Failed to send message', 'error');
+      showToast(err.message || t('chat.sendError'), 'error');
     } finally {
       setIsLoading(false);
     }
@@ -421,7 +429,7 @@ function ChatAgent({
       <button
         className="chat-agent-fab"
         onClick={() => setIsOpen(true)}
-        title="Open AI Chat Assistant"
+        title={t('chat.openTooltip')}
       >
         💬
       </button>
@@ -444,7 +452,7 @@ function ChatAgent({
       <div className={`chat-agent-header ${chatMode === 'floating' ? 'draggable' : ''}`}>
         <div className="chat-agent-title">
           <span className="chat-icon">🤖</span>
-          <span>AI Chat Assistant</span>
+          <span>{t('chat.title')}</span>
           <span className="chat-mode-indicator">
             {chatMode === 'expanded' && '📐'}
             {chatMode === 'floating' && '🪟'}
@@ -454,28 +462,28 @@ function ChatAgent({
           <button
             className="chat-control-btn"
             onClick={() => handleModeChange(chatMode === 'normal' ? 'expanded' : 'normal')}
-            title={chatMode === 'normal' ? 'Expand Width' : 'Normal Width'}
+            title={chatMode === 'normal' ? t('chat.controls.expandWidth') : t('chat.controls.normalWidth')}
           >
             {chatMode === 'normal' ? '⟷' : '⟵'}
           </button>
           <button
             className="chat-control-btn"
             onClick={() => handleModeChange(chatMode === 'floating' ? 'normal' : 'floating')}
-            title={chatMode === 'floating' ? 'Dock to Corner' : 'Pop Out Window'}
+            title={chatMode === 'floating' ? t('chat.controls.dockToCorner') : t('chat.controls.popOutWindow')}
           >
             {chatMode === 'floating' ? '📌' : '🪟'}
           </button>
           <button
             className="chat-control-btn"
             onClick={() => setIsMinimized(!isMinimized)}
-            title={isMinimized ? 'Expand' : 'Minimize'}
+            title={isMinimized ? t('chat.controls.expand') : t('chat.controls.minimize')}
           >
             {isMinimized ? '▲' : '▼'}
           </button>
           <button
             className="chat-control-btn"
             onClick={() => setIsOpen(false)}
-            title="Close"
+            title={t('chat.controls.close')}
           >
             ✕
           </button>
@@ -489,11 +497,11 @@ function ChatAgent({
               <div className="agents-header-row" onClick={toggleAgentsExpanded}>
                 <span className="agents-label">
                   <span className="expand-chevron">{agentsExpanded ? '▼' : '▶'}</span>
-                  Chat with:
-                  {agentsLoading && <span className="agents-loading"> (Loading agents...)</span>}
+                  {t('chat.chatWith')}
+                  {agentsLoading && <span className="agents-loading"> {t('chat.loadingAgents')}</span>}
                 </span>
                 <span className="agents-count">
-                  {Object.values(selectedAgents).filter(v => v).length} selected
+                  {Object.values(selectedAgents).filter(v => v).length} {t('chat.selected')}
                 </span>
               </div>
               {agentsExpanded && (
@@ -535,7 +543,7 @@ function ChatAgent({
                   </label>
                 ))}
                 {!agentsLoading && availableAgents.length === 0 && (
-                  <span className="no-agents-message">No project agents found</span>
+                  <span className="no-agents-message">{t('chat.noAgentsFound')}</span>
                 )}
               </div>
               )}
@@ -545,27 +553,27 @@ function ChatAgent({
           <div className="chat-agent-messages">
             {messages.length === 0 && (
               <div className="chat-welcome">
-                <p>Welcome! I can help you with:</p>
+                <p>{t('chat.welcome')}</p>
                 <ul>
                   {currentPage === 'task-list' && (
-                    <li>• Summarizing all tasks and their statuses</li>
+                    <li>{t('chat.welcomeTaskList')}</li>
                   )}
                   {currentPage === 'task-detail' && currentTask && (
-                    <li>• Analyzing the current task: "{currentTask.name}"</li>
+                    <li>{t('chat.welcomeTaskDetail', { taskName: currentTask.name })}</li>
                   )}
                   {currentPage === 'history' && (
-                    <li>• Reviewing historical task data</li>
+                    <li>{t('chat.welcomeHistory')}</li>
                   )}
-                  <li>• Suggesting task assignments to agents</li>
-                  <li>• Analyzing agent workloads and assignments</li>
-                  <li>• Answering questions about your project</li>
-                  {currentTask && <li>• Modifying current task details</li>}
+                  <li>{t('chat.welcomeAssignment')}</li>
+                  <li>{t('chat.welcomeWorkload')}</li>
+                  <li>{t('chat.welcomeQuestions')}</li>
+                  {currentTask && <li>{t('chat.welcomeModify')}</li>}
                 </ul>
                 <p className="chat-context-info">
-                  <strong>Project:</strong> {profileName || profileId}<br/>
-                  <strong>Context:</strong> {currentPage}
+                  <strong>{t('chat.contextProject')}</strong> {profileName || profileId}<br/>
+                  <strong>{t('chat.contextContext')}</strong> {currentPage}
                   {currentTask && ` - Task: ${currentTask.name}`}<br/>
-                  <strong>Available Agents:</strong> {availableAgents.length + 1} (OpenAI + {availableAgents.length} project agents)
+                  <strong>{t('chat.contextAvailableAgents')}</strong> {availableAgents.length + 1} (OpenAI + {availableAgents.length} {t('chat.projectAgents')})
                 </p>
               </div>
             )}
@@ -590,7 +598,18 @@ function ChatAgent({
                       )}
                     </div>
                     <div className="message-content">
-                      {message.content}
+                      {message.role === 'assistant' ? (
+                        <MDEditor.Markdown
+                          source={message.content}
+                          style={{ 
+                            whiteSpace: 'pre-wrap',
+                            backgroundColor: 'transparent',
+                            color: 'inherit'
+                          }}
+                        />
+                      ) : (
+                        message.content
+                      )}
                     </div>
                     <div className="message-timestamp">
                       {new Date(message.timestamp).toLocaleTimeString()}
@@ -621,7 +640,7 @@ function ChatAgent({
               value={inputMessage}
               onChange={(e) => setInputMessage(e.target.value)}
               onKeyPress={handleKeyPress}
-              placeholder="Type your message... (Shift+Enter for new line)"
+              placeholder={t('chat.inputPlaceholder')}
               disabled={isLoading}
               rows="2"
             />
