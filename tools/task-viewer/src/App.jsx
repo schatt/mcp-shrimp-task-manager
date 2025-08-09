@@ -15,7 +15,7 @@ import ProjectAgentsView from './components/ProjectAgentsView';
 import ToastContainer from './components/ToastContainer';
 import LanguageSelector from './components/LanguageSelector';
 import ChatAgent from './components/ChatAgent';
-import { LanguageProvider, useLanguage } from './i18n/NewLanguageContext';
+import { LanguageProvider, useLanguage } from './i18n/LanguageContext';
 import { parseUrlState, updateUrl, pushUrlState, getInitialUrlState, cleanUrlStateForTab } from './utils/urlStateSync';
 import NestedTabs from './components/NestedTabs';
 
