@@ -36,21 +36,25 @@ export async function getListTasksPrompt(
   const { status, tasks, allTasks } = params;
 
   // 如果沒有任務，顯示通知
+  // If there are no tasks, show notification
   if (allTasks.length === 0) {
     const notFoundTemplate = await loadPromptFromTemplate(
       "listTasks/notFound.md"
     );
     const statusText = status === "all" ? "任何" : `任何 ${status} 的`;
+    // Set status text: "any" for all, or "any [status]" for specific status
     return generatePrompt(notFoundTemplate, {
       statusText: statusText,
     });
   }
 
   // 獲取所有狀態的計數
+  // Get counts for all statuses
   const statusCounts = Object.values(TaskStatus)
     .map((statusType) => {
       const count = tasks[statusType]?.length || 0;
       return `- **${statusType}**: ${count} 個任務`;
+      // Return formatted string showing task count for each status
     })
     .join("\n");
 
@@ -72,6 +76,7 @@ export async function getListTasksPrompt(
     "listTasks/taskDetails.md"
   );
   // 添加每個狀態下的詳細任務
+  // Add detailed tasks under each status
   for (const statusType of Object.values(TaskStatus)) {
     const tasksWithStatus = tasks[statusType] || [];
     if (
@@ -80,6 +85,7 @@ export async function getListTasksPrompt(
     ) {
       for (const task of tasksWithStatus) {
         let dependencies = "沒有依賴";
+        // Default dependency text when no dependencies exist
         if (task.dependencies && task.dependencies.length > 0) {
           dependencies = task.dependencies
             .map((d) => `\`${d.taskId}\``)
@@ -107,5 +113,6 @@ export async function getListTasksPrompt(
   });
 
   // 載入可能的自定義 prompt
+  // Load possible custom prompt
   return loadPrompt(prompt, "LIST_TASKS");
 }
