@@ -1,19 +1,28 @@
 // 全局變量
+// Global variables
 let tasks = [];
 let selectedTaskId = null;
 let searchTerm = "";
 let sortOption = "date-asc";
 let globalAnalysisResult = null; // 新增：儲存全局分析結果
+                                   // New: Store global analysis result
 let svg, g, simulation;
 let width, height; // << 新增：將寬高定義為全局變量
+                   // << New: Define width and height as global variables
 let isGraphInitialized = false; // << 新增：追蹤圖表是否已初始化
+                                 // << New: Track whether the chart has been initialized
 let zoom; // << 新增：保存縮放行為對象
+          // << New: Save zoom behavior object
 
 // 新增：i18n 全局變量
+// New: i18n global variables
 let currentLang = "en"; // 預設語言
+                           // Default language
 let translations = {}; // 儲存加載的翻譯
+                       // Store loaded translations
 
 // DOM元素
+// DOM elements
 const taskListElement = document.getElementById("task-list");
 const taskDetailsContent = document.getElementById("task-details-content");
 const statusFilter = document.getElementById("status-filter");
@@ -27,29 +36,40 @@ const dependencyGraphElement = document.getElementById("dependency-graph");
 const globalAnalysisResultElement = document.getElementById(
   "global-analysis-result"
 ); // 假設 HTML 中有這個元素
+// Assuming this element exists in HTML
 const langSwitcher = document.getElementById("lang-switcher"); // << 新增：獲取切換器元素
+                                                                   // << New: Get switcher element
 const resetViewBtn = document.getElementById("reset-view-btn"); // << 新增：獲取重置按鈕元素
+                                                                   // << New: Get reset button element
 
 // 初始化
+// Initialization
 document.addEventListener("DOMContentLoaded", () => {
   // fetchTasks(); // 將由 initI18n() 觸發
+  // fetchTasks(); // Will be triggered by initI18n()
   initI18n(); // << 新增：初始化 i18n
+              // << New: Initialize i18n
   updateCurrentTime();
   setInterval(updateCurrentTime, 1000);
   updateDimensions(); // << 新增：初始化時更新尺寸
+                      // << New: Update dimensions during initialization
 
   // 事件監聽器
+  // Event listeners
   // statusFilter.addEventListener("change", renderTasks); // 將由 changeLanguage 觸發或在 applyTranslations 後觸發
+  // statusFilter.addEventListener("change", renderTasks); // Will be triggered by changeLanguage or after applyTranslations
   if (statusFilter) {
     statusFilter.addEventListener("change", renderTasks);
   }
 
   // 新增：重置視圖按鈕事件監聽
+  // New: Reset view button event listener
   if (resetViewBtn) {
     resetViewBtn.addEventListener("click", resetView);
   }
 
   // 新增：搜索和排序事件監聽
+  // New: Search and sorting event listeners
   const searchInput = document.getElementById("search-input");
   const sortOptions = document.getElementById("sort-options");
 
@@ -68,9 +88,11 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // 新增：設置 SSE 連接
+  // New: Setup SSE connection
   setupSSE();
 
   // 新增：語言切換器事件監聽
+  // New: Language switcher event listener
   if (langSwitcher) {
     langSwitcher.addEventListener("change", (e) =>
       changeLanguage(e.target.value)
@@ -78,6 +100,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // 新增：視窗大小改變時更新尺寸
+  // New: Update dimensions when window size changes
   window.addEventListener("resize", () => {
     updateDimensions();
     if (svg && simulation) {
@@ -89,9 +112,12 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 // 新增：i18n 核心函數
+// New: i18n core functions
 // 1. 語言檢測 (URL 參數 > navigator.language > 'en')
+// 1. Language detection (URL parameters > navigator.language > 'en')
 function detectLanguage() {
   // 1. 優先從 URL 參數讀取
+  // 1. Read from URL parameters first
   const urlParams = new URLSearchParams(window.location.search);
   const urlLang = urlParams.get("lang");
   if (urlLang && ["en", "zh-TW"].includes(urlLang)) {
@@ -99,18 +125,22 @@ function detectLanguage() {
   }
 
   // 2. 檢查瀏覽器語言（移除 localStorage 檢查）
+  // 2. Check browser language (removed localStorage check)
   const browserLang = navigator.language || navigator.userLanguage;
   if (browserLang) {
     if (browserLang.toLowerCase().startsWith("zh-tw")) return "zh-TW";
     if (browserLang.toLowerCase().startsWith("zh")) return "zh-TW"; // 簡體也先 fallback 到繁體
+                                                                        // Simplified Chinese also fallback to Traditional Chinese
     if (browserLang.toLowerCase().startsWith("en")) return "en";
   }
 
   // 3. 預設值
+  // 3. Default value
   return "en";
 }
 
 // 2. 異步加載翻譯文件
+// 2. Asynchronously load translation files
 async function loadTranslations(lang) {
   try {
     const response = await fetch(`/locales/${lang}.json`);
@@ -129,15 +159,18 @@ async function loadTranslations(lang) {
     } else {
       translations = {}; // Clear translations if even English fails
       // Maybe display a more persistent error message?
+      // 也許顯示更持久的錯誤消息？
       alert("Critical error: Could not load language files.");
     }
   }
 }
 
 // 3. 翻譯函數
+// 3. Translation function
 function translate(key, replacements = {}) {
   let translated = translations[key] || key; // Fallback to key itself
   // 簡單的佔位符替換（例如 {message}）
+  // Simple placeholder replacement (e.g., {message})
   for (const placeholder in replacements) {
     translated = translated.replace(
       `{${placeholder}}`,
@@ -148,6 +181,7 @@ function translate(key, replacements = {}) {
 }
 
 // 4. 應用翻譯到 DOM (處理 textContent, placeholder, title)
+// 4. Apply translations to DOM (handle textContent, placeholder, title)
 function applyTranslations() {
   console.log("Applying translations for:", currentLang);
   document.querySelectorAll("[data-i18n-key]").forEach((el) => {
@@ -155,6 +189,7 @@ function applyTranslations() {
     const translatedText = translate(key);
 
     // 優先處理特定屬性
+    // Handle specific attributes first
     if (el.hasAttribute("placeholder")) {
       el.placeholder = translatedText;
     } else if (el.hasAttribute("title")) {
@@ -162,21 +197,28 @@ function applyTranslations() {
     } else if (el.tagName === "OPTION") {
       el.textContent = translatedText;
       // 如果需要，也可以翻譯 value，但通常不需要
+      // If needed, value can also be translated, but usually not necessary
     } else {
       // 對於大多數元素，設置 textContent
+      // For most elements, set textContent
       el.textContent = translatedText;
     }
   });
   // 手動更新沒有 data-key 的元素（如果有的話）
+  // Manually update elements without data-key (if any)
   // 例如，如果 footer 時間格式需要本地化，可以在這裡處理
+  // For example, if footer time format needs localization, it can be handled here
   // updateCurrentTime(); // 確保時間格式也可能更新（如果需要）
+  // updateCurrentTime(); // Ensure time format may also be updated (if needed)
 }
 
 // 5. 初始化 i18n
+// 5. Initialize i18n
 async function initI18n() {
   currentLang = detectLanguage();
   console.log(`Initializing i18n with language: ${currentLang}`);
   // << 新增：設置切換器的初始值 >>
+  // << New: Set initial value of the switcher >>
   if (langSwitcher) {
     langSwitcher.value = currentLang;
   }
@@ -186,6 +228,7 @@ async function initI18n() {
 }
 
 // 新增：語言切換函數
+// New: Language switching function
 function changeLanguage(lang) {
   if (!lang || !["en", "zh-TW"].includes(lang)) {
     console.warn(`Invalid language selected: ${lang}. Defaulting to English.`);
@@ -228,15 +271,20 @@ function changeLanguage(lang) {
     .catch((error) => {
       console.error("Error changing language:", error);
       // 可以添加用戶反饋，例如顯示錯誤消息
+      // User feedback can be added, such as displaying error messages
       showTemporaryError("Failed to change language. Please try again."); // Need translation key
+      // 需要翻譯鍵
     });
 }
 // --- i18n 核心函數結束 ---
+// --- i18n core functions end ---
 
 // 獲取任務數據
+// Fetch task data
 async function fetchTasks() {
   try {
     // 初始載入時顯示 loading (現在使用翻譯)
+    // Show loading during initial load (now uses translation)
     if (tasks.length === 0) {
       taskListElement.innerHTML = `<div class="loading">${translate(
         "task_list_loading"
@@ -253,17 +301,21 @@ async function fetchTasks() {
     const newTasks = data.tasks || [];
 
     // 提取全局分析結果 (找第一個非空的)
+    // Extract global analysis result (find the first non-empty one)
     let foundAnalysisResult = null;
     for (const task of newTasks) {
       if (task.analysisResult) {
         foundAnalysisResult = task.analysisResult;
         break; // 找到一個就夠了
+               // Found one is enough
       }
     }
     // 只有當找到的結果與當前儲存的不同時才更新
+    // Only update when the found result is different from the currently stored one
     if (foundAnalysisResult !== globalAnalysisResult) {
       globalAnalysisResult = foundAnalysisResult;
       renderGlobalAnalysisResult(); // 更新顯示
+                                      // Update display
     }
 
     // --- 智慧更新邏輯 (初步 - 仍需改進以避免閃爍) ---
@@ -311,6 +363,7 @@ async function fetchTasks() {
 }
 
 // 新增：設置 Server-Sent Events 連接
+// New: Setup Server-Sent Events connection
 function setupSSE() {
   console.log("Setting up SSE connection to /api/tasks/stream");
   const evtSource = new EventSource("/api/tasks/stream");
@@ -340,6 +393,7 @@ function setupSSE() {
 }
 
 // 新增：比較任務列表是否有變化的輔助函數 (最全面版)
+// New: Helper function to compare whether the task list has changed (most comprehensive version)
 function didTasksChange(oldTasks, newTasks) {
   if (!oldTasks || !newTasks) return true; // Handle initial load or error states
 
@@ -460,6 +514,7 @@ function compareRelatedFiles(files1, files2) {
 }
 
 // 新增：顯示臨時錯誤訊息的函數
+// New: Function to display temporary error messages
 function showTemporaryError(message) {
   const errorElement = document.createElement("div");
   errorElement.className = "temporary-error";
@@ -471,6 +526,7 @@ function showTemporaryError(message) {
 }
 
 // 渲染任務列表 - *** 需要進一步優化以實現智慧更新 ***
+// Render task list - *** Needs further optimization to achieve smart updates ***
 function renderTasks() {
   console.log("Rendering tasks..."); // 添加日誌
   const filterValue = statusFilter.value;
@@ -491,6 +547,7 @@ function renderTasks() {
   }
 
   // 儲存篩選後的任務 ID 集合，用於圖形渲染
+  // Store the filtered task ID set for graphic rendering
   const filteredTaskIds = new Set(filteredTasks.map(task => task.id));
 
   filteredTasks.sort((a, b) => {
