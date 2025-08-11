@@ -54,11 +54,17 @@ export async function getDataDir(): Promise<string> {
         if (firstFileRoot) {
           // 從 file:// URI 中提取實際路徑
           // Extract actual path from file:// URI
-          rootPath = firstFileRoot.uri.replace("file://", "");
+          // Windows: file:///C:/path -> C:/path
+          // Unix: file:///path -> /path
+          if (process.platform === 'win32') {
+            rootPath = firstFileRoot.uri.replace("file:///", "").replace(/\//g, "\\");
+          } else {
+            rootPath = firstFileRoot.uri.replace("file://", "");
+          }
         }
       }
     } catch (error) {
-      console.error("Failed to get roots:", error);
+      // Silently handle error - console not supported in MCP
     }
   }
 
@@ -70,7 +76,8 @@ export async function getDataDir(): Promise<string> {
       // If DATA_DIR is an absolute path, return "DATA_DIR/last folder name of rootPath"
       if (rootPath) {
         const lastFolderName = path.basename(rootPath);
-        return path.join(process.env.DATA_DIR, lastFolderName);
+        const finalPath = path.join(process.env.DATA_DIR, lastFolderName);
+        return finalPath;
       } else {
         // 如果沒有 rootPath，直接返回 DATA_DIR
         // If there's no rootPath, return DATA_DIR directly

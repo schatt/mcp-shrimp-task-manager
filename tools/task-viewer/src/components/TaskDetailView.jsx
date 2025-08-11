@@ -1,6 +1,6 @@
 import React from 'react';
 
-function TaskDetailView({ task, onBack }) {
+function TaskDetailView({ task, onBack, projectRoot, onNavigateToTask, taskIndex, allTasks }) {
   if (!task) return null;
 
   const formatDate = (dateStr) => {
@@ -33,7 +33,10 @@ function TaskDetailView({ task, onBack }) {
   return (
     <div className="task-detail-view">
       <div className="task-detail-header">
-        <h2>{task.name}</h2>
+        <h2>
+          <span className="task-number">TASK {taskIndex + 1}</span>
+          {task.name}
+        </h2>
         <button className="back-button" onClick={onBack}>
           ← Back to Tasks
         </button>
@@ -114,14 +117,41 @@ function TaskDetailView({ task, onBack }) {
         {task.dependencies && task.dependencies.length > 0 && (
           <div className="task-detail-section">
             <h3>Dependencies</h3>
-            <ul className="dependency-list">
-              {task.dependencies.map((dep, idx) => (
-                <li key={idx}>
-                  <span className="monospace">{dep.taskId}</span>
-                  {dep.name && <span> - {dep.name}</span>}
-                </li>
-              ))}
-            </ul>
+            <div className="dependencies-list">
+              {task.dependencies.map((dep, idx) => {
+                // Handle both string IDs and object dependencies
+                let depId, depName;
+                if (typeof dep === 'string') {
+                  depId = dep;
+                  depName = null;
+                } else if (dep && typeof dep === 'object') {
+                  depId = dep.taskId || dep.id;
+                  depName = dep.name;
+                } else {
+                  return null;
+                }
+                
+                console.log('Dependency:', dep, 'depId:', depId);
+                console.log('All tasks:', allTasks);
+                
+                // Find the task number for this dependency
+                const depTaskIndex = allTasks ? allTasks.findIndex(t => t.id === depId) : -1;
+                const taskNumber = depTaskIndex >= 0 ? `TASK ${depTaskIndex + 1}` : 'TASK ?';
+                
+                console.log('Found task index:', depTaskIndex, 'Task number:', taskNumber);
+                
+                return (
+                  <span 
+                    key={idx}
+                    className="task-number dependency-badge"
+                    onClick={() => onNavigateToTask(depId)}
+                    title={`${depId}${depName ? ` - ${depName}` : ''}`}
+                  >
+                    {taskNumber}
+                  </span>
+                );
+              })}
+            </div>
           </div>
         )}
 
@@ -133,7 +163,24 @@ function TaskDetailView({ task, onBack }) {
                 <div key={idx} className="related-file-item">
                   <span className="file-type-icon">{getFileTypeIcon(file.type)}</span>
                   <div className="file-info">
-                    <div className="file-path monospace">{file.path}</div>
+                    <div 
+                      className="file-path monospace file-link"
+                      onClick={(e) => {
+                        // Copy the full file path to clipboard
+                        const fullPath = projectRoot ? `${projectRoot}/${file.path}` : file.path;
+                        navigator.clipboard.writeText(fullPath);
+                        
+                        // Show feedback
+                        const element = e.currentTarget;
+                        element.classList.add('copied');
+                        setTimeout(() => {
+                          element.classList.remove('copied');
+                        }, 2000);
+                      }}
+                      title={projectRoot ? `Click to copy: ${projectRoot}/${file.path}` : `Click to copy: ${file.path}`}
+                    >
+                      {file.path}
+                    </div>
                     {file.description && (
                       <div className="file-description">{file.description}</div>
                     )}
