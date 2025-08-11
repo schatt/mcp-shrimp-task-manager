@@ -1,6 +1,6 @@
-[English](README.md) | [中文](docs/zh/README.md)
+[🇺🇸 English](README.md) | [🇩🇪 Deutsch](docs/de/README.md) | [🇫🇷 Français](docs/fr/README.md) | [🇰🇷 한국어](docs/ko/README.md) | [🇧🇷 Português](docs/pt/README.md) | [🇷🇺 Русский](docs/ru/README.md) | [🇨🇳 中文](docs/zh/README.md)
 
-## 目錄
+## Table of Contents
 
 - [✨ Features](#features1)
 - [🧭 Usage Guide](#usage-guide)

@@ -1,4 +1,4 @@
-[English](../../README.md) | [中文](README.md)
+[🇺🇸 English](../../README.md) | [🇩🇪 Deutsch](../de/README.md) | [🇫🇷 Français](../fr/README.md) | [🇰🇷 한국어](../ko/README.md) | [🇧🇷 Português](../pt/README.md) | [🇷🇺 Русский](../ru/README.md) | [🇨🇳 中文](README.md)
 
 ## 目錄
 
