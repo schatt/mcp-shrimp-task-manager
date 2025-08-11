@@ -1,5 +1,7 @@
 // i18n.js - 多語系支援功能
+// i18n.js - Multi-language support functionality
 // 翻譯資料結構
+// Translation data structure
 const i18n = {
   "zh-TW": {
     // 導航欄
@@ -618,24 +620,30 @@ If the user requests "continuous mode", all tasks will be executed in sequence.`
 };
 
 // 翻譯應用函數
+// Translation application function
 function applyTranslations(lang) {
   // 確保選擇的語言有效
+  // Ensure the selected language is valid
   if (!i18n[lang]) {
     console.error("不支援的語言:", lang);
+    console.error("Unsupported language:", lang);
     return;
   }
 
   // 應用翻譯到所有帶有 data-i18n 屬性的元素
+  // Apply translations to all elements with data-i18n attribute
   document.querySelectorAll("[data-i18n]").forEach((element) => {
     const key = element.getAttribute("data-i18n");
     if (i18n[lang][key]) {
       element.textContent = i18n[lang][key];
     } else {
       console.warn(`未找到翻譯鍵: ${key}`);
+      console.warn(`Translation key not found: ${key}`);
     }
   });
 
   // 處理語言特定的連結
+  // Handle language-specific links
   document.querySelectorAll(".lang-specific").forEach((element) => {
     if (element.hasAttribute(`data-lang-${lang}`)) {
       const langSpecificHref = element.getAttribute(`data-lang-${lang}`);

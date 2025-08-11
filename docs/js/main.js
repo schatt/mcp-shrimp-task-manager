@@ -1,16 +1,21 @@
 /**
  * MCP Shrimp Task Manager 網站主腳本
+ * MCP Shrimp Task Manager main website script
  */
 
 // 頁面加載完成後執行
+// Execute after page load
 document.addEventListener("DOMContentLoaded", function () {
   // 初始化滾動動畫
+  // Initialize scroll animation
   initAOS();
 
   // 初始化移動端菜單
+  // Initialize mobile menu
   initMobileMenu();
 
   // 初始化代碼高亮和複製功能
+  // Initialize code highlighting and copy functionality
   initCodeBlocks();
 
   // 平滑滾動功能
@@ -46,6 +51,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
 /**
  * 初始化AOS滾動動畫庫
+ * Initialize AOS scroll animation library
  */
 function initAOS() {
   AOS.init({
@@ -55,11 +61,13 @@ function initAOS() {
     mirror: true,
     disable: function () {
       // 只在低性能設備上禁用動畫，根據用戶偏好設置
+      // Only disable animations on low-performance devices based on user preferences
       return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     },
   });
 
   // 在窗口調整大小時重新初始化AOS以確保正確的觸發位置
+  // Re-initialize AOS when window is resized to ensure correct trigger positions
   window.addEventListener("resize", function () {
     AOS.refresh();
   });
