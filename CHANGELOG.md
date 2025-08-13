@@ -2,13 +2,36 @@
 
 # Changelog
 
-## [1.0.21]
+## [1.0.21] - 2025-01-13
 
 ### Added
 
+- **Task Viewer Tool**: Complete React-based web interface for task management
+  - Modern tabbed interface with drag & drop tab reordering
+  - Real-time search and filtering across all task fields
+  - Configurable auto-refresh intervals (5s to 5m)
+  - Professional dark theme optimized for development
+  - Responsive design for all screen sizes
+  - TanStack React Table with sorting and pagination
+  - Task statistics dashboard with live counts
+  - Profile management with add/remove capabilities
+  - Hot Module Replacement for development
+  - Comprehensive documentation with screenshots
 - Added support for ListRoots protocol and optimized DATA_DIR configuration method (99baa0f)
 - Added WEB_PORT environment variable to customize WebGUI port number (8771a5b)
 
+### Enhanced
+
+- **Main README**: Added Task Viewer section with feature highlights and links
+- **Documentation**: Complete setup guide and usage instructions for Task Viewer
+- **Visual Assets**: Professional screenshot showing the new interface
+
+### Technical
+
+- **React 19 + Vite**: Modern development environment with hot reload
+- **Node.js HTTP Server**: RESTful API endpoints for task and profile management
+- **HTML5 Drag & Drop**: Native browser API for intuitive tab reordering
+- **CSS Grid & Flexbox**: Responsive layout system with mobile-first approach
 ### Changed
 
 - Updated documentation to reflect new configuration options (99baa0f, 8771a5b)
