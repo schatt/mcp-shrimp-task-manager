@@ -10,82 +10,82 @@ import { TaskStatus, Task } from "../../types/index.js";
 import { getExecuteTaskPrompt } from "../../prompts/index.js";
 import { loadTaskRelatedFiles } from "../../utils/fileLoader.js";
 
-// 執行任務工具
+// Execute task tool
 export const executeTaskSchema = z.object({
   taskId: z
     .string()
     .regex(UUID_V4_REGEX, {
-      message: "任務ID格式無效，請提供有效的UUID v4格式",
+      message: "Invalid task ID format. Please provide a valid UUID v4.",
     })
-    .describe("待執行任務的唯一標識符，必須是系統中存在的有效任務ID"),
+    .describe("The unique identifier of the task to execute. Must be an existing valid task ID."),
 });
 
 export async function executeTask({
   taskId,
 }: z.infer<typeof executeTaskSchema>) {
   try {
-    // 檢查任務是否存在
+    // Check if task exists
     const task = await getTaskById(taskId);
     if (!task) {
       return {
         content: [
           {
             type: "text" as const,
-            text: `找不到ID為 \`${taskId}\` 的任務。請確認ID是否正確。`,
+            text: `Task with ID \`${taskId}\` was not found. Please verify the ID.`,
           },
         ],
       };
     }
 
-    // 檢查任務是否可以執行（依賴任務都已完成）
+    // Check executability (all dependencies completed)
     const executionCheck = await canExecuteTask(taskId);
     if (!executionCheck.canExecute) {
       const blockedByTasksText =
         executionCheck.blockedBy && executionCheck.blockedBy.length > 0
-          ? `被以下未完成的依賴任務阻擋: ${executionCheck.blockedBy.join(", ")}`
-          : "無法確定阻擋原因";
+          ? `Blocked by unfinished dependencies: ${executionCheck.blockedBy.join(", ")}`
+          : "Unable to determine blocking reason";
 
       return {
         content: [
           {
             type: "text" as const,
-            text: `任務 "${task.name}" (ID: \`${taskId}\`) 目前無法執行。${blockedByTasksText}`,
+            text: `Task "${task.name}" (ID: \`${taskId}\`) cannot be executed now. ${blockedByTasksText}`,
           },
         ],
       };
     }
 
-    // 如果任務已經標記為「進行中」，提示用戶
+    // If already In Progress, inform user
     if (task.status === TaskStatus.IN_PROGRESS) {
       return {
         content: [
           {
             type: "text" as const,
-            text: `任務 "${task.name}" (ID: \`${taskId}\`) 已經處於進行中狀態。`,
+            text: `Task "${task.name}" (ID: \`${taskId}\`) is already In Progress.`,
           },
         ],
       };
     }
 
-    // 如果任務已經標記為「已完成」，提示用戶
+    // If already Completed, inform user
     if (task.status === TaskStatus.COMPLETED) {
       return {
         content: [
           {
             type: "text" as const,
-            text: `任務 "${task.name}" (ID: \`${taskId}\`) 已經標記為完成。如需重新執行，請先使用 delete_task 刪除該任務並重新創建。`,
+            text: `Task "${task.name}" (ID: \`${taskId}\`) is already completed. To re-execute, delete the task with \`delete_task\` and recreate it.`,
           },
         ],
       };
     }
 
-    // 更新任務狀態為「進行中」
+    // Update status to In Progress
     await updateTaskStatus(taskId, TaskStatus.IN_PROGRESS);
 
-    // 評估任務複雜度
+    // Assess task complexity
     const complexityResult = await assessTaskComplexity(taskId);
 
-    // 將複雜度結果轉換為適當的格式
+    // Normalize complexity result format
     const complexityAssessment = complexityResult
       ? {
           level: complexityResult.level,
@@ -97,7 +97,7 @@ export async function executeTask({
         }
       : undefined;
 
-    // 獲取依賴任務，用於顯示完成摘要
+    // Load dependency tasks for summary
     const dependencyTasks: Task[] = [];
     if (task.dependencies && task.dependencies.length > 0) {
       for (const dep of task.dependencies) {
@@ -108,7 +108,7 @@ export async function executeTask({
       }
     }
 
-    // 加載任務相關的文件內容
+    // Load related files summary
     let relatedFilesSummary = "";
     if (task.relatedFiles && task.relatedFiles.length > 0) {
       try {
@@ -125,7 +125,7 @@ export async function executeTask({
       }
     }
 
-    // 使用prompt生成器獲取最終prompt
+    // Build final prompt via generator
     const prompt = await getExecuteTaskPrompt({
       task,
       complexityAssessment,
@@ -146,7 +146,7 @@ export async function executeTask({
       content: [
         {
           type: "text" as const,
-          text: `執行任務時發生錯誤: ${
+          text: `Error occurred while executing task: ${
             error instanceof Error ? error.message : String(error)
           }`,
         },

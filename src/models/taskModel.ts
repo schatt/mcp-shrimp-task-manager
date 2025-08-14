@@ -15,19 +15,19 @@ import { exec } from "child_process";
 import { promisify } from "util";
 import { getDataDir, getTasksFilePath, getMemoryDir } from "../utils/paths.js";
 
-// Make sure to get the project folder path
+// Ensure we resolve the project folder path
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const PROJECT_ROOT = path.resolve(__dirname, "../..");
 
-// Data file path (changed to asynchronous acquisition)
+// Data file path (retrieved asynchronously)
 // const DATA_DIR = getDataDir();
 // const TASKS_FILE = getTasksFilePath();
 
-// Convert exec to Promise
+// Promisify exec
 const execPromise = promisify(exec);
 
-// Make sure the data directory exists
+// Ensure the data directory and tasks file exist
 async function ensureDataDir() {
   const DATA_DIR = await getDataDir();
   const TASKS_FILE = await getTasksFilePath();
@@ -52,7 +52,7 @@ async function readTasks(): Promise<Task[]> {
   const data = await fs.readFile(TASKS_FILE, "utf-8");
   const tasks = JSON.parse(data).tasks;
 
-  // Convert a date string back to a Date object
+  // Convert string timestamps back into Date objects
   return tasks.map((task: any) => ({
     ...task,
     createdAt: task.createdAt ? new Date(task.createdAt) : new Date(),
@@ -111,7 +111,7 @@ export async function createTask(
   return newTask;
 }
 
-// Update Tasks
+// Update task
 export async function updateTask(
   taskId: string,
   updates: Partial<Task>
@@ -123,9 +123,9 @@ export async function updateTask(
     return null;
   }
 
-  // Check if the task is completed. Completed tasks are not allowed to be updated (unless it is a field that is explicitly allowed)
+  // Disallow updates to completed tasks (except explicitly allowed fields)
   if (tasks[taskIndex].status === TaskStatus.COMPLETED) {
-    // Only update of summary field (task summary) and relatedFiles field is allowed
+    // Only 'summary' and 'relatedFiles' can be updated
     const allowedFields = ["summary", "relatedFiles"];
     const attemptedFields = Object.keys(updates);
 
@@ -171,7 +171,7 @@ export async function updateTaskSummary(
   return await updateTask(taskId, { summary });
 }
 
-// Update mission content
+// Update task content
 export async function updateTaskContent(
   taskId: string,
   updates: {
@@ -184,19 +184,19 @@ export async function updateTaskContent(
     verificationCriteria?: string;
   }
 ): Promise<{ success: boolean; message: string; task?: Task }> {
-  // Get the task and check if it exists
+  // Load the task and check existence
   const task = await getTaskById(taskId);
 
   if (!task) {
     return { success: false, message: "The specified task could not be found" };
   }
 
-  // 檢查任務是否已完成
+  // Disallow updates to completed tasks
   if (task.status === TaskStatus.COMPLETED) {
     return { success: false, message: "Unable to update completed tasks" };
   }
 
-  // Construct the update object, including only the fields that actually need to be updated
+  // Build update object with only provided fields
   const updateObj: Partial<Task> = {};
 
   if (updates.name !== undefined) {
@@ -229,12 +229,12 @@ export async function updateTaskContent(
     updateObj.verificationCriteria = updates.verificationCriteria;
   }
 
-  // If there is no content to update, return early
+  // Early return when nothing to update
   if (Object.keys(updateObj).length === 0) {
     return { success: true, message: "No content was provided that needed updating", task };
   }
 
-  // Performing Updates
+  // Perform update
   const updatedTask = await updateTask(taskId, updateObj);
 
   if (!updatedTask) {
@@ -253,19 +253,19 @@ export async function updateTaskRelatedFiles(
   taskId: string,
   relatedFiles: RelatedFile[]
 ): Promise<{ success: boolean; message: string; task?: Task }> {
-  // Get the task and check if it exists
+  // Load task and check existence
   const task = await getTaskById(taskId);
 
   if (!task) {
     return { success: false, message: "The specified task could not be found" };
   }
 
-  // Check if the task is completed
+  // Disallow updates to completed tasks
   if (task.status === TaskStatus.COMPLETED) {
     return { success: false, message: "Unable to update completed tasks" };
   }
 
-  // Performing Updates
+  // Perform update
   const updatedTask = await updateTask(taskId, { relatedFiles });
 
   if (!updatedTask) {
@@ -321,32 +321,31 @@ export async function batchCreateOrUpdateTasks(
     tasksToKeep = [];
   }
 
-  // This map will be used to store the mapping of names to task IDs, to support referencing tasks by name.
+  // Map of task name to task ID (supports name-based references)
   const taskNameToIdMap = new Map<string, string>();
 
-  // For selective update mode, first record the name and ID of the existing task
+  // In selective mode, record existing name->ID first
   if (updateMode === "selective") {
     existingTasks.forEach((task) => {
       taskNameToIdMap.set(task.name, task.id);
     });
   }
 
-  // Record the names and IDs of all tasks, whether they are to be retained or newly created
-  // This will be used to resolve dependencies later
+  // Record names and IDs of all retained tasks for dependency resolution
   tasksToKeep.forEach((task) => {
     taskNameToIdMap.set(task.name, task.id);
   });
 
-  // Create a list of new tasks
+  // Build list of new/updated tasks
   const newTasks: Task[] = [];
 
   for (const taskData of taskDataList) {
-    // Checks whether the task is in selective update mode and the task name already exists
+    // In selective mode, update existing non-completed tasks by name
     if (updateMode === "selective" && taskNameToIdMap.has(taskData.name)) {
-      // Get the ID of an existing task
+      // Existing task ID
       const existingTaskId = taskNameToIdMap.get(taskData.name)!;
 
-      // Find existing tasks
+      // Find existing task
       const existingTaskIndex = existingTasks.findIndex(
         (task) => task.id === existingTaskId
       );
@@ -358,38 +357,38 @@ export async function batchCreateOrUpdateTasks(
       ) {
         const taskToUpdate = existingTasks[existingTaskIndex];
 
-        // Update the basic information of the task, but keep the original ID, creation time, etc.
+        // Update task fields, keeping original ID and timestamps
         const updatedTask: Task = {
           ...taskToUpdate,
           name: taskData.name,
           description: taskData.description,
           notes: taskData.notes,
-          // Will deal with it later dependencies
+          // Dependencies handled later
           updatedAt: new Date(),
-          // New: Save implementation guide (if any)
+          // Save implementation guide (if any)
           implementationGuide: taskData.implementationGuide,
-          // New: Save validation criteria (if any)
+          // Save verification criteria (if any)
           verificationCriteria: taskData.verificationCriteria,
-          // New: Save global analysis results (if any)
+          // Save global analysis results (if any)
           analysisResult: globalAnalysisResult,
         };
 
-        // Process related documents (if any)
+        // Process related files (if any)
         if (taskData.relatedFiles) {
           updatedTask.relatedFiles = taskData.relatedFiles;
         }
 
-        // Add the updated task to the new task list
+        // Add to new list
         newTasks.push(updatedTask);
 
-        // Remove this task from tasksToKeep because it has been updated and added to newTasks
+        // Remove from tasksToKeep (now in newTasks)
         tasksToKeep = tasksToKeep.filter((task) => task.id !== existingTaskId);
       }
     } else {
       // Create a new task
       const newTaskId = uuidv4();
 
-      // Add the name and ID of the new task to the map
+      // Track in map
       taskNameToIdMap.set(taskData.name, newTaskId);
 
       const newTask: Task = {
@@ -398,15 +397,15 @@ export async function batchCreateOrUpdateTasks(
         description: taskData.description,
         notes: taskData.notes,
         status: TaskStatus.PENDING,
-        dependencies: [], // Will fill later
+        dependencies: [], // Filled later
         createdAt: new Date(),
         updatedAt: new Date(),
         relatedFiles: taskData.relatedFiles,
-        // New: Save implementation guide (if any)
+        // Save implementation guide (if any)
         implementationGuide: taskData.implementationGuide,
-        // New: Save validation criteria (if any)
+        // Save verification criteria (if any)
         verificationCriteria: taskData.verificationCriteria,
-        // New: Save global analysis results (if any)
+        // Save global analysis results (if any)
         analysisResult: globalAnalysisResult,
       };
 
@@ -414,33 +413,33 @@ export async function batchCreateOrUpdateTasks(
     }
   }
 
-  // Handling dependencies between tasks
+  // Resolve dependencies between tasks
   for (let i = 0; i < taskDataList.length; i++) {
     const taskData = taskDataList[i];
     const newTask = newTasks[i];
 
-    // If there are dependencies, handle them
+    // Handle dependencies if present
     if (taskData.dependencies && taskData.dependencies.length > 0) {
       const resolvedDependencies: TaskDependency[] = [];
 
       for (const dependencyName of taskData.dependencies) {
-        // First try to interpret the dependencies as task IDs
+        // First treat dependency as an ID
         let dependencyTaskId = dependencyName;
 
-        // If the dependency does not look like a UUID, try to interpret it as a task name
+        // If it does not look like a UUID, treat it as a task name
         if (
           !dependencyName.match(
             /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
           )
         ) {
-          // If the name exists in the map, the corresponding ID is used
+          // Map name to ID if known
           if (taskNameToIdMap.has(dependencyName)) {
             dependencyTaskId = taskNameToIdMap.get(dependencyName)!;
           } else {
             continue; //Skip this dependency
           }
         } else {
-          // It is in UUID format, but you need to confirm whether this ID corresponds to an actual task.
+          // It looks like a UUID; confirm the ID corresponds to an actual task
           const idExists = [...tasksToKeep, ...newTasks].some(
             (task) => task.id === dependencyTaskId
           );
@@ -456,10 +455,10 @@ export async function batchCreateOrUpdateTasks(
     }
   }
 
-  // Merge the retained tasks and the new tasks
+  // Merge retained and new tasks
   const allTasks = [...tasksToKeep, ...newTasks];
 
-  // Write the updated task list
+  // Persist the updated task list
   await writeTasks(allTasks);
 
   return newTasks;
@@ -500,7 +499,7 @@ export async function canExecuteTask(
   };
 }
 
-// 刪除任務
+// Deleting a task
 export async function deleteTask(
   taskId: string
 ): Promise<{ success: boolean; message: string }> {
@@ -623,7 +622,7 @@ export async function assessTaskComplexity(
       recommendations.push("Pay attention to checking the completion status and output quality of all dependent tasks");
     }
   }
-  // 高複雜度任務建議
+  // High-complexity task suggestions
   else if (level === TaskComplexityLevel.HIGH) {
     recommendations.push("This task is relatively complex, so it is recommended to conduct sufficient analysis and planning first.");
     recommendations.push("Consider breaking tasks into smaller, independently executable subtasks");
@@ -636,7 +635,7 @@ export async function assessTaskComplexity(
       );
     }
   }
-  // 極高複雜度任務建議
+  // Recommendations for very high complexity tasks
   else if (level === TaskComplexityLevel.VERY_HIGH) {
     recommendations.push("⚠️ This task is extremely complex and it is strongly recommended to split it into multiple independent tasks");
     recommendations.push(
@@ -672,7 +671,7 @@ export async function assessTaskComplexity(
   };
 }
 
-// 清除所有任務
+  // Clear all tasks
 export async function clearAllTasks(): Promise<{
   success: boolean;
   message: string;
@@ -774,12 +773,12 @@ export async function searchTasksWithCommand(
         });
 
         if (stdout) {
-          // 解析搜尋結果，提取符合的檔案路徑
+          // Parse search results and extract matching file paths
           const matchedFiles = new Set<string>();
 
           stdout.split("\n").forEach((line) => {
             if (line.trim()) {
-              // 格式通常是: 文件路徑:匹配內容
+              // Format usually: filepath:matched_content
               const filePath = line.split(":")[0];
               if (filePath) {
                 matchedFiles.add(filePath);
@@ -787,20 +786,20 @@ export async function searchTasksWithCommand(
             }
           });
 
-          // 限制讀取檔案數量
+          // Limit number of files to read
           const MAX_FILES_TO_READ = 10;
           const sortedFiles = Array.from(matchedFiles)
             .sort()
             .reverse()
             .slice(0, MAX_FILES_TO_READ);
 
-          // 只處理符合條件的檔案
+          // Process only eligible files
           for (const filePath of sortedFiles) {
             try {
               const data = await fs.readFile(filePath, "utf-8");
               const tasks = JSON.parse(data).tasks || [];
 
-              // 格式化日期字段
+              // Normalize date fields
               const formattedTasks = tasks.map((task: any) => ({
                 ...task,
                 createdAt: task.createdAt
@@ -814,7 +813,7 @@ export async function searchTasksWithCommand(
                   : undefined,
               }));
 
-              // 進一步過濾任務確保符合條件
+              // Further filter tasks to ensure they match
               const filteredTasks = isId
                 ? formattedTasks.filter((task: Task) => task.id === query)
                 : formattedTasks.filter((task: Task) => {
@@ -848,46 +847,46 @@ export async function searchTasksWithCommand(
     }
   } catch (error: unknown) {}
 
-  // 從當前任務中過濾符合條件的任務
+  // Filter matching tasks from current tasks
   const filteredCurrentTasks = filterCurrentTasks(currentTasks, query, isId);
 
-  // 合併結果並去重
+  // Merge results and deduplicate
   const taskMap = new Map<string, Task>();
 
-  // 當前任務優先
+  // Prefer current tasks first
   filteredCurrentTasks.forEach((task) => {
     taskMap.set(task.id, task);
   });
 
-  // 加入記憶任務，避免重複
+  // Add memory tasks while avoiding duplicates
   memoryTasks.forEach((task) => {
     if (!taskMap.has(task.id)) {
       taskMap.set(task.id, task);
     }
   });
 
-  // 合併後的結果
+  // Combine into final result
   const allTasks = Array.from(taskMap.values());
 
-  // 排序 - 按照更新或完成時間降序排列
+  // Sort by updated or completed time (desc)
   allTasks.sort((a, b) => {
-    // 優先按完成時間排序
+    // Prioritize by completion time
     if (a.completedAt && b.completedAt) {
       return b.completedAt.getTime() - a.completedAt.getTime();
     } else if (a.completedAt) {
-      return -1; // a完成了但b未完成，a排前面
+      return -1; // a completed, b not
     } else if (b.completedAt) {
-      return 1; // b完成了但a未完成，b排前面
+      return 1; // b completed, a not
     }
 
-    // 否則按更新時間排序
+    // Otherwise sort by updated time
     return b.updatedAt.getTime() - a.updatedAt.getTime();
   });
 
-  // 分頁處理
+  // Pagination
   const totalResults = allTasks.length;
   const totalPages = Math.ceil(totalResults / pageSize);
-  const safePage = Math.max(1, Math.min(page, totalPages || 1)); // 確保頁碼有效
+  const safePage = Math.max(1, Math.min(page, totalPages || 1)); // Ensure valid page
   const startIndex = (safePage - 1) * pageSize;
   const endIndex = Math.min(startIndex + pageSize, totalResults);
   const paginatedTasks = allTasks.slice(startIndex, endIndex);
@@ -903,40 +902,40 @@ export async function searchTasksWithCommand(
   };
 }
 
-// 根據平台生成適當的搜尋命令
+// Generate appropriate search command by platform
 function generateSearchCommand(
   query: string,
   isId: boolean,
   memoryDir: string
 ): string {
-  // 安全地轉義用戶輸入
+  // Safely escape user input
   const safeQuery = escapeShellArg(query);
   const keywords = safeQuery.split(/\s+/).filter((k) => k.length > 0);
 
-  // 檢測操作系統類型
+  // Detect OS type
   const isWindows = process.platform === "win32";
 
   if (isWindows) {
-    // Windows環境，使用findstr命令
+    // Windows: use findstr
     if (isId) {
-      // ID搜尋
+      // Search by ID
       return `findstr /s /i /c:"${safeQuery}" "${memoryDir}\\*.json"`;
     } else if (keywords.length === 1) {
-      // 單一關鍵字
+      // Single keyword
       return `findstr /s /i /c:"${safeQuery}" "${memoryDir}\\*.json"`;
     } else {
-      // 多關鍵字搜尋 - Windows中使用PowerShell
+      // Multiple keywords - use PowerShell
       const keywordPatterns = keywords.map((k) => `'${k}'`).join(" -and ");
       return `powershell -Command "Get-ChildItem -Path '${memoryDir}' -Filter *.json -Recurse | Select-String -Pattern ${keywordPatterns} | ForEach-Object { $_.Path }"`;
     }
   } else {
-    // Unix/Linux/MacOS環境，使用grep命令
+    // Unix/Linux/macOS: use grep
     if (isId) {
       return `grep -r --include="*.json" "${safeQuery}" "${memoryDir}"`;
     } else if (keywords.length === 1) {
       return `grep -r --include="*.json" "${safeQuery}" "${memoryDir}"`;
     } else {
-      // 多關鍵字用管道連接多個grep命令
+      // Chain multiple grep commands for multiple keywords
       const firstKeyword = escapeShellArg(keywords[0]);
       const otherKeywords = keywords.slice(1).map((k) => escapeShellArg(k));
 
@@ -950,18 +949,18 @@ function generateSearchCommand(
 }
 
 /**
- * 安全地轉義shell參數，防止命令注入
+ * Safely escape shell arguments to prevent command injection
  */
 function escapeShellArg(arg: string): string {
   if (!arg) return "";
 
-  // 移除所有控制字符和特殊字符
+  // Remove control and special shell characters
   return arg
-    .replace(/[\x00-\x1F\x7F]/g, "") // 控制字符
-    .replace(/[&;`$"'<>|]/g, ""); // Shell 特殊字符
+    .replace(/[\x00-\x1F\x7F]/g, "") // control chars
+    .replace(/[&;`$"'<>|]/g, ""); // shell specials
 }
 
-// 過濾當前任務列表
+// Filter tasks in current list
 function filterCurrentTasks(
   tasks: Task[],
   query: string,
