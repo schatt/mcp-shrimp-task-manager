@@ -24,7 +24,13 @@ export const LanguageProvider = ({ children }) => {
     
     // Fall back to localStorage
     const saved = localStorage.getItem('shrimpTaskViewerLanguage');
-    return saved || 'en';
+    // Ensure we have a valid language from localStorage
+    if (saved && supportedLanguages.includes(saved)) {
+      return saved;
+    }
+    
+    // Default to English
+    return 'en';
   });
 
   // Save language preference when it changes
@@ -47,13 +53,18 @@ export const LanguageProvider = ({ children }) => {
   }, [currentLanguage]);
 
   const t = (key, params) => {
-    return getTranslation(currentLanguage, key, params);
+    // Ensure currentLanguage is never null/undefined
+    const safeLang = currentLanguage || 'en';
+    return getTranslation(safeLang, key, params);
   };
 
   const changeLanguage = (lang) => {
     console.log('changeLanguage called with:', lang);
     console.log('Available translations:', Object.keys(translations));
-    setCurrentLanguage(lang);
+    // Only set valid languages, default to 'en' if invalid
+    const supportedLanguages = ['en', 'zh', 'es', 'ko', 'ja', 'th', 'vi', 'pt', 'tr', 'hi', 'it', 'fr', 'de', 'ru'];
+    const validLang = lang && supportedLanguages.includes(lang) ? lang : 'en';
+    setCurrentLanguage(validLang);
   };
 
   const value = {

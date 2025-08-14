@@ -1578,8 +1578,10 @@ export const translations = {
 };
 
 export const getTranslation = (lang, key, params = {}) => {
+  // Default to 'en' if lang is null, undefined, or not a valid language
+  const safeLang = lang && translations[lang] ? lang : 'en';
   const keys = key.split('.');
-  let value = translations[lang] || translations.en;
+  let value = translations[safeLang];
   
   for (const k of keys) {
     value = value?.[k];
