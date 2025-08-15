@@ -1,6 +1,8 @@
 /**
  * reflectTask prompt 生成器
+ * reflectTask prompt generator
  * 負責將模板和參數組合成最終的 prompt
+ * Responsible for combining templates and parameters into the final prompt
  */
 
 import {
@@ -11,6 +13,7 @@ import {
 
 /**
  * reflectTask prompt 參數介面
+ * reflectTask prompt parameter interface
  */
 export interface ReflectTaskPromptParams {
   summary: string;
@@ -19,8 +22,11 @@ export interface ReflectTaskPromptParams {
 
 /**
  * 獲取 reflectTask 的完整 prompt
+ * Get the complete reflectTask prompt
  * @param params prompt 參數
+ * @param params prompt parameters
  * @returns 生成的 prompt
+ * @returns generated prompt
  */
 export async function getReflectTaskPrompt(
   params: ReflectTaskPromptParams
@@ -32,5 +38,6 @@ export async function getReflectTaskPrompt(
   });
 
   // 載入可能的自定義 prompt
+  // Load possible custom prompt
   return loadPrompt(prompt, "REFLECT_TASK");
 }
