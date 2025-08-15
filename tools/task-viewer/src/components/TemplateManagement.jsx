@@ -28,7 +28,7 @@ function TemplateManagement({
   const columns = useMemo(() => [
     {
       accessorKey: 'functionName',
-      header: t('function'),
+      header: () => t('function'),
       cell: ({ row }) => (
         <div>
           <div className="task-name">
@@ -46,7 +46,7 @@ function TemplateManagement({
     },
     {
       accessorKey: 'description',
-      header: t('description'),
+      header: () => t('description'),
       cell: ({ getValue }) => (
         <div className="task-description">
           {getValue()?.slice(0, 120)}
@@ -57,7 +57,7 @@ function TemplateManagement({
     },
     {
       accessorKey: 'status',
-      header: t('status'),
+      header: () => t('status'),
       cell: ({ getValue }) => {
         const status = getValue() || 'default';
         let statusText = status;
@@ -89,7 +89,7 @@ function TemplateManagement({
     },
     {
       accessorKey: 'language',
-      header: t('language'),
+      header: () => t('language'),
       cell: ({ getValue }) => {
         const language = getValue() || 'en';
         const languageMap = {
@@ -108,7 +108,7 @@ function TemplateManagement({
     },
     {
       accessorKey: 'actions',
-      header: t('actions'),
+      header: () => t('actions'),
       cell: ({ row }) => (
         <div className="actions-cell">
           <button
