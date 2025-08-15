@@ -55,10 +55,7 @@
     "@types/react": "^19.1.8",
     "@types/react-dom": "^19.1.6",
     "@types/react-syntax-highlighter": "^15.5.13",
-<<<<<<< HEAD
-=======
     "@uiw/react-md-editor": "^4.0.8",
->>>>>>> 863f8a5 (feat: Add AI-powered bulk agent assignment, Git task history, and UI improvements)
     "@vitejs/plugin-react": "^4.6.0",
     "busboy": "^1.6.0",
     "dotenv": "^17.2.1",
@@ -69,12 +66,8 @@
     "react-dom": "^19.1.0",
     "react-i18next": "^15.6.1",
     "react-syntax-highlighter": "^15.6.1",
-<<<<<<< HEAD
-    "vite": "^5.4.19"
-=======
     "vite": "^5.4.19",
     "yet-another-react-lightbox": "^3.25.0"
->>>>>>> 863f8a5 (feat: Add AI-powered bulk agent assignment, Git task history, and UI improvements)
   },
   "devDependencies": {
     "@testing-library/dom": "^10.4.0",
