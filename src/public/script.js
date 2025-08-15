@@ -684,6 +684,7 @@ function selectTask(taskId) {
         <span>${translate(
           "task_detail_status_label"
         )} <span id="detail-status" class="task-status"></span></span>
+        <span class="task-id">ID: ${task.id}</span>
       </div>
     </div>
     
