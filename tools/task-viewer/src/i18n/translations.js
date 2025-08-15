@@ -1350,6 +1350,7 @@ export const translations = {
     globalSettingsDesc: "애플리케이션 전역 설정을 구성합니다.",
     settings: "설정",
     readme: "읽어보기",
+    subAgents: "서브 에이전트",
     projectSettings: "프로젝트 설정",
     editProjectSettings: "프로젝트 설정 편집",
     settingsSaved: "설정이 성공적으로 저장되었습니다",
@@ -1523,6 +1524,7 @@ export const translations = {
     globalSettingsDesc: "アプリケーションのグローバル設定を構成します。",
     settings: "設定",
     readme: "リードミー",
+    subAgents: "サブエージェント",
     projectSettings: "プロジェクト設定",
     editProjectSettings: "プロジェクト設定を編集",
     settingsSaved: "設定が正常に保存されました",
@@ -1574,6 +1576,76 @@ export const translations = {
     noAgentsFound: "エージェントが見つかりません",
     agentSavedSuccess: "エージェントが正常に保存されました",
     aiInstruction: "AI指示"
+  },
+  
+  // Thai
+  th: {
+    projects: "โครงการ",
+    releaseNotes: "บันทึกการเผยแพร่",
+    readme: "อ่านเพิ่มเติม",
+    templates: "เทมเพลต",
+    subAgents: "ตัวแทนย่อย",
+    settings: "การตั้งค่า"
+  },
+  
+  // Vietnamese
+  vi: {
+    projects: "Dự án",
+    releaseNotes: "Ghi chú phát hành",
+    readme: "Tài liệu",
+    templates: "Mẫu",
+    subAgents: "Tác nhân phụ",
+    settings: "Cài đặt"
+  },
+  
+  // Hindi
+  hi: {
+    projects: "परियोजनाएं",
+    releaseNotes: "रिलीज़ नोट्स",
+    readme: "रीडमी",
+    templates: "टेम्प्लेट",
+    subAgents: "उप-एजेंट",
+    settings: "सेटिंग्स"
+  },
+  
+  // Italian
+  it: {
+    projects: "Progetti",
+    releaseNotes: "Note di rilascio",
+    readme: "Leggimi",
+    templates: "Modelli",
+    subAgents: "Sotto-agenti",
+    settings: "Impostazioni"
+  },
+  
+  // French
+  fr: {
+    projects: "Projets",
+    releaseNotes: "Notes de version",
+    readme: "Lisez-moi",
+    templates: "Modèles",
+    subAgents: "Sous-agents",
+    settings: "Paramètres"
+  },
+  
+  // German
+  de: {
+    projects: "Projekte",
+    releaseNotes: "Versionshinweise",
+    readme: "Liesmich",
+    templates: "Vorlagen",
+    subAgents: "Unter-Agenten",
+    settings: "Einstellungen"
+  },
+  
+  // Russian
+  ru: {
+    projects: "Проекты",
+    releaseNotes: "Примечания к выпуску",
+    readme: "Прочитай меня",
+    templates: "Шаблоны",
+    subAgents: "Суб-агенты",
+    settings: "Настройки"
   }
 };
 

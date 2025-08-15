@@ -7,7 +7,7 @@ import {
   getSortedRowModel,
   flexRender,
 } from '@tanstack/react-table';
-import { useLanguage } from '../i18n/LanguageContext';
+import { useTranslation } from 'react-i18next';
 import AgentViewer from './AgentViewer';
 import AgentEditor from './AgentEditor';
 
@@ -22,7 +22,7 @@ function AgentsListView({
   onAgentViewChange,
   onNavigateToSettings
 }) {
-  const { t } = useLanguage();
+  const { t } = useTranslation();
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');

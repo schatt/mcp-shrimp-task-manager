@@ -15,12 +15,13 @@ import ProjectAgentsView from './components/ProjectAgentsView';
 import ToastContainer from './components/ToastContainer';
 import LanguageSelector from './components/LanguageSelector';
 import ChatAgent from './components/ChatAgent';
-import { LanguageProvider, useLanguage } from './i18n/LanguageContext';
+import { useTranslation } from 'react-i18next';
 import { parseUrlState, updateUrl, pushUrlState, getInitialUrlState, cleanUrlStateForTab } from './utils/urlStateSync';
 import NestedTabs from './components/NestedTabs';
 
 function AppContent() {
-  const { t, currentLanguage } = useLanguage();
+  const { t, i18n } = useTranslation();
+  const currentLanguage = i18n.language;
   
   // Initialize URL state
   const [urlStateInitialized, setUrlStateInitialized] = useState(false);
@@ -954,7 +955,6 @@ function AppContent() {
               lang: currentLanguage
             });
           }}
-          t={t}
           selectedOuterTab={selectedOuterTab}
           onOuterTabChange={handleOuterTabChange}
           draggedTabIndex={draggedTabIndex}
@@ -1545,12 +1545,4 @@ function AppContent() {
   );
 }
 
-function App() {
-  return (
-    <LanguageProvider>
-      <AppContent />
-    </LanguageProvider>
-  );
-}
-
-export default App;
+export default AppContent;

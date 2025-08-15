@@ -1,4 +1,11 @@
 {
+  "appTitle": "🦐 새우 작업 관리자 뷰어",
+  "projects": "프로젝트",
+  "releaseNotes": "릴리스 노트",
+  "readme": "읽어보기",
+  "templates": "템플릿",
+  "subAgents": "서브 에이전트",
+  "settings": "설정",
   "header": {
     "appTitle": "🦐 새우 작업 관리자 뷰어",
     "version": "버전",
@@ -10,7 +17,7 @@
   },
   "navigation": {
     "tasks": "작업",
-    "templates": "템플릿", 
+    "templates": "템플릿",
     "projects": "프로젝트"
   },
   "template": {
@@ -61,7 +68,7 @@
     "taskFolderPathPlaceholder": "작업 파일이 포함된 폴더 경로 입력",
     "profileName": "프로필 이름",
     "profileNamePlaceholder": "프로필 이름 입력",
-    "projectRootPath": "프로젝트 루트 경로", 
+    "projectRootPath": "프로젝트 루트 경로",
     "projectRootPathPlaceholder": "프로젝트 루트 경로 입력 (선택사항)",
     "addProfile": "프로필 추가",
     "editProfile": "프로필 편집",
@@ -70,7 +77,7 @@
   "task": {
     "number": "작업 번호",
     "name": "작업 이름",
-    "status": "상태", 
+    "status": "상태",
     "dependencies": "의존성",
     "assignedAgent": "할당된 에이전트",
     "details": "작업 세부정보",
@@ -124,7 +131,7 @@
   },
   "notifications": {
     "profileCreatedSuccess": "프로필이 성공적으로 생성되었습니다",
-    "profileUpdatedSuccess": "프로필이 성공적으로 업데이트되었습니다", 
+    "profileUpdatedSuccess": "프로필이 성공적으로 업데이트되었습니다",
     "profileDeletedSuccess": "프로필이 성공적으로 삭제되었습니다",
     "taskUpdatedSuccess": "작업이 성공적으로 업데이트되었습니다",
     "settingsSaved": "설정이 성공적으로 저장되었습니다",
@@ -152,16 +159,25 @@
   },
   "statistics": {
     "totalTasks": "총 작업",
-    "completedTasks": "완료된 작업", 
+    "completedTasks": "완료된 작업",
     "pendingTasks": "대기 중 작업",
     "inProgressTasks": "진행 중 작업",
     "totalTemplates": "총 템플릿",
     "totalNumberOfTemplates": "총 템플릿 수",
-    "numberOfDefaultTemplates": "기본 템플릿 수", 
+    "numberOfDefaultTemplates": "기본 템플릿 수",
     "numberOfCustomTemplates": "사용자 정의 템플릿 수",
     "numberOfEnvOverrideTemplates": "환경 변수 재정의 템플릿 수",
     "default": "기본",
     "custom": "사용자 정의",
     "envOverride": "환경 변수 재정의"
-  }
+  },
+  "tasks": "작업",
+  "history": "기록",
+  "agents": "에이전트",
+  "totalTasks": "전체 작업",
+  "completed": "완료됨",
+  "inProgress": "진행 중",
+  "pending": "대기 중",
+  "autoRefresh": "자동 새로고침",
+  "searchTasksPlaceholder": "작업 검색..."
 }

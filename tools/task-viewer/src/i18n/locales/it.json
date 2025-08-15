@@ -1,4 +1,5 @@
 {
+  "appTitle": "🦐 Visualizzatore Gestore Attività Shrimp",
   "header": {
     "appTitle": "🦐 Visualizzatore Gestore Attività Shrimp",
     "version": "Versione",
@@ -10,7 +11,7 @@
   },
   "navigation": {
     "tasks": "Attività",
-    "templates": "Modelli", 
+    "templates": "Modelli",
     "projects": "Progetti"
   },
   "template": {
@@ -61,7 +62,7 @@
     "taskFolderPathPlaceholder": "Inserisci il percorso della cartella contenente i file delle attività",
     "profileName": "Nome Profilo",
     "profileNamePlaceholder": "Inserisci il nome del profilo",
-    "projectRootPath": "Percorso Radice Progetto", 
+    "projectRootPath": "Percorso Radice Progetto",
     "projectRootPathPlaceholder": "Inserisci il percorso radice del progetto (opzionale)",
     "addProfile": "Aggiungi Profilo",
     "editProfile": "Modifica Profilo",
@@ -70,7 +71,7 @@
   "task": {
     "number": "Numero Attività",
     "name": "Nome Attività",
-    "status": "Stato", 
+    "status": "Stato",
     "dependencies": "Dipendenze",
     "assignedAgent": "Agente Assegnato",
     "details": "Dettagli Attività",
@@ -161,7 +162,7 @@
   },
   "notifications": {
     "profileCreatedSuccess": "Profilo creato con successo",
-    "profileUpdatedSuccess": "Profilo aggiornato con successo", 
+    "profileUpdatedSuccess": "Profilo aggiornato con successo",
     "profileDeletedSuccess": "Profilo eliminato con successo",
     "taskUpdatedSuccess": "Attività aggiornata con successo",
     "settingsSaved": "Impostazioni salvate con successo",
@@ -189,16 +190,31 @@
   },
   "statistics": {
     "totalTasks": "Attività Totali",
-    "completedTasks": "Attività Completate", 
+    "completedTasks": "Attività Completate",
     "pendingTasks": "Attività in Attesa",
     "inProgressTasks": "Attività in Corso",
     "totalTemplates": "Modelli Totali",
     "totalNumberOfTemplates": "Numero totale di modelli",
-    "numberOfDefaultTemplates": "Numero di modelli predefiniti", 
+    "numberOfDefaultTemplates": "Numero di modelli predefiniti",
     "numberOfCustomTemplates": "Numero di modelli personalizzati",
     "numberOfEnvOverrideTemplates": "Numero di modelli di override ambiente",
     "default": "Predefinito",
     "custom": "Personalizzato",
     "envOverride": "Override Ambiente"
-  }
+  },
+  "projects": "Progetti",
+  "releaseNotes": "Note di rilascio",
+  "readme": "Leggimi",
+  "templates": "Modelli",
+  "subAgents": "Sotto-agenti",
+  "settings": "Impostazioni",
+  "tasks": "Attività",
+  "history": "Cronologia",
+  "agents": "Agenti",
+  "totalTasks": "ATTIVITÀ TOTALI",
+  "completed": "COMPLETATE",
+  "inProgress": "IN CORSO",
+  "pending": "IN ATTESA",
+  "autoRefresh": "Aggiornamento Automatico",
+  "searchTasksPlaceholder": "Cerca attività..."
 }

@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { useLanguage } from '../i18n/LanguageContext';
+import { useTranslation } from 'react-i18next';
 
 function TaskEditView({ task, onBack, projectRoot, profileId, onNavigateToTask, taskIndex, allTasks, onSave }) {
-  const { t } = useLanguage();
+  const { t } = useTranslation();
   const [editedTask, setEditedTask] = useState({
     description: task.description || '',
     notes: task.notes || '',

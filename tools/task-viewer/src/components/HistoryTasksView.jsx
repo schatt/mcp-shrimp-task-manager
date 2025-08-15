@@ -8,7 +8,7 @@ import {
   flexRender,
 } from '@tanstack/react-table';
 import TaskDetailView from './TaskDetailView';
-import { useLanguage } from '../i18n/LanguageContext';
+import { useTranslation } from 'react-i18next';
 
 function HistoryTasksView({ 
   tasks = [], 
@@ -17,7 +17,7 @@ function HistoryTasksView({
   error = '',
   onBack
 }) {
-  const { t } = useLanguage();
+  const { t } = useTranslation();
   const [selectedTask, setSelectedTask] = useState(null);
 
   const columns = useMemo(() => [

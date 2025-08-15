@@ -1,4 +1,5 @@
 {
+  "appTitle": "🦐 Visualiseur du Gestionnaire de Tâches Shrimp",
   "header": {
     "appTitle": "🦐 Visualiseur du Gestionnaire de Tâches Shrimp",
     "version": "Version",
@@ -10,7 +11,7 @@
   },
   "navigation": {
     "tasks": "Tâches",
-    "templates": "Modèles", 
+    "templates": "Modèles",
     "projects": "Projets"
   },
   "template": {
@@ -61,7 +62,7 @@
     "taskFolderPathPlaceholder": "Entrez le chemin du dossier contenant les fichiers de tâches",
     "profileName": "Nom du Profil",
     "profileNamePlaceholder": "Entrez le nom du profil",
-    "projectRootPath": "Chemin Racine du Projet", 
+    "projectRootPath": "Chemin Racine du Projet",
     "projectRootPathPlaceholder": "Entrez le chemin racine du projet (optionnel)",
     "addProfile": "Ajouter un Profil",
     "editProfile": "Modifier le Profil",
@@ -70,7 +71,7 @@
   "task": {
     "number": "Numéro de Tâche",
     "name": "Nom de la Tâche",
-    "status": "Statut", 
+    "status": "Statut",
     "dependencies": "Dépendances",
     "assignedAgent": "Agent Assigné",
     "details": "Détails de la Tâche",
@@ -124,7 +125,7 @@
   },
   "notifications": {
     "profileCreatedSuccess": "Profil créé avec succès",
-    "profileUpdatedSuccess": "Profil mis à jour avec succès", 
+    "profileUpdatedSuccess": "Profil mis à jour avec succès",
     "profileDeletedSuccess": "Profil supprimé avec succès",
     "taskUpdatedSuccess": "Tâche mise à jour avec succès",
     "settingsSaved": "Paramètres enregistrés avec succès",
@@ -189,16 +190,31 @@
   },
   "statistics": {
     "totalTasks": "Tâches Totales",
-    "completedTasks": "Tâches Terminées", 
+    "completedTasks": "Tâches Terminées",
     "pendingTasks": "Tâches en Attente",
     "inProgressTasks": "Tâches en Cours",
     "totalTemplates": "Modèles Totaux",
     "totalNumberOfTemplates": "Nombre total de modèles",
-    "numberOfDefaultTemplates": "Nombre de modèles par défaut", 
+    "numberOfDefaultTemplates": "Nombre de modèles par défaut",
     "numberOfCustomTemplates": "Nombre de modèles personnalisés",
     "numberOfEnvOverrideTemplates": "Nombre de modèles de remplacement d'environnement",
     "default": "Par défaut",
     "custom": "Personnalisé",
     "envOverride": "Remplacement d'Environnement"
-  }
+  },
+  "projects": "Projets",
+  "releaseNotes": "Notes de version",
+  "readme": "Lisez-moi",
+  "templates": "Modèles",
+  "subAgents": "Sous-agents",
+  "settings": "Paramètres",
+  "tasks": "Tâches",
+  "history": "Historique",
+  "agents": "Agents",
+  "totalTasks": "TÂCHES TOTALES",
+  "completed": "TERMINÉES",
+  "inProgress": "EN COURS",
+  "pending": "EN ATTENTE",
+  "autoRefresh": "Actualisation Auto",
+  "searchTasksPlaceholder": "Rechercher des tâches..."
 }

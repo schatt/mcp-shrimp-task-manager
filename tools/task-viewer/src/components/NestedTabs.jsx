@@ -1,5 +1,6 @@
 import React from 'react';
 import { Tab } from '@headlessui/react';
+import { useTranslation } from 'react-i18next';
 
 const NestedTabs = ({ 
   profiles, 
@@ -10,7 +11,6 @@ const NestedTabs = ({
   projectInnerTab,
   setProjectInnerTab,
   children,
-  t,
   selectedOuterTab,
   onOuterTabChange,
   draggedTabIndex,
@@ -21,6 +21,8 @@ const NestedTabs = ({
   handleDrop,
   claudeFolderPath
 }) => {
+  const { t } = useTranslation();
+  
   // Create dynamic tab arrays based on Claude folder path configuration
   const baseTabNames = ['projects', 'release-notes', 'readme', 'templates'];
   const tabNames = claudeFolderPath 

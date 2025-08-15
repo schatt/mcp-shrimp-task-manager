@@ -1,4 +1,11 @@
 {
+  "appTitle": "🦐 Shrimp Task Manager Viewer",
+  "projects": "Projects",
+  "releaseNotes": "Release Notes",
+  "readme": "README",
+  "templates": "Templates",
+  "subAgents": "Sub-Agents",
+  "settings": "Settings",
   "header": {
     "appTitle": "🦐 Shrimp Task Manager Viewer",
     "version": "Version",
@@ -10,7 +17,7 @@
   },
   "navigation": {
     "tasks": "Tasks",
-    "templates": "Templates", 
+    "templates": "Templates",
     "projects": "Projects"
   },
   "template": {
@@ -61,7 +68,7 @@
     "taskFolderPathPlaceholder": "Enter folder path containing task files",
     "profileName": "Profile Name",
     "profileNamePlaceholder": "Enter profile name",
-    "projectRootPath": "Project Root Path", 
+    "projectRootPath": "Project Root Path",
     "projectRootPathPlaceholder": "Enter project root path (optional)",
     "addProfile": "Add Profile",
     "editProfile": "Edit Profile",
@@ -70,7 +77,7 @@
   "task": {
     "number": "Task Number",
     "name": "Task Name",
-    "status": "Status", 
+    "status": "Status",
     "dependencies": "Dependencies",
     "assignedAgent": "Assigned Agent",
     "details": "Task Details",
@@ -161,7 +168,7 @@
   },
   "notifications": {
     "profileCreatedSuccess": "Profile created successfully",
-    "profileUpdatedSuccess": "Profile updated successfully", 
+    "profileUpdatedSuccess": "Profile updated successfully",
     "profileDeletedSuccess": "Profile deleted successfully",
     "taskUpdatedSuccess": "Task updated successfully",
     "settingsSaved": "Settings saved successfully",
@@ -189,16 +196,25 @@
   },
   "statistics": {
     "totalTasks": "Total Tasks",
-    "completedTasks": "Completed Tasks", 
+    "completedTasks": "Completed Tasks",
     "pendingTasks": "Pending Tasks",
     "inProgressTasks": "In Progress Tasks",
     "totalTemplates": "Total Templates",
     "totalNumberOfTemplates": "Total number of templates",
-    "numberOfDefaultTemplates": "Number of default templates", 
+    "numberOfDefaultTemplates": "Number of default templates",
     "numberOfCustomTemplates": "Number of custom templates",
     "numberOfEnvOverrideTemplates": "Number of env override templates",
     "default": "Default",
     "custom": "Custom",
     "envOverride": "Env Override"
-  }
+  },
+  "tasks": "Tasks",
+  "history": "History",
+  "agents": "Agents",
+  "totalTasks": "TOTAL TASKS",
+  "completed": "COMPLETED",
+  "inProgress": "IN PROGRESS",
+  "pending": "PENDING",
+  "autoRefresh": "Auto Refresh",
+  "searchTasksPlaceholder": "Search tasks..."
 }

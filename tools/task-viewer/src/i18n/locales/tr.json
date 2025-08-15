@@ -1,4 +1,5 @@
 {
+  "appTitle": "🦐 Shrimp Görev Yöneticisi Görüntüleyici",
   "header": {
     "appTitle": "🦐 Shrimp Görev Yöneticisi Görüntüleyici",
     "version": "Sürüm",
@@ -10,7 +11,7 @@
   },
   "navigation": {
     "tasks": "Görevler",
-    "templates": "Şablonlar", 
+    "templates": "Şablonlar",
     "projects": "Projeler"
   },
   "template": {
@@ -67,7 +68,7 @@
     "taskFolderPathPlaceholder": "/yol/to/shrimp_veri_klasoru",
     "profileName": "Proje Adı",
     "profileNamePlaceholder": "örn., Takım Alpha Görevleri",
-    "projectRootPath": "Proje Kök Yolu", 
+    "projectRootPath": "Proje Kök Yolu",
     "projectRootPathPlaceholder": "örn., /home/kullanici/projem",
     "addProfile": "Proje Ekle",
     "editProfile": "Proje Düzenle",
@@ -98,7 +99,7 @@
   "task": {
     "number": "Görev Numarası",
     "name": "Görev Adı",
-    "status": "Durum", 
+    "status": "Durum",
     "dependencies": "Bağımlılıklar",
     "assignedAgent": "Atanan Ajan",
     "details": "Görev Detayları",
@@ -204,7 +205,7 @@
   },
   "notifications": {
     "profileCreatedSuccess": "Profil başarıyla oluşturuldu",
-    "profileUpdatedSuccess": "Profil başarıyla güncellendi", 
+    "profileUpdatedSuccess": "Profil başarıyla güncellendi",
     "profileDeletedSuccess": "Profil başarıyla silindi",
     "taskUpdatedSuccess": "Görev başarıyla güncellendi",
     "settingsSaved": "Ayarlar başarıyla kaydedildi",
@@ -238,12 +239,12 @@
   },
   "statistics": {
     "totalTasks": "Toplam Görevler",
-    "completedTasks": "Tamamlanan Görevler", 
+    "completedTasks": "Tamamlanan Görevler",
     "pendingTasks": "Bekleyen Görevler",
     "inProgressTasks": "Devam Eden Görevler",
     "totalTemplates": "Toplam Şablonlar",
     "totalNumberOfTemplates": "Toplam şablon sayısı",
-    "numberOfDefaultTemplates": "Varsayılan şablon sayısı", 
+    "numberOfDefaultTemplates": "Varsayılan şablon sayısı",
     "numberOfCustomTemplates": "Özel şablon sayısı",
     "numberOfEnvOverrideTemplates": "Çevre tarafından geçersiz kılınmış şablon sayısı",
     "default": "Varsayılan",
@@ -261,5 +262,20 @@
   "confirmation": {
     "confirmRemoveProfile": "Bu projeyi kaldırmak istediğinizden emin misiniz? Bu eylem geri alınamaz.",
     "confirmResetTemplate": "{{name}} şablonunu varsayılana sıfırlamak istediğinizden emin misiniz? Bu, tüm özelleştirmeleri kaldıracak."
-  }
+  },
+  "projects": "Projeler",
+  "releaseNotes": "Sürüm Notları",
+  "readme": "Beni Oku",
+  "templates": "Şablonlar",
+  "subAgents": "Alt Ajanlar",
+  "settings": "Ayarlar",
+  "tasks": "Görevler",
+  "history": "Geçmiş",
+  "agents": "Ajanlar",
+  "totalTasks": "TOPLAM GÖREV",
+  "completed": "TAMAMLANDI",
+  "inProgress": "DEVAM EDİYOR",
+  "pending": "BEKLİYOR",
+  "autoRefresh": "Otomatik Yenile",
+  "searchTasksPlaceholder": "Görev ara..."
 }

@@ -1,4 +1,5 @@
 {
+  "appTitle": "🦐 Shrimp Task Manager Viewer",
   "header": {
     "appTitle": "🦐 Shrimp Task Manager Viewer",
     "version": "Version",
@@ -10,7 +11,7 @@
   },
   "navigation": {
     "tasks": "Aufgaben",
-    "templates": "Vorlagen", 
+    "templates": "Vorlagen",
     "projects": "Projekte"
   },
   "template": {
@@ -61,7 +62,7 @@
     "taskFolderPathPlaceholder": "Geben Sie den Ordnerpfad mit Aufgabendateien ein",
     "profileName": "Profilname",
     "profileNamePlaceholder": "Geben Sie den Profilnamen ein",
-    "projectRootPath": "Projekt-Stammverzeichnis-Pfad", 
+    "projectRootPath": "Projekt-Stammverzeichnis-Pfad",
     "projectRootPathPlaceholder": "Geben Sie den Projekt-Stammverzeichnis-Pfad ein (optional)",
     "addProfile": "Profil Hinzufügen",
     "editProfile": "Profil Bearbeiten",
@@ -70,7 +71,7 @@
   "task": {
     "number": "Aufgabennummer",
     "name": "Aufgabenname",
-    "status": "Status", 
+    "status": "Status",
     "dependencies": "Abhängigkeiten",
     "assignedAgent": "Zugewiesener Agent",
     "details": "Aufgabendetails",
@@ -124,7 +125,7 @@
   },
   "notifications": {
     "profileCreatedSuccess": "Profil erfolgreich erstellt",
-    "profileUpdatedSuccess": "Profil erfolgreich aktualisiert", 
+    "profileUpdatedSuccess": "Profil erfolgreich aktualisiert",
     "profileDeletedSuccess": "Profil erfolgreich gelöscht",
     "taskUpdatedSuccess": "Aufgabe erfolgreich aktualisiert",
     "settingsSaved": "Einstellungen erfolgreich gespeichert",
@@ -189,16 +190,31 @@
   },
   "statistics": {
     "totalTasks": "Gesamte Aufgaben",
-    "completedTasks": "Abgeschlossene Aufgaben", 
+    "completedTasks": "Abgeschlossene Aufgaben",
     "pendingTasks": "Ausstehende Aufgaben",
     "inProgressTasks": "Aufgaben in Bearbeitung",
     "totalTemplates": "Gesamte Vorlagen",
     "totalNumberOfTemplates": "Gesamtanzahl der Vorlagen",
-    "numberOfDefaultTemplates": "Anzahl der Standardvorlagen", 
+    "numberOfDefaultTemplates": "Anzahl der Standardvorlagen",
     "numberOfCustomTemplates": "Anzahl der benutzerdefinierten Vorlagen",
     "numberOfEnvOverrideTemplates": "Anzahl der Umgebungsüberschreibungsvorlagen",
     "default": "Standard",
     "custom": "Benutzerdefiniert",
     "envOverride": "Umgebungsüberschreibung"
-  }
+  },
+  "projects": "Projekte",
+  "releaseNotes": "Versionshinweise",
+  "readme": "Liesmich",
+  "templates": "Vorlagen",
+  "subAgents": "Unter-Agenten",
+  "settings": "Einstellungen",
+  "tasks": "Aufgaben",
+  "history": "Verlauf",
+  "agents": "Agenten",
+  "totalTasks": "GESAMTAUFGABEN",
+  "completed": "ABGESCHLOSSEN",
+  "inProgress": "IN BEARBEITUNG",
+  "pending": "AUSSTEHEND",
+  "autoRefresh": "Auto-Aktualisierung",
+  "searchTasksPlaceholder": "Aufgaben suchen..."
 }

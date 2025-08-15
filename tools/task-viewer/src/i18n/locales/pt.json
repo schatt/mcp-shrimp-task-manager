@@ -1,4 +1,5 @@
 {
+  "appTitle": "🦐 Visualizador do Gerenciador de Tarefas Shrimp",
   "header": {
     "appTitle": "🦐 Visualizador do Gerenciador de Tarefas Shrimp",
     "version": "Versão",
@@ -10,7 +11,7 @@
   },
   "navigation": {
     "tasks": "Tarefas",
-    "templates": "Templates", 
+    "templates": "Templates",
     "projects": "Projetos"
   },
   "template": {
@@ -67,7 +68,7 @@
     "taskFolderPathPlaceholder": "/caminho/para/pasta_dados_shrimp",
     "profileName": "Nome do Projeto",
     "profileNamePlaceholder": "ex., Tarefas da Equipe Alpha",
-    "projectRootPath": "Caminho Raiz do Projeto", 
+    "projectRootPath": "Caminho Raiz do Projeto",
     "projectRootPathPlaceholder": "ex., /home/usuario/meu-projeto",
     "addProfile": "Adicionar Projeto",
     "editProfile": "Editar Projeto",
@@ -98,7 +99,7 @@
   "task": {
     "number": "Número da Tarefa",
     "name": "Nome da Tarefa",
-    "status": "Status", 
+    "status": "Status",
     "dependencies": "Dependências",
     "assignedAgent": "Agente Atribuído",
     "details": "Detalhes da Tarefa",
@@ -204,7 +205,7 @@
   },
   "notifications": {
     "profileCreatedSuccess": "Perfil criado com sucesso",
-    "profileUpdatedSuccess": "Perfil atualizado com sucesso", 
+    "profileUpdatedSuccess": "Perfil atualizado com sucesso",
     "profileDeletedSuccess": "Perfil removido com sucesso",
     "taskUpdatedSuccess": "Tarefa atualizada com sucesso",
     "settingsSaved": "Configurações salvas com sucesso",
@@ -238,12 +239,12 @@
   },
   "statistics": {
     "totalTasks": "Total de Tarefas",
-    "completedTasks": "Tarefas Concluídas", 
+    "completedTasks": "Tarefas Concluídas",
     "pendingTasks": "Tarefas Pendentes",
     "inProgressTasks": "Tarefas em Progresso",
     "totalTemplates": "Total de Templates",
     "totalNumberOfTemplates": "Número total de templates",
-    "numberOfDefaultTemplates": "Número de templates padrão", 
+    "numberOfDefaultTemplates": "Número de templates padrão",
     "numberOfCustomTemplates": "Número de templates personalizados",
     "numberOfEnvOverrideTemplates": "Número de templates sobrescritos por ambiente",
     "default": "Padrão",
@@ -261,5 +262,20 @@
   "confirmation": {
     "confirmRemoveProfile": "Tem certeza de que deseja remover este projeto? Esta ação não pode ser desfeita.",
     "confirmResetTemplate": "Tem certeza de que deseja redefinir {{name}} para padrão? Isso removerá qualquer personalização."
-  }
+  },
+  "projects": "Projetos",
+  "releaseNotes": "Notas de Lançamento",
+  "readme": "Leia-me",
+  "templates": "Templates",
+  "subAgents": "Sub-Agentes",
+  "settings": "Configurações",
+  "tasks": "Tarefas",
+  "history": "Histórico",
+  "agents": "Agentes",
+  "totalTasks": "TAREFAS TOTAIS",
+  "completed": "CONCLUÍDAS",
+  "inProgress": "EM PROGRESSO",
+  "pending": "PENDENTES",
+  "autoRefresh": "Atualização Automática",
+  "searchTasksPlaceholder": "Procurar tarefas..."
 }

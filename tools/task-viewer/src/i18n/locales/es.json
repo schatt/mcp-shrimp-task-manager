@@ -1,4 +1,5 @@
 {
+  "appTitle": "🦐 Visor del Gestor de Tareas Shrimp",
   "header": {
     "appTitle": "🦐 Visor del Gestor de Tareas Shrimp",
     "version": "Versión",
@@ -10,7 +11,7 @@
   },
   "navigation": {
     "tasks": "Tareas",
-    "templates": "Plantillas", 
+    "templates": "Plantillas",
     "projects": "Proyectos"
   },
   "template": {
@@ -103,7 +104,7 @@
     "taskFolderPathPlaceholder": "/ruta/a/carpeta_datos_shrimp",
     "profileName": "Nombre del Proyecto",
     "profileNamePlaceholder": "ej., Tareas del Equipo Alpha",
-    "projectRootPath": "Ruta Raíz del Proyecto", 
+    "projectRootPath": "Ruta Raíz del Proyecto",
     "projectRootPathPlaceholder": "ej., /home/usuario/mi-proyecto",
     "addProfile": "Agregar Proyecto",
     "editProfile": "Editar Proyecto",
@@ -134,7 +135,7 @@
   "task": {
     "number": "Número de Tarea",
     "name": "Nombre de Tarea",
-    "status": "Estado", 
+    "status": "Estado",
     "dependencies": "Dependencias",
     "assignedAgent": "Agente Asignado",
     "details": "Detalles de Tarea",
@@ -182,7 +183,7 @@
     "subAgents": "Sub-Agentes",
     "agents": "Agentes",
     "agentName": "Nombre del Agente",
-    "type": "Tipo", 
+    "type": "Tipo",
     "agentSavedSuccess": "Agente guardado exitosamente"
   },
   "bulk": {
@@ -240,7 +241,7 @@
   },
   "notifications": {
     "profileCreatedSuccess": "Perfil creado exitosamente",
-    "profileUpdatedSuccess": "Perfil actualizado exitosamente", 
+    "profileUpdatedSuccess": "Perfil actualizado exitosamente",
     "profileDeletedSuccess": "Perfil eliminado exitosamente",
     "taskUpdatedSuccess": "Tarea actualizada exitosamente",
     "settingsSaved": "Configuración guardada exitosamente",
@@ -274,12 +275,12 @@
   },
   "statistics": {
     "totalTasks": "Total de Tareas",
-    "completedTasks": "Tareas Completadas", 
+    "completedTasks": "Tareas Completadas",
     "pendingTasks": "Tareas Pendientes",
     "inProgressTasks": "Tareas en Progreso",
     "totalTemplates": "Total de Plantillas",
     "totalNumberOfTemplates": "Número total de plantillas",
-    "numberOfDefaultTemplates": "Número de plantillas predeterminadas", 
+    "numberOfDefaultTemplates": "Número de plantillas predeterminadas",
     "numberOfCustomTemplates": "Número de plantillas personalizadas",
     "numberOfEnvOverrideTemplates": "Número de plantillas sobrescritas por el entorno",
     "default": "Predeterminado",
@@ -297,5 +298,20 @@
   "confirmation": {
     "confirmRemoveProfile": "¿Estás seguro de que quieres eliminar este proyecto? Esta acción no se puede deshacer.",
     "confirmResetTemplate": "¿Estás seguro de que quieres restablecer {{name}} a predeterminado? Esto eliminará cualquier personalización."
-  }
+  },
+  "projects": "Proyectos",
+  "releaseNotes": "Notas de la versión",
+  "readme": "Léeme",
+  "templates": "Plantillas",
+  "subAgents": "Sub-Agentes",
+  "settings": "Configuración",
+  "tasks": "Tareas",
+  "history": "Historial",
+  "agents": "Agentes",
+  "totalTasks": "TAREAS TOTALES",
+  "completed": "COMPLETADAS",
+  "inProgress": "EN PROGRESO",
+  "pending": "PENDIENTES",
+  "autoRefresh": "Actualización Automática",
+  "searchTasksPlaceholder": "Buscar tareas..."
 }

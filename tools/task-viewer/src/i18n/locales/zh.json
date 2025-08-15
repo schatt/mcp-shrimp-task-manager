@@ -1,4 +1,11 @@
 {
+  "appTitle": "🦐 虾米任务管理器查看器",
+  "projects": "项目",
+  "releaseNotes": "发布说明",
+  "readme": "说明文档",
+  "templates": "模板",
+  "subAgents": "子代理",
+  "settings": "设置",
   "header": {
     "appTitle": "🦐 虾米任务管理器查看器",
     "version": "版本",
@@ -10,7 +17,7 @@
   },
   "navigation": {
     "tasks": "任务",
-    "templates": "模板", 
+    "templates": "模板",
     "projects": "项目"
   },
   "template": {
@@ -103,7 +110,7 @@
     "taskFolderPathPlaceholder": "/path/to/shrimp_data_folder",
     "profileName": "项目名称",
     "profileNamePlaceholder": "例如，团队 Alpha 任务",
-    "projectRootPath": "项目根路径", 
+    "projectRootPath": "项目根路径",
     "projectRootPathPlaceholder": "例如，/home/user/my-project",
     "addProfile": "添加项目",
     "editProfile": "编辑项目",
@@ -134,7 +141,7 @@
   "task": {
     "number": "任务编号",
     "name": "任务名称",
-    "status": "状态", 
+    "status": "状态",
     "dependencies": "依赖项",
     "assignedAgent": "指派的代理",
     "details": "任务详情",
@@ -181,7 +188,7 @@
     "aiInstruction": "AI 指令",
     "subAgents": "子代理",
     "agents": "代理",
-    "agentName": "代理名称", 
+    "agentName": "代理名称",
     "type": "类型",
     "agentSavedSuccess": "代理保存成功"
   },
@@ -240,7 +247,7 @@
   },
   "notifications": {
     "profileCreatedSuccess": "配置文件创建成功",
-    "profileUpdatedSuccess": "配置文件更新成功", 
+    "profileUpdatedSuccess": "配置文件更新成功",
     "profileDeletedSuccess": "配置文件删除成功",
     "taskUpdatedSuccess": "任务更新成功",
     "settingsSaved": "设置保存成功",
@@ -274,12 +281,12 @@
   },
   "statistics": {
     "totalTasks": "总任务数",
-    "completedTasks": "已完成任务", 
+    "completedTasks": "已完成任务",
     "pendingTasks": "待处理任务",
     "inProgressTasks": "进行中任务",
     "totalTemplates": "模板总数",
     "totalNumberOfTemplates": "模板总数",
-    "numberOfDefaultTemplates": "默认模板数量", 
+    "numberOfDefaultTemplates": "默认模板数量",
     "numberOfCustomTemplates": "自定义模板数量",
     "numberOfEnvOverrideTemplates": "环境覆盖模板数量",
     "default": "默认",
@@ -297,5 +304,14 @@
   "confirmation": {
     "confirmRemoveProfile": "您确定要删除此项目吗？此操作无法撤消。",
     "confirmResetTemplate": "您确定要将 {{name}} 重置为默认吗？这将删除任何自定义设置。"
-  }
+  },
+  "tasks": "任务",
+  "history": "历史",
+  "agents": "代理",
+  "totalTasks": "任务总数",
+  "completed": "已完成",
+  "inProgress": "进行中",
+  "pending": "待处理",
+  "autoRefresh": "自动刷新",
+  "searchTasksPlaceholder": "搜索任务..."
 }

@@ -1,4 +1,5 @@
 {
+  "appTitle": "🦐 Trình Xem Quản Lý Tác Vụ Shrimp",
   "header": {
     "appTitle": "🦐 Trình Xem Quản Lý Tác Vụ Shrimp",
     "version": "Phiên bản",
@@ -10,7 +11,7 @@
   },
   "navigation": {
     "tasks": "Tác vụ",
-    "templates": "Mẫu", 
+    "templates": "Mẫu",
     "projects": "Dự án"
   },
   "template": {
@@ -61,7 +62,7 @@
     "taskFolderPathPlaceholder": "Nhập đường dẫn thư mục chứa các tệp tác vụ",
     "profileName": "Tên Hồ Sơ",
     "profileNamePlaceholder": "Nhập tên hồ sơ",
-    "projectRootPath": "Đường Dẫn Gốc Dự Án", 
+    "projectRootPath": "Đường Dẫn Gốc Dự Án",
     "projectRootPathPlaceholder": "Nhập đường dẫn gốc dự án (tùy chọn)",
     "addProfile": "Thêm Hồ Sơ",
     "editProfile": "Chỉnh Sửa Hồ Sơ",
@@ -70,7 +71,7 @@
   "task": {
     "number": "Số Tác Vụ",
     "name": "Tên Tác Vụ",
-    "status": "Trạng thái", 
+    "status": "Trạng thái",
     "dependencies": "Phụ thuộc",
     "assignedAgent": "Agent Được Gán",
     "details": "Chi Tiết Tác Vụ",
@@ -124,7 +125,7 @@
   },
   "notifications": {
     "profileCreatedSuccess": "Tạo hồ sơ thành công",
-    "profileUpdatedSuccess": "Cập nhật hồ sơ thành công", 
+    "profileUpdatedSuccess": "Cập nhật hồ sơ thành công",
     "profileDeletedSuccess": "Xóa hồ sơ thành công",
     "taskUpdatedSuccess": "Cập nhật tác vụ thành công",
     "settingsSaved": "Lưu cài đặt thành công",
@@ -152,12 +153,12 @@
   },
   "statistics": {
     "totalTasks": "Tổng Tác Vụ",
-    "completedTasks": "Tác Vụ Hoàn Thành", 
+    "completedTasks": "Tác Vụ Hoàn Thành",
     "pendingTasks": "Tác Vụ Đang Chờ",
     "inProgressTasks": "Tác Vụ Đang Thực Hiện",
     "totalTemplates": "Tổng Mẫu",
     "totalNumberOfTemplates": "Tổng số mẫu",
-    "numberOfDefaultTemplates": "Số mẫu mặc định", 
+    "numberOfDefaultTemplates": "Số mẫu mặc định",
     "numberOfCustomTemplates": "Số mẫu tùy chỉnh",
     "numberOfEnvOverrideTemplates": "Số mẫu ghi đè môi trường",
     "default": "Mặc định",
@@ -200,5 +201,20 @@
       "minimize": "Thu nhỏ",
       "close": "Đóng"
     }
-  }
+  },
+  "projects": "Dự án",
+  "releaseNotes": "Ghi chú phát hành",
+  "readme": "Tài liệu",
+  "templates": "Mẫu",
+  "subAgents": "Tác nhân phụ",
+  "settings": "Cài đặt",
+  "tasks": "Nhiệm vụ",
+  "history": "Lịch sử",
+  "agents": "Đại lý",
+  "totalTasks": "TỔNG NHIỆM VỤ",
+  "completed": "HOÀN THÀNH",
+  "inProgress": "ĐANG THỰC HIỆN",
+  "pending": "CHỜ XỬ LÝ",
+  "autoRefresh": "Tự động làm mới",
+  "searchTasksPlaceholder": "Tìm kiếm nhiệm vụ..."
 }

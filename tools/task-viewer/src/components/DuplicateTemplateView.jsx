@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import { useLanguage } from '../i18n/LanguageContext';
+import { useTranslation } from 'react-i18next';
 
 function DuplicateTemplateView({ template, onBack, onConfirm }) {
-  const { t } = useLanguage();
+  const { t } = useTranslation();
   const [newName, setNewName] = useState('');
   const [error, setError] = useState('');
   const [duplicating, setDuplicating] = useState(false);

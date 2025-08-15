@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import MDEditor from '@uiw/react-md-editor';
 import '@uiw/react-md-editor/markdown-editor.css';
 import '@uiw/react-markdown-preview/markdown.css';
-import { useLanguage } from '../i18n/LanguageContext';
+import { useTranslation } from 'react-i18next';
 
 function TemplateEditor({ 
   template, 
@@ -12,7 +12,7 @@ function TemplateEditor({
   loading = false, 
   error = '' 
 }) {
-  const { t } = useLanguage();
+  const { t } = useTranslation();
   // Initialize with template content if available
   const [content, setContent] = useState(template?.content || '');
   const [mode, setMode] = useState(template?.status === 'custom+append' ? 'append' : 'override');
