@@ -502,6 +502,16 @@ function renderTasks() {
       case "status":
         const statusOrder = { pending: 1, in_progress: 2, completed: 3 };
         return (statusOrder[a.status] || 0) - (statusOrder[b.status] || 0);
+      case "priority-high":
+        const priorityOrder = { critical: 4, high: 3, medium: 2, low: 1 };
+        const aPriority = (a.priority || "medium").toLowerCase();
+        const bPriority = (b.priority || "medium").toLowerCase();
+        return (priorityOrder[bPriority] || 0) - (priorityOrder[aPriority] || 0);
+      case "priority-low":
+        const priorityOrderLow = { critical: 4, high: 3, medium: 2, low: 1 };
+        const aPriorityLow = (a.priority || "medium").toLowerCase();
+        const bPriorityLow = (b.priority || "medium").toLowerCase();
+        return (priorityOrderLow[aPriorityLow] || 0) - (priorityOrderLow[bPriorityLow] || 0);
       case "date-asc":
         return new Date(a.createdAt || 0) - new Date(b.createdAt || 0);
       case "date-desc":
@@ -522,7 +532,10 @@ function renderTasks() {
   } else {
     taskListElement.innerHTML = filteredTasks
       .map(
-        (task) => `
+        (task) => {
+          const priorityText = task.priority || "MEDIUM";
+          const priorityClass = `priority-${priorityText.toLowerCase()}`;
+          return `
             <div class="task-item status-${task.status.replace(
               "_",
               "-"
@@ -533,9 +546,11 @@ function renderTasks() {
                   "_",
                   "-"
                 )}">${getStatusText(task.status)}</span>
+                <span class="task-priority-indicator ${priorityClass}">${priorityText}</span>
             </div>
             </div>
-        `
+        `;
+        }
       )
       .join("");
   }
@@ -684,6 +699,7 @@ function selectTask(taskId) {
         <span>${translate(
           "task_detail_status_label"
         )} <span id="detail-status" class="task-status"></span></span>
+        <span class="task-priority" id="detail-priority"></span>
         <span class="task-id">ID: ${task.id}</span>
       </div>
     </div>
@@ -732,6 +748,7 @@ function selectTask(taskId) {
   // 2. 獲取對應元素並使用 textContent 安全地填充內容
   const detailName = document.getElementById("detail-name");
   const detailStatus = document.getElementById("detail-status");
+  const detailPriority = document.getElementById("detail-priority");
   const detailDescription = document.getElementById("detail-description");
   const detailImplementationGuide = document.getElementById(
     "detail-implementation-guide"
@@ -755,6 +772,29 @@ function selectTask(taskId) {
       "_",
       "-"
     )}`;
+  }
+  if (detailPriority) {
+    const priorityText = task.priority || "MEDIUM";
+    
+    // Create editable priority dropdown
+    detailPriority.innerHTML = `
+      <span class="priority-label">Priority:</span>
+      <select class="priority-selector" data-task-id="${task.id}">
+        <option value="critical" ${priorityText.toLowerCase() === 'critical' ? 'selected' : ''}>CRITICAL</option>
+        <option value="high" ${priorityText.toLowerCase() === 'high' ? 'selected' : ''}>HIGH</option>
+        <option value="medium" ${priorityText.toLowerCase() === 'medium' ? 'selected' : ''}>MEDIUM</option>
+        <option value="low" ${priorityText.toLowerCase() === 'low' ? 'selected' : ''}>LOW</option>
+      </select>
+    `;
+    
+    // Apply priority styling to the container
+    detailPriority.className = `task-priority priority-${priorityText.toLowerCase()}`;
+    
+    // Add change event listener to the priority selector
+    const prioritySelector = detailPriority.querySelector('.priority-selector');
+    if (prioritySelector) {
+      prioritySelector.addEventListener('change', handlePriorityChange);
+    }
   }
   if (detailDescription)
     detailDescription.textContent =
@@ -1465,3 +1505,86 @@ function updateMinimap() {
 
 // 函數：啟用節點拖拽 (保持不變)
 // ... drag ...
+
+// Handle priority change
+async function handlePriorityChange(event) {
+  const select = event.target;
+  const taskId = select.dataset.taskId;
+  const newPriority = select.value;
+  
+  if (!taskId || !newPriority) {
+    console.error('Missing task ID or priority value');
+    return;
+  }
+  
+  try {
+    // Show loading state
+    select.disabled = true;
+    select.style.opacity = '0.6';
+    
+    // Call the updateTaskContent API to update the priority
+    const response = await fetch('/api/tasks/update', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        taskId: taskId,
+        priority: newPriority.toUpperCase()
+      })
+    });
+    
+    if (response.ok) {
+      // Update the local task data
+      const task = tasks.find(t => t.id === taskId);
+      if (task) {
+        task.priority = newPriority.toUpperCase();
+        
+        // Update the priority container styling
+        const priorityContainer = select.closest('.task-priority');
+        if (priorityContainer) {
+          priorityContainer.className = `task-priority priority-${newPriority.toLowerCase()}`;
+        }
+        
+        // Show success feedback
+        showPriorityUpdateFeedback(select, 'success');
+      }
+    } else {
+      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+    }
+  } catch (error) {
+    console.error('Error updating priority:', error);
+    
+    // Reset to previous value
+    const task = tasks.find(t => t.id === taskId);
+    if (task) {
+      select.value = (task.priority || 'MEDIUM').toLowerCase();
+    }
+    
+    // Show error feedback
+    showPriorityUpdateFeedback(select, 'error');
+  } finally {
+    // Re-enable the select
+    select.disabled = false;
+    select.style.opacity = '1';
+  }
+}
+
+// Show priority update feedback
+function showPriorityUpdateFeedback(select, type) {
+  const feedback = document.createElement('div');
+  feedback.className = `priority-feedback priority-feedback-${type}`;
+  feedback.textContent = type === 'success' ? '✓ Priority updated' : '✗ Update failed';
+  
+  const container = select.closest('.task-priority');
+  if (container) {
+    container.appendChild(feedback);
+    
+    // Remove feedback after 3 seconds
+    setTimeout(() => {
+      if (feedback.parentNode) {
+        feedback.parentNode.removeChild(feedback);
+      }
+    }, 3000);
+  }
+}

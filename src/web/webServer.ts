@@ -57,6 +57,58 @@ export async function createWebServer() {
     }
   });
 
+  // Task update endpoint
+  app.post("/api/tasks/update", express.json(), async (req: Request, res: Response) => {
+    try {
+      const { taskId, priority, name, description, notes, dependencies, relatedFiles, implementationGuide, verificationCriteria } = req.body;
+      
+      if (!taskId) {
+        res.status(400).json({ error: "Task ID is required" });
+        return;
+      }
+
+      // Read current tasks
+      const tasksData = await fsPromises.readFile(TASKS_FILE_PATH, "utf-8");
+      const { tasks } = JSON.parse(tasksData);
+      
+      // Find the task to update
+      const taskIndex = tasks.findIndex((task: any) => task.id === taskId);
+      if (taskIndex === -1) {
+        res.status(404).json({ error: "Task not found" });
+        return;
+      }
+
+      // Build update object with only provided fields
+      const updates: any = {};
+      if (priority !== undefined) updates.priority = priority;
+      if (name !== undefined) updates.name = name;
+      if (description !== undefined) updates.description = description;
+      if (notes !== undefined) updates.notes = notes;
+      if (dependencies !== undefined) updates.dependencies = dependencies;
+      if (relatedFiles !== undefined) updates.relatedFiles = relatedFiles;
+      if (implementationGuide !== undefined) updates.implementationGuide = implementationGuide;
+      if (verificationCriteria !== undefined) updates.verificationCriteria = verificationCriteria;
+
+      // Update the task
+      tasks[taskIndex] = {
+        ...tasks[taskIndex],
+        ...updates,
+        updatedAt: new Date().toISOString()
+      };
+
+      // Write updated tasks back to file
+      await fsPromises.writeFile(TASKS_FILE_PATH, JSON.stringify({ tasks }, null, 2));
+
+      // Notify SSE clients of the update
+      sendSseUpdate();
+
+      res.json({ success: true, message: "Task updated successfully", task: tasks[taskIndex] });
+    } catch (error) {
+      console.error('Error updating task:', error);
+      res.status(500).json({ error: "Failed to update task" });
+    }
+  });
+
   // SSE endpoint
   app.get("/api/tasks/stream", (req: Request, res: Response) => {
     res.writeHead(200, {

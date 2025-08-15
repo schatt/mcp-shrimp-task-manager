@@ -1,6 +1,7 @@
 import {
   Task,
   TaskStatus,
+  TaskPriority,
   TaskDependency,
   TaskComplexityLevel,
   TaskComplexityThresholds,
@@ -85,7 +86,8 @@ export async function createTask(
   description: string,
   notes?: string,
   dependencies: string[] = [],
-  relatedFiles?: RelatedFile[]
+  relatedFiles?: RelatedFile[],
+  priority?: TaskPriority
 ): Promise<Task> {
   const tasks = await readTasks();
 
@@ -99,6 +101,7 @@ export async function createTask(
     description,
     notes,
     status: TaskStatus.PENDING,
+    priority: priority || TaskPriority.MEDIUM, // Default to MEDIUM priority if not specified
     dependencies: dependencyObjects,
     createdAt: new Date(),
     updatedAt: new Date(),
@@ -178,6 +181,7 @@ export async function updateTaskContent(
     name?: string;
     description?: string;
     notes?: string;
+    priority?: TaskPriority; // New: Task priority level
     relatedFiles?: RelatedFile[];
     dependencies?: string[];
     implementationGuide?: string;
@@ -209,6 +213,10 @@ export async function updateTaskContent(
 
   if (updates.notes !== undefined) {
     updateObj.notes = updates.notes;
+  }
+
+  if (updates.priority !== undefined) {
+    updateObj.priority = updates.priority;
   }
 
   if (updates.relatedFiles !== undefined) {
@@ -287,6 +295,7 @@ export async function batchCreateOrUpdateTasks(
     notes?: string;
     dependencies?: string[];
     relatedFiles?: RelatedFile[];
+    priority?: TaskPriority; // New: Task priority level
     implementationGuide?: string; // New: Implementation Guide
     verificationCriteria?: string; // New: Validation criteria
   }>,
@@ -363,6 +372,7 @@ export async function batchCreateOrUpdateTasks(
           name: taskData.name,
           description: taskData.description,
           notes: taskData.notes,
+          priority: taskData.priority || taskToUpdate.priority, // Preserve existing priority if not specified
           // Dependencies handled later
           updatedAt: new Date(),
           // Save implementation guide (if any)
@@ -397,6 +407,7 @@ export async function batchCreateOrUpdateTasks(
         description: taskData.description,
         notes: taskData.notes,
         status: TaskStatus.PENDING,
+        priority: taskData.priority || TaskPriority.MEDIUM, // Default to MEDIUM priority if not specified
         dependencies: [], // Filled later
         createdAt: new Date(),
         updatedAt: new Date(),

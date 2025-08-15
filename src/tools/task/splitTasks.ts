@@ -4,7 +4,7 @@ import {
   batchCreateOrUpdateTasks,
   clearAllTasks as modelClearAllTasks,
 } from "../../models/taskModel.js";
-import { RelatedFileType, Task } from "../../types/index.js";
+import { RelatedFileType, Task, TaskPriority } from "../../types/index.js";
 import { getSplitTasksPrompt } from "../../prompts/index.js";
 
 // Split tasks tool
@@ -29,6 +29,10 @@ export const splitTasksSchema = z.object({
             message: "Task description too short. Provide more details for clarity.",
           })
           .describe("Detailed task description including implementation points, technical details, and acceptance criteria"),
+        priority: z
+          .nativeEnum(TaskPriority)
+          .optional()
+          .describe("Task priority level (CRITICAL, HIGH, MEDIUM, LOW). Defaults to MEDIUM if not specified."),
         implementationGuide: z
           .string()
           .describe("Specific implementation methods and steps; provide concise pseudocode where needed"),
@@ -125,6 +129,7 @@ export async function splitTasks({
       description: task.description,
       notes: task.notes,
       dependencies: task.dependencies,
+      priority: task.priority, // Include priority field
       implementationGuide: task.implementationGuide,
       verificationCriteria: task.verificationCriteria,
       relatedFiles: task.relatedFiles?.map((file) => ({

@@ -4,7 +4,7 @@ import {
   getTaskById,
   updateTaskContent as modelUpdateTaskContent,
 } from "../../models/taskModel.js";
-import { RelatedFileType } from "../../types/index.js";
+import { RelatedFileType, TaskPriority } from "../../types/index.js";
 import { getUpdateTaskContentPrompt } from "../../prompts/index.js";
 
 // Update task content tool
@@ -18,6 +18,10 @@ export const updateTaskContentSchema = z.object({
   name: z.string().optional().describe("New task name (optional)"),
   description: z.string().optional().describe("New task description (optional)"),
   notes: z.string().optional().describe("New additional notes (optional)"),
+  priority: z
+    .nativeEnum(TaskPriority)
+    .optional()
+    .describe("New task priority level (CRITICAL, HIGH, MEDIUM, LOW). Optional field."),
   dependencies: z
     .array(z.string())
     .optional()
@@ -64,6 +68,7 @@ export async function updateTaskContent({
   name,
   description,
   notes,
+  priority,
   relatedFiles,
   dependencies,
   implementationGuide,
@@ -97,6 +102,7 @@ export async function updateTaskContent({
       name ||
       description ||
       notes ||
+      priority ||
       dependencies ||
       implementationGuide ||
       verificationCriteria ||
@@ -138,6 +144,7 @@ export async function updateTaskContent({
   if (name) updateSummary += `, new name: ${name}`;
   if (description) updateSummary += `, update description`;
   if (notes) updateSummary += `, update notes`;
+  if (priority) updateSummary += `, new priority: ${priority}`;
   if (relatedFiles)
     updateSummary += `, update related files (${relatedFiles.length})`;
   if (dependencies)
@@ -150,6 +157,7 @@ export async function updateTaskContent({
     name,
     description,
     notes,
+    priority,
     relatedFiles,
     dependencies,
     implementationGuide,

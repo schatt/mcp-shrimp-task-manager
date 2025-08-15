@@ -6,6 +6,14 @@ export enum TaskStatus {
   BLOCKED = "blocked", // Temporarily not executable due to dependencies
 }
 
+// Task priority enum: defines the importance and urgency level of a task
+export enum TaskPriority {
+  CRITICAL = "critical", // Highest priority: urgent and critical for project success
+  HIGH = "high", // High priority: important and should be completed soon
+  MEDIUM = "medium", // Medium priority: standard priority level
+  LOW = "low", // Low priority: can be deferred if needed
+}
+
 // Task dependency: defines prerequisite relationships between tasks
 export interface TaskDependency {
   taskId: string; // The unique ID of the prerequisite task that must be completed before this task
@@ -36,6 +44,7 @@ export interface Task {
   description: string; // Detailed description with implementation points and acceptance criteria
   notes?: string; // Additional notes or special handling requirements (optional)
   status: TaskStatus; // Current execution status
+  priority?: TaskPriority; // Task priority level (optional for backward compatibility)
   dependencies: TaskDependency[]; // List of prerequisite tasks
   createdAt: Date; // Creation timestamp
   updatedAt: Date; // Last updated timestamp

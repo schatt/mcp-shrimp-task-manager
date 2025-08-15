@@ -1,0 +1,255 @@
+{
+  "tasks": [
+    {
+      "id": "2560ee2d-3f53-4b35-9072-17f1b9a10213",
+      "name": "Add TaskPriority enum and update Task interface",
+      "description": "Create TaskPriority enum with CRITICAL, HIGH, MEDIUM, LOW levels and add priority field to Task interface. Follow existing enum patterns like TaskStatus.",
+      "notes": "This is the foundation change that all other tasks depend on",
+      "status": "completed",
+      "dependencies": [],
+      "createdAt": "2025-08-15T19:31:57.462Z",
+      "updatedAt": "2025-08-15T19:32:56.185Z",
+      "relatedFiles": [
+        {
+          "path": "src/types/index.ts",
+          "type": "TO_MODIFY",
+          "description": "Core type definitions file",
+          "lineStart": 1,
+          "lineEnd": 95
+        }
+      ],
+      "implementationGuide": "1. Add TaskPriority enum after TaskStatus enum\\n2. Add priority?: TaskPriority field to Task interface\\n3. Ensure backward compatibility with optional field\\n4. Follow existing naming conventions and comment style",
+      "verificationCriteria": "TaskPriority enum exists with 4 levels, Task interface has optional priority field, no TypeScript compilation errors",
+      "summary": "Successfully added TaskPriority enum with 4 levels (CRITICAL, HIGH, MEDIUM, LOW) and added optional priority field to Task interface. The enum follows existing patterns with descriptive comments, and the priority field is optional for backward compatibility. TypeScript compilation passes without errors.",
+      "completedAt": "2025-08-15T19:32:56.184Z"
+    },
+    {
+      "id": "a7111a87-eda3-4d03-b317-0e52675e0da2",
+      "name": "Update task model functions for priority support",
+      "description": "Modify createTask, updateTask, and batchCreateOrUpdateTasks functions to handle priority field. Add default priority handling for existing tasks.",
+      "notes": "Core business logic changes needed for priority functionality",
+      "status": "completed",
+      "dependencies": [
+        {
+          "taskId": "2560ee2d-3f53-4b35-9072-17f1b9a10213"
+        }
+      ],
+      "createdAt": "2025-08-15T19:31:57.462Z",
+      "updatedAt": "2025-08-15T19:35:29.241Z",
+      "relatedFiles": [
+        {
+          "path": "src/models/taskModel.ts",
+          "type": "TO_MODIFY",
+          "description": "Task model functions and data operations",
+          "lineStart": 83,
+          "lineEnd": 465
+        }
+      ],
+      "implementationGuide": "1. Update createTask function signature to accept priority parameter\\n2. Modify updateTask to handle priority updates\\n3. Update batchCreateOrUpdateTasks to support priority\\n4. Add default priority (MEDIUM) for new tasks without specified priority\\n5. Ensure existing tasks without priority field continue to work",
+      "verificationCriteria": "All task creation/update functions accept priority parameter, default priority applied correctly, existing functionality preserved",
+      "summary": "Successfully updated task model functions for priority support. Modified createTask function to accept priority parameter with default MEDIUM priority, updated batchCreateOrUpdateTasks to handle priority field in both new task creation and task updates, and updated splitTasks and splitTasksRaw tools to include priority in their schemas. All functions now properly handle the priority field while maintaining backward compatibility.",
+      "completedAt": "2025-08-15T19:35:29.240Z"
+    },
+    {
+      "id": "0e03ef33-a924-4804-a2f1-3570476f8b7f",
+      "name": "Update task tool schemas for priority support",
+      "description": "Modify all task-related tool schemas to include priority field. Update createTask, updateTask, executeTask, and other task tools.",
+      "notes": "Tool layer needs to support priority in all task operations",
+      "status": "completed",
+      "dependencies": [
+        {
+          "taskId": "a7111a87-eda3-4d03-b317-0e52675e0da2"
+        }
+      ],
+      "createdAt": "2025-08-15T19:32:09.881Z",
+      "updatedAt": "2025-08-15T19:37:26.028Z",
+      "relatedFiles": [
+        {
+          "path": "src/tools/task/createTask.ts",
+          "type": "TO_MODIFY",
+          "description": "Create task tool schema and logic"
+        },
+        {
+          "path": "src/tools/task/updateTask.ts",
+          "type": "TO_MODIFY",
+          "description": "Update task tool schema and logic"
+        },
+        {
+          "path": "src/tools/task/executeTask.ts",
+          "type": "TO_MODIFY",
+          "description": "Execute task tool schema and logic"
+        }
+      ],
+      "implementationGuide": "1. Update createTask tool schema to include priority field\\n2. Update updateTask tool schema for priority editing\\n3. Update executeTask tool schema if needed\\n4. Add priority validation (optional field, enum validation)\\n5. Ensure all task tools can handle priority field",
+      "verificationCriteria": "All task tool schemas include priority field, validation works correctly, no schema errors",
+      "summary": "Successfully updated task tool schemas for priority support. Added priority field to updateTask tool schema with proper TaskPriority enum validation, updated updateTaskContent function to handle priority updates, and ensured the model layer supports priority field updates. All task tools now properly support priority field operations while maintaining backward compatibility.",
+      "completedAt": "2025-08-15T19:37:26.027Z"
+    },
+    {
+      "id": "1d7cb706-ec66-47a4-92c0-bd58bac610c0",
+      "name": "Add priority display to WebGUI",
+      "description": "Update WebGUI to display task priority in task details panel with appropriate styling.",
+      "notes": "UI changes to show priority information",
+      "status": "completed",
+      "dependencies": [
+        {
+          "taskId": "0e03ef33-a924-4804-a2f1-3570476f8b7f"
+        }
+      ],
+      "createdAt": "2025-08-15T19:32:18.311Z",
+      "updatedAt": "2025-08-15T19:38:30.314Z",
+      "relatedFiles": [
+        {
+          "path": "src/public/script.js",
+          "type": "TO_MODIFY",
+          "description": "WebGUI JavaScript logic"
+        },
+        {
+          "path": "src/public/style.css",
+          "type": "TO_MODIFY",
+          "description": "WebGUI styling"
+        }
+      ],
+      "implementationGuide": "1. Modify script.js to include priority display\\n2. Add priority styling in style.css\\n3. Position priority alongside status in task header",
+      "verificationCriteria": "Priority displayed in task details, styling consistent, priority levels visually distinct",
+      "summary": "Successfully added priority display to WebGUI task details panel. Modified script.js to include priority display alongside status in task header, added priority element retrieval and population logic with default MEDIUM priority handling, and implemented comprehensive CSS styling for all priority levels (CRITICAL, HIGH, MEDIUM, LOW) with distinct colors and visual indicators.",
+      "completedAt": "2025-08-15T19:38:30.313Z"
+    },
+    {
+      "id": "9e679a59-6547-4a84-8cc5-d0ecc9ee3269",
+      "name": "Add priority editing in WebGUI",
+      "description": "Implement priority editing functionality allowing users to change task priority through the interface.",
+      "notes": "Interactive priority management for users",
+      "status": "completed",
+      "dependencies": [
+        {
+          "taskId": "1d7cb706-ec66-47a4-92c0-bd58bac610c0"
+        }
+      ],
+      "createdAt": "2025-08-15T19:32:21.864Z",
+      "updatedAt": "2025-08-15T19:41:13.480Z",
+      "relatedFiles": [
+        {
+          "path": "src/public/script.js",
+          "type": "TO_MODIFY",
+          "description": "WebGUI JavaScript logic"
+        },
+        {
+          "path": "src/public/index.html",
+          "type": "TO_MODIFY",
+          "description": "WebGUI HTML structure"
+        }
+      ],
+      "implementationGuide": "1. Add priority selector dropdown to task editing forms\\n2. Implement priority change functionality\\n3. Add priority update API calls\\n4. Handle validation and feedback",
+      "verificationCriteria": "Priority can be edited through forms, changes saved correctly, UI updates immediately",
+      "summary": "Successfully implemented priority editing functionality in WebGUI. Added editable priority dropdown selector in task details panel, implemented handlePriorityChange function for priority updates, added task update API endpoint (/api/tasks/update) to handle priority changes, implemented visual feedback for success/error states, and added comprehensive CSS styling for priority selector and feedback elements. Users can now click on priority in task details and change it through a dropdown interface.",
+      "completedAt": "2025-08-15T19:41:13.480Z"
+    },
+    {
+      "id": "e9b5a2ff-677d-4db5-987b-d42d8418de19",
+      "name": "Implement priority-based task sorting",
+      "description": "Add priority-based sorting options to WebGUI allowing users to sort tasks by priority.",
+      "notes": "Enhanced task organization and workflow management",
+      "status": "completed",
+      "dependencies": [
+        {
+          "taskId": "9e679a59-6547-4a84-8cc5-d0ecc9ee3269"
+        }
+      ],
+      "createdAt": "2025-08-15T19:32:25.503Z",
+      "updatedAt": "2025-08-15T19:45:21.568Z",
+      "relatedFiles": [
+        {
+          "path": "src/public/script.js",
+          "type": "TO_MODIFY",
+          "description": "WebGUI JavaScript logic"
+        },
+        {
+          "path": "src/public/index.html",
+          "type": "TO_MODIFY",
+          "description": "WebGUI HTML structure"
+        }
+      ],
+      "implementationGuide": "1. Add priority sorting option to sort dropdown\\n2. Implement priority-based sorting logic\\n3. Add visual indicators for priority in task list\\n4. Maintain existing sorting functionality",
+      "verificationCriteria": "Priority sorting option available, tasks sort correctly by priority, existing sorting preserved",
+      "summary": "Successfully implemented priority-based task sorting in WebGUI. Added priority sorting options to sort dropdown (Priority High to Low, Priority Low to High), implemented priority sorting logic with proper priority order mapping (CRITICAL=4, HIGH=3, MEDIUM=2, LOW=1), added visual priority indicators in task list with color-coded styling, and maintained all existing sorting functionality. Users can now sort tasks by priority while seeing clear visual priority indicators in the task list.",
+      "completedAt": "2025-08-15T19:45:21.568Z"
+    },
+    {
+      "id": "6226da97-6397-4915-ad5e-2366c49450cb",
+      "name": "Test and validate priority system",
+      "description": "Comprehensive testing of priority system including data persistence, UI functionality, and integration.",
+      "notes": "Final validation to ensure system works correctly",
+      "status": "pending",
+      "dependencies": [
+        {
+          "taskId": "e9b5a2ff-677d-4db5-987b-d42d8418de19"
+        }
+      ],
+      "createdAt": "2025-08-15T19:32:29.979Z",
+      "updatedAt": "2025-08-15T19:32:29.979Z",
+      "relatedFiles": [
+        {
+          "path": "src/types/index.ts",
+          "type": "REFERENCE",
+          "description": "Verify type definitions"
+        },
+        {
+          "path": "src/models/taskModel.ts",
+          "type": "REFERENCE",
+          "description": "Verify model functions"
+        },
+        {
+          "path": "src/public/script.js",
+          "type": "REFERENCE",
+          "description": "Verify WebGUI functionality"
+        }
+      ],
+      "implementationGuide": "1. Test priority field persistence in task data\\n2. Verify priority display and editing in WebGUI\\n3. Test priority-based sorting functionality\\n4. Validate backward compatibility with existing tasks\\n5. Test priority integration with task dependencies",
+      "verificationCriteria": "All priority functionality works correctly, no regressions in existing features, system handles edge cases properly"
+    },
+    {
+      "id": "077a98cf-255e-4fbc-aa26-6f0ace4f3a26",
+      "name": "Add add_task alias to plan_task",
+      "description": "Create an alias 'add_task' that maps to the existing plan_task functionality, allowing users to use either name for task creation.",
+      "notes": "Very easy task that improves usability with minimal risk",
+      "status": "pending",
+      "dependencies": [],
+      "createdAt": "2025-08-15T19:43:49.650Z",
+      "updatedAt": "2025-08-15T19:43:49.650Z",
+      "relatedFiles": [
+        {
+          "path": "src/index.ts",
+          "type": "TO_MODIFY",
+          "description": "Main tool handler where aliases are registered"
+        }
+      ],
+      "implementationGuide": "1. Add add_task case in main index.ts tool handler\\n2. Map add_task to plan_task function call\\n3. Ensure both names work identically\\n4. Test that both aliases function correctly",
+      "verificationCriteria": "Both add_task and plan_task work identically, no breaking changes, TypeScript compilation successful"
+    },
+    {
+      "id": "b3a52ffa-6592-43f7-a939-49b78fdd0d17",
+      "name": "Implement task protection system for clearAllTasks",
+      "description": "Add safety measures to prevent accidental task clearing by implementing confirmation flags, archive-to-memory functionality, and environment variable protection.",
+      "notes": "Moderate complexity task that adds professional-grade data protection",
+      "status": "pending",
+      "dependencies": [],
+      "createdAt": "2025-08-15T19:43:49.650Z",
+      "updatedAt": "2025-08-15T19:43:49.650Z",
+      "relatedFiles": [
+        {
+          "path": "src/tools/task/clearAllTasks.ts",
+          "type": "TO_MODIFY",
+          "description": "Clear all tasks tool implementation"
+        },
+        {
+          "path": "src/models/taskModel.ts",
+          "type": "TO_MODIFY",
+          "description": "Task model functions for archiving functionality"
+        }
+      ],
+      "implementationGuide": "1. Add environment variable protection (ENABLE_CLEAR_ALL_TASKS)\\n2. Modify clearAllTasks schema to require force flag\\n3. Implement archive-to-memory functionality\\n4. Add recovery/restore options for archived tasks\\n5. Update clearAllTasks to default to archive mode",
+      "verificationCriteria": "clearAllTasks requires explicit force flag, tasks are archived to memory by default, recovery options available, no accidental data loss possible"
+    }
+  ]
+}

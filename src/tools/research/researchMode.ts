@@ -43,6 +43,11 @@ export async function researchMode({
   const PROJECT_ROOT = path.resolve(__dirname, "../../..");
   const MEMORY_DIR = await getMemoryDir();
 
+  // Check for potential research loops
+  const loopWarning = previousState && previousState.includes(currentState) 
+    ? "\n\n⚠️ **LOOP DETECTION WARNING**: Your current state appears similar to previous states. Consider providing more specific progress or moving to the next research phase."
+    : "";
+
   // Build final prompt via generator
   const prompt = await getResearchModePrompt({
     topic,
@@ -52,11 +57,14 @@ export async function researchMode({
     memoryDir: MEMORY_DIR,
   });
 
+  // Add loop warning if detected
+  const finalPrompt = loopWarning ? prompt + loopWarning : prompt;
+
   return {
     content: [
       {
         type: "text" as const,
-        text: prompt,
+        text: finalPrompt,
       },
     ],
   };
