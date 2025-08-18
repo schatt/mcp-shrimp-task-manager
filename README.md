@@ -2,12 +2,18 @@
 
 # MCP Shrimp Task Manager
 
+> 🦐 **Intelligent task management for AI-powered development** - Break down complex projects into manageable tasks, maintain context across sessions, and accelerate your development workflow.
+
+<div align="center">
+  
 [![Shrimp Task Manager Demo](docs/yt.png)](https://www.youtube.com/watch?v=Arzu0lV09so)
+
+**[Watch Demo Video](https://www.youtube.com/watch?v=Arzu0lV09so)** • **[Quick Start](#-quick-start)** • **[Documentation](#-documentation)**
 
 [![smithery badge](https://smithery.ai/badge/@cjo4m06/mcp-shrimp-task-manager)](https://smithery.ai/server/@cjo4m06/mcp-shrimp-task-manager)
 <a href="https://glama.ai/mcp/servers/@cjo4m06/mcp-shrimp-task-manager"><img width="380" height="200" src="https://glama.ai/mcp/servers/@cjo4m06/mcp-shrimp-task-manager/badge" alt="Shrimp Task Manager MCP server" /></a>
 
-> 🦐 **Intelligent task management for AI-powered development** - Break down complex projects into manageable tasks, maintain context across sessions, and accelerate your development workflow.
+</div>
 
 ## 🚀 Quick Start
 

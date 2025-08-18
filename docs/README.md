@@ -1,8 +1,8 @@
 # Shrimp Task Manager Documentation
 
-Welcome to the comprehensive documentation for MCP Shrimp Task Manager.
+> Complete guide for using MCP Shrimp Task Manager - an intelligent task management system for AI-powered development.
 
-## 📚 Documentation Structure
+## 📚 Documentation
 
 ### Getting Started
 - [Quick Start Guide](../README.md#-quick-start) - Get up and running quickly
