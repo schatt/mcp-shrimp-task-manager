@@ -79,6 +79,25 @@ Add to VS Code settings.json:
 2. **Plan a task**: `"plan task: implement user authentication"`
 3. **Execute tasks**: `"execute task"` or `"continuous mode"`
 
+### Launch Task Viewer (Optional)
+
+Visualize and manage your tasks with the web interface:
+
+```bash
+# Navigate to task viewer
+cd tools/task-viewer
+
+# Install dependencies (first time only)
+npm install
+
+# Start the viewer
+npm start
+# Or use the start script
+./start.sh
+```
+
+Open http://localhost:5173 in your browser to access the Task Viewer.
+
 ## 💡 What is Shrimp?
 
 Shrimp Task Manager is an MCP (Model Context Protocol) server that transforms how AI agents approach software development. Instead of losing context or repeating work, Shrimp provides:
