@@ -28,49 +28,55 @@ npm install
 npm run build
 ```
 
-### Configure Your AI Client
+### Configure Claude Code
 
-<details>
-<summary><b>Claude Desktop Configuration</b></summary>
-
-Add to your Claude Desktop config:
-
-**macOS**: `~/Library/Application Support/Claude/claude_desktop_config.json`  
-**Windows**: `%APPDATA%\Claude\claude_desktop_config.json`
+Create a `.mcp.json` file in your project directory:
 
 ```json
 {
   "mcpServers": {
-    "mcp-shrimp-task-manager": {
+    "shrimp-task-manager": {
       "command": "node",
       "args": ["/path/to/mcp-shrimp-task-manager/dist/index.js"],
       "env": {
-        "DATA_DIR": "/path/to/your/data-directory"
+        "DATA_DIR": "/path/to/your/shrimp_data",
+        "TEMPLATES_USE": "en",
+        "ENABLE_GUI": "false"
       }
     }
   }
 }
 ```
-</details>
 
-<details>
-<summary><b>Cline Configuration</b></summary>
-
-Add to VS Code settings.json:
-
+Example configuration:
 ```json
 {
-  "cline.mcpServers": {
-    "mcp-shrimp-task-manager": {
+  "mcpServers": {
+    "shrimp-task-manager": {
       "command": "node",
-      "args": ["/path/to/mcp-shrimp-task-manager/dist/index.js"],
+      "args": ["/home/fire/claude/mcp-shrimp-task-manager/dist/index.js"],
       "env": {
-        "DATA_DIR": "/path/to/your/data-directory"
+        "DATA_DIR": "/home/fire/claude/project/shrimp_data",
+        "TEMPLATES_USE": "en",
+        "ENABLE_GUI": "false"
       }
     }
   }
 }
 ```
+
+Then start Claude Code with your custom MCP configuration:
+
+```bash
+claude --dangerously-skip-permissions --mcp-config .mcp.json
+```
+
+<details>
+<summary><b>Other AI Clients</b></summary>
+
+**Claude Desktop**: Add to `~/Library/Application Support/Claude/claude_desktop_config.json` (macOS) or `%APPDATA%\Claude\claude_desktop_config.json` (Windows)
+
+**Cline (VS Code)**: Add to VS Code settings.json under `cline.mcpServers`
 </details>
 
 ### Start Using
@@ -78,25 +84,6 @@ Add to VS Code settings.json:
 1. **Initialize your project**: `"init project rules"`
 2. **Plan a task**: `"plan task: implement user authentication"`
 3. **Execute tasks**: `"execute task"` or `"continuous mode"`
-
-### Launch Task Viewer (Optional)
-
-Visualize and manage your tasks with the web interface:
-
-```bash
-# Navigate to task viewer
-cd tools/task-viewer
-
-# Install dependencies (first time only)
-npm install
-
-# Start the viewer
-npm start
-# Or use the start script
-./start.sh
-```
-
-Open http://localhost:5173 in your browser to access the Task Viewer.
 
 ## 💡 What is Shrimp?
 
@@ -126,7 +113,15 @@ Shrimp Task Manager is an MCP (Model Context Protocol) server that transforms ho
 #### 🖥️ Task Viewer
 Modern React interface for visual task management with drag-and-drop, real-time search, and multi-profile support.
 
-[📖 Task Viewer Documentation](tools/task-viewer/README.md)
+**Quick Setup:**
+```bash
+cd tools/task-viewer
+npm install
+npm start
+# Access at http://localhost:5173
+```
+
+[📖 Full Task Viewer Documentation](tools/task-viewer/README.md)
 
 <kbd><img src="tools/task-viewer/task-viewer-interface.png" alt="Task Viewer Interface" width="600"/></kbd>
 
