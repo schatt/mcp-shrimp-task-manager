@@ -14,7 +14,7 @@ import { v4 as uuidv4 } from "uuid";
 import { fileURLToPath } from "url";
 import { exec } from "child_process";
 import { promisify } from "util";
-import { getDataDir, getTasksFilePath, getMemoryDir } from "../utils/paths.js";
+import { getDataDir, getTasksFilePath, getMemoryDir, getProjectTasksFilePathPath, getProjectMemoryDirPath } from "../utils/paths.js";
 
 // Ensure we resolve the project folder path
 const __filename = fileURLToPath(import.meta.url);
@@ -47,9 +47,11 @@ async function ensureDataDir() {
 }
 
 // Read all tasks
-async function readTasks(): Promise<Task[]> {
+async function readTasks(projectName?: string): Promise<Task[]> {
   await ensureDataDir();
-  const TASKS_FILE = await getTasksFilePath();
+  const TASKS_FILE = projectName 
+    ? await getProjectTasksFilePathPath(projectName)
+    : await getTasksFilePath();
   const data = await fs.readFile(TASKS_FILE, "utf-8");
   const tasks = JSON.parse(data).tasks;
 
@@ -63,20 +65,22 @@ async function readTasks(): Promise<Task[]> {
 }
 
 // Write all tasks
-async function writeTasks(tasks: Task[]): Promise<void> {
+async function writeTasks(tasks: Task[], projectName?: string): Promise<void> {
   await ensureDataDir();
-  const TASKS_FILE = await getTasksFilePath();
+  const TASKS_FILE = projectName 
+    ? await getProjectTasksFilePathPath(projectName)
+    : await getTasksFilePath();
   await fs.writeFile(TASKS_FILE, JSON.stringify({ tasks }, null, 2));
 }
 
 // Get all tasks
-export async function getAllTasks(): Promise<Task[]> {
-  return await readTasks();
+export async function getAllTasks(projectName?: string): Promise<Task[]> {
+  return await readTasks(projectName);
 }
 
 // Get a task by ID
-export async function getTaskById(taskId: string): Promise<Task | null> {
-  const tasks = await readTasks();
+export async function getTaskById(taskId: string, projectName?: string): Promise<Task | null> {
+  const tasks = await readTasks(projectName);
   return tasks.find((task) => task.id === taskId) || null;
 }
 
@@ -87,9 +91,10 @@ export async function createTask(
   notes?: string,
   dependencies: string[] = [],
   relatedFiles?: RelatedFile[],
-  priority?: TaskPriority
+  priority?: TaskPriority,
+  projectName?: string
 ): Promise<Task> {
-  const tasks = await readTasks();
+  const tasks = await readTasks(projectName);
 
   const dependencyObjects: TaskDependency[] = dependencies.map((taskId) => ({
     taskId,
@@ -109,7 +114,7 @@ export async function createTask(
   };
 
   tasks.push(newTask);
-  await writeTasks(tasks);
+  await writeTasks(tasks, projectName);
 
   return newTask;
 }
@@ -117,9 +122,10 @@ export async function createTask(
 // Update task
 export async function updateTask(
   taskId: string,
-  updates: Partial<Task>
+  updates: Partial<Task>,
+  projectName?: string
 ): Promise<Task | null> {
-  const tasks = await readTasks();
+  const tasks = await readTasks(projectName);
   const taskIndex = tasks.findIndex((task) => task.id === taskId);
 
   if (taskIndex === -1) {
@@ -147,7 +153,7 @@ export async function updateTask(
     updatedAt: new Date(),
   };
 
-  await writeTasks(tasks);
+  await writeTasks(tasks, projectName);
 
   return tasks[taskIndex];
 }
@@ -155,7 +161,8 @@ export async function updateTask(
 // Update task status
 export async function updateTaskStatus(
   taskId: string,
-  status: TaskStatus
+  status: TaskStatus,
+  projectName?: string
 ): Promise<Task | null> {
   const updates: Partial<Task> = { status };
 
@@ -163,15 +170,16 @@ export async function updateTaskStatus(
     updates.completedAt = new Date();
   }
 
-  return await updateTask(taskId, updates);
+  return await updateTask(taskId, updates, projectName);
 }
 
 // Update Task Summary
 export async function updateTaskSummary(
   taskId: string,
-  summary: string
+  summary: string,
+  projectName?: string
 ): Promise<Task | null> {
-  return await updateTask(taskId, { summary });
+  return await updateTask(taskId, { summary }, projectName);
 }
 
 // Update task content
@@ -186,10 +194,11 @@ export async function updateTaskContent(
     dependencies?: string[];
     implementationGuide?: string;
     verificationCriteria?: string;
-  }
+  },
+  projectName?: string
 ): Promise<{ success: boolean; message: string; task?: Task }> {
   // Load the task and check existence
-  const task = await getTaskById(taskId);
+  const task = await getTaskById(taskId, projectName);
 
   if (!task) {
     return { success: false, message: "The specified task could not be found" };
@@ -243,7 +252,7 @@ export async function updateTaskContent(
   }
 
   // Perform update
-  const updatedTask = await updateTask(taskId, updateObj);
+  const updatedTask = await updateTask(taskId, updateObj, projectName);
 
   if (!updatedTask) {
     return { success: false, message: "An error occurred while updating the task" };
@@ -259,10 +268,11 @@ export async function updateTaskContent(
 // Update task related files
 export async function updateTaskRelatedFiles(
   taskId: string,
-  relatedFiles: RelatedFile[]
+  relatedFiles: RelatedFile[],
+  projectName?: string
 ): Promise<{ success: boolean; message: string; task?: Task }> {
   // Load task and check existence
-  const task = await getTaskById(taskId);
+  const task = await getTaskById(taskId, projectName);
 
   if (!task) {
     return { success: false, message: "The specified task could not be found" };
@@ -274,7 +284,7 @@ export async function updateTaskRelatedFiles(
   }
 
   // Perform update
-  const updatedTask = await updateTask(taskId, { relatedFiles });
+  const updatedTask = await updateTask(taskId, { relatedFiles }, projectName);
 
   if (!updatedTask) {
     return { success: false, message: "An error occurred while updating task-related files" };
@@ -300,10 +310,12 @@ export async function batchCreateOrUpdateTasks(
     verificationCriteria?: string; // New: Validation criteria
   }>,
   updateMode: "append" | "overwrite" | "selective" | "clearAllTasks", // Required parameter, specifies the task update strategy
-  globalAnalysisResult?: string // New: Global analysis results
+  globalAnalysisResult?: string, // New: Global analysis results
+  archiveOnOverwrite: boolean = false, // New: Whether to archive tasks when overwriting (default: false)
+  projectName?: string // New: Project name for project-specific operations
 ): Promise<Task[]> {
   // Read all existing tasks
-  const existingTasks = await readTasks();
+  const existingTasks = await readTasks(projectName);
 
   // Process existing tasks according to update mode
   let tasksToKeep: Task[] = [];
@@ -312,7 +324,47 @@ export async function batchCreateOrUpdateTasks(
     // Append mode: keep all existing tasks
     tasksToKeep = [...existingTasks];
   } else if (updateMode === "overwrite") {
-    // Overwrite mode: only keep completed tasks and clear all unfinished tasks
+    // Overwrite mode: optionally archive unfinished tasks and keep completed tasks
+    const tasksToArchive = existingTasks.filter(
+      (task) => task.status !== TaskStatus.COMPLETED
+    );
+    
+    // Archive unfinished tasks to memory only if explicitly requested
+    if (archiveOnOverwrite && tasksToArchive.length > 0) {
+      try {
+        const MEMORY_DIR = await getMemoryDir();
+        const timestamp = new Date()
+          .toISOString()
+          .replace(/:/g, "-")
+          .replace(/\..+/, "");
+        const backupFileName = `overwrite_archive_${timestamp}.json`;
+        const memoryFilePath = path.join(MEMORY_DIR, backupFileName);
+        
+        // Ensure memory directory exists
+        try {
+          await fs.access(MEMORY_DIR);
+        } catch (error) {
+          await fs.mkdir(MEMORY_DIR, { recursive: true });
+        }
+        
+        // Archive unfinished tasks
+        await fs.writeFile(
+          memoryFilePath,
+          JSON.stringify({ 
+            tasks: tasksToArchive, 
+            mode: "overwrite_archive",
+            originalCount: existingTasks.length,
+            archivedCount: tasksToArchive.length
+          }, null, 2)
+        );
+        
+        console.log(`Archived ${tasksToArchive.length} unfinished tasks to ${backupFileName}`);
+      } catch (error) {
+        console.error(`Warning: Failed to archive tasks: ${error instanceof Error ? error.message : String(error)}`);
+      }
+    }
+    
+    // Keep only completed tasks
     tasksToKeep = existingTasks.filter(
       (task) => task.status === TaskStatus.COMPLETED
     );
@@ -470,16 +522,17 @@ export async function batchCreateOrUpdateTasks(
   const allTasks = [...tasksToKeep, ...newTasks];
 
   // Persist the updated task list
-  await writeTasks(allTasks);
+  await writeTasks(allTasks, projectName);
 
   return newTasks;
 }
 
 // Check if the task is executable (all dependencies are complete)
 export async function canExecuteTask(
-  taskId: string
+  taskId: string,
+  projectName?: string
 ): Promise<{ canExecute: boolean; blockedBy?: string[] }> {
-  const task = await getTaskById(taskId);
+  const task = await getTaskById(taskId, projectName);
 
   if (!task) {
     return { canExecute: false };
@@ -493,7 +546,7 @@ export async function canExecuteTask(
     return { canExecute: true }; // Tasks without dependencies can be executed directly
   }
 
-  const allTasks = await readTasks();
+  const allTasks = await readTasks(projectName);
   const blockedBy: string[] = [];
 
   for (const dependency of task.dependencies) {
@@ -512,9 +565,10 @@ export async function canExecuteTask(
 
 // Deleting a task
 export async function deleteTask(
-  taskId: string
+  taskId: string,
+  projectName?: string
 ): Promise<{ success: boolean; message: string }> {
-  const tasks = await readTasks();
+  const tasks = await readTasks(projectName);
   const taskIndex = tasks.findIndex((task) => task.id === taskId);
 
   if (taskIndex === -1) {
@@ -544,16 +598,17 @@ export async function deleteTask(
 
   // Perform a delete operation
   tasks.splice(taskIndex, 1);
-  await writeTasks(tasks);
+  await writeTasks(tasks, projectName);
 
   return { success: true, message: "Task deleted successfully" };
 }
 
 // Evaluating task complexity
 export async function assessTaskComplexity(
-  taskId: string
+  taskId: string,
+  projectName?: string
 ): Promise<TaskComplexityAssessment | null> {
-  const task = await getTaskById(taskId);
+  const task = await getTaskById(taskId, projectName);
 
   if (!task) {
     return null;
@@ -682,28 +737,50 @@ export async function assessTaskComplexity(
   };
 }
 
-  // Clear all tasks
-export async function clearAllTasks(): Promise<{
+  // Clear all tasks with protection options
+export async function clearAllTasks(
+  force: boolean = false,
+  archive: boolean = true,
+  projectName?: string
+): Promise<{
   success: boolean;
   message: string;
   backupFile?: string;
+  archivedTasks?: number;
 }> {
   try {
     // Make sure the data directory exists
     await ensureDataDir();
 
     // Reading an existing task
-    const allTasks = await readTasks();
+    const allTasks = await readTasks(projectName);
 
     // If there is no task, return directly
     if (allTasks.length === 0) {
       return { success: true, message: "No tasks to clear" };
     }
 
-    // Filter completed tasks
-    const completedTasks = allTasks.filter(
-      (task) => task.status === TaskStatus.COMPLETED
-    );
+    // Determine which tasks to archive based on options
+    let tasksToArchive: Task[] = [];
+    let tasksToDelete: Task[] = [];
+    
+    if (force) {
+      // Force mode: archive all tasks (including completed ones)
+      tasksToArchive = allTasks;
+      tasksToDelete = [];
+    } else if (archive) {
+      // Archive mode: archive all tasks, don't delete anything
+      tasksToArchive = allTasks;
+      tasksToDelete = [];
+    } else {
+      // Legacy mode: only archive completed tasks
+      tasksToArchive = allTasks.filter(
+        (task) => task.status === TaskStatus.COMPLETED
+      );
+      tasksToDelete = allTasks.filter(
+        (task) => task.status !== TaskStatus.COMPLETED
+      );
+    }
 
     // Create backup file name
     const timestamp = new Date()
@@ -723,19 +800,24 @@ export async function clearAllTasks(): Promise<{
     // Create a backup path under the memory directory
     const memoryFilePath = path.join(MEMORY_DIR, backupFileName);
 
-    // Also write to the memory directory (only contains completed tasks)
-    await fs.writeFile(
-      memoryFilePath,
-      JSON.stringify({ tasks: completedTasks }, null, 2)
-    );
+    // Archive tasks to memory
+    if (tasksToArchive.length > 0) {
+      await fs.writeFile(
+        memoryFilePath,
+        JSON.stringify({ tasks: tasksToArchive }, null, 2)
+      );
+    }
 
-    // Clear task files
-    await writeTasks([]);
+    // Clear task files (only if not in archive-only mode)
+    if (tasksToDelete.length > 0 || !archive) {
+      await writeTasks([], projectName);
+    }
 
     return {
       success: true,
-      message: `All tasks have been successfully cleared. A total of ${allTasks.length} tasks have been deleted. ${completedTasks.length} completed tasks have been backed up to the memory directory.`,
+      message: `Task operation completed successfully. ${tasksToArchive.length} tasks archived to memory. ${tasksToDelete.length} tasks permanently deleted. Backup file: ${backupFileName}`,
       backupFile: backupFileName,
+      archivedTasks: tasksToArchive.length,
     };
   } catch (error) {
     return {
@@ -752,7 +834,8 @@ export async function searchTasksWithCommand(
   query: string,
   isId: boolean = false,
   page: number = 1,
-  pageSize: number = 5
+  pageSize: number = 5,
+  projectName?: string
 ): Promise<{
   tasks: Task[];
   pagination: {
@@ -763,11 +846,13 @@ export async function searchTasksWithCommand(
   };
 }> {
   // Read the task in the current task file
-  const currentTasks = await readTasks();
+  const currentTasks = await readTasks(projectName);
   let memoryTasks: Task[] = [];
 
   // Searching for tasks in the memory folder
-  const MEMORY_DIR = await getMemoryDir();
+  const MEMORY_DIR = projectName 
+    ? await getProjectMemoryDirPath(projectName)
+    : await getMemoryDir();
 
   try {
     // Make sure the memory folder exists
@@ -996,5 +1081,75 @@ function filterCurrentTasks(
         );
       });
     });
+  }
+}
+
+// Restore archived tasks from memory
+export async function restoreArchivedTasks(
+  backupFileName: string,
+  projectName?: string
+): Promise<{
+  success: boolean;
+  message: string;
+  restoredTasks: number;
+}> {
+  try {
+    const MEMORY_DIR = projectName 
+      ? await getProjectMemoryDirPath(projectName)
+      : await getMemoryDir();
+    const backupFilePath = path.join(MEMORY_DIR, backupFileName);
+    
+    // Check if backup file exists
+    try {
+      await fs.access(backupFilePath);
+    } catch (error) {
+      return {
+        success: false,
+        message: `Backup file ${backupFileName} not found in memory directory.`,
+        restoredTasks: 0,
+      };
+    }
+    
+    // Read backup file
+    const backupData = await fs.readFile(backupFilePath, "utf-8");
+    const { tasks: archivedTasks } = JSON.parse(backupData);
+    
+    if (!archivedTasks || archivedTasks.length === 0) {
+      return {
+        success: false,
+        message: "No tasks found in backup file.",
+        restoredTasks: 0,
+      };
+    }
+    
+    // Read current tasks
+    const currentTasks = await readTasks(projectName);
+    
+    // Merge archived tasks with current tasks (avoid duplicates by ID)
+    const existingIds = new Set(currentTasks.map(task => task.id));
+    const newTasks = archivedTasks.filter((task: Task) => !existingIds.has(task.id));
+    
+    if (newTasks.length === 0) {
+      return {
+        success: false,
+        message: "All tasks in backup file already exist in current task list.",
+        restoredTasks: 0,
+      };
+    }
+    
+    // Write merged tasks
+    await writeTasks([...currentTasks, ...newTasks], projectName);
+    
+    return {
+      success: true,
+      message: `Successfully restored ${newTasks.length} tasks from backup file ${backupFileName}.`,
+      restoredTasks: newTasks.length,
+    };
+  } catch (error) {
+    return {
+      success: false,
+      message: `Error restoring tasks: ${error instanceof Error ? error.message : String(error)}`,
+      restoredTasks: 0,
+    };
   }
 }

@@ -77,6 +77,43 @@ document.addEventListener("DOMContentLoaded", () => {
     );
   }
 
+  // 新增：項目選擇器事件監聽
+  const projectSelector = document.getElementById("project-selector");
+  if (projectSelector) {
+    projectSelector.addEventListener("change", (e) => {
+      console.log("Project changed to:", e.target.value);
+      // Reload tasks for the selected project
+      fetchTasks();
+    });
+  }
+
+  // 新增：項目創建按鈕事件監聽
+  const createProjectBtn = document.getElementById("create-project-btn");
+  if (createProjectBtn) {
+    createProjectBtn.addEventListener("click", () => {
+      openProjectModal();
+    });
+  }
+
+  // 新增：項目創建表單事件監聽
+  const createProjectForm = document.getElementById("create-project-form");
+  if (createProjectForm) {
+    createProjectForm.addEventListener("submit", handleCreateProject);
+  }
+
+  // 新增：項目模態框關閉事件監聽
+  const projectModalClose = document.getElementById("project-modal-close");
+  const cancelProjectBtn = document.getElementById("cancel-project-btn");
+  if (projectModalClose) {
+    projectModalClose.addEventListener("click", closeProjectModal);
+  }
+  if (cancelProjectBtn) {
+    cancelProjectBtn.addEventListener("click", closeProjectModal);
+  }
+
+  // 新增：載入項目列表
+  loadProjects();
+
   // 新增：視窗大小改變時更新尺寸
   window.addEventListener("resize", () => {
     updateDimensions();
@@ -243,7 +280,14 @@ async function fetchTasks() {
       )}</div>`;
     }
 
-    const response = await fetch("/api/tasks");
+    // Get the currently selected project
+    const projectSelector = document.getElementById("project-selector");
+    const selectedProject = projectSelector ? projectSelector.value : null;
+    
+    // Build the API URL with project parameter if a project is selected
+    const apiUrl = selectedProject ? `/api/tasks?project=${encodeURIComponent(selectedProject)}` : "/api/tasks";
+    
+    const response = await fetch(apiUrl);
 
     if (!response.ok) {
       throw new Error(`HTTP error! Status: ${response.status}`);
@@ -1587,4 +1631,148 @@ function showPriorityUpdateFeedback(select, type) {
       }
     }, 3000);
   }
+}
+
+// Load projects and populate the project selector
+async function loadProjects() {
+  try {
+    const response = await fetch('/api/projects');
+    if (!response.ok) {
+      throw new Error(`HTTP error! Status: ${response.status}`);
+    }
+    
+    const data = await response.json();
+    const projects = data.projects || [];
+    const defaultProject = data.defaultProject;
+    
+    console.log('Projects loaded:', projects);
+    console.log('Default project:', defaultProject);
+    
+    // Get the project selector
+    const projectSelector = document.getElementById('project-selector');
+    if (!projectSelector) {
+      console.error('Project selector not found');
+      return;
+    }
+    
+    // Clear existing options
+    projectSelector.innerHTML = '';
+    
+    // Add projects to the selector
+    projects.forEach(project => {
+      const option = document.createElement('option');
+      option.value = project.name;
+      option.textContent = project.description || project.name;
+      projectSelector.appendChild(option);
+    });
+    
+    // Set the default project as selected
+    if (defaultProject) {
+      projectSelector.value = defaultProject;
+      console.log('Set default project:', defaultProject);
+    }
+    
+    // Update the current project indicator
+    const currentProjectIndicator = document.getElementById('current-project-indicator');
+    if (currentProjectIndicator) {
+      currentProjectIndicator.textContent = defaultProject || 'No project selected';
+    }
+    
+    // Load tasks for the selected project
+    fetchTasks();
+    
+  } catch (error) {
+    console.error('Error loading projects:', error);
+    // Show error in the project selector
+    const projectSelector = document.getElementById('project-selector');
+    if (projectSelector) {
+      projectSelector.innerHTML = '<option value="">Error loading projects</option>';
+    }
+  }
+}
+
+// Project modal functions
+function openProjectModal() {
+  const modal = document.getElementById('project-modal');
+  if (modal) {
+    modal.style.display = 'block';
+    // Focus on the project name input
+    const projectNameInput = document.getElementById('project-name');
+    if (projectNameInput) {
+      projectNameInput.focus();
+    }
+  }
+}
+
+function closeProjectModal() {
+  const modal = document.getElementById('project-modal');
+  if (modal) {
+    modal.style.display = 'none';
+    // Reset the form
+    const form = document.getElementById('create-project-form');
+    if (form) {
+      form.reset();
+    }
+  }
+}
+
+async function handleCreateProject(event) {
+  event.preventDefault();
+  
+  const form = event.target;
+  const formData = new FormData(form);
+  
+  const projectData = {
+    name: formData.get('name'),
+    description: formData.get('description') || '',
+    setAsDefault: formData.get('setAsDefault') === 'on'
+  };
+  
+  try {
+    const response = await fetch('/api/projects/create', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(projectData)
+    });
+    
+    if (response.ok) {
+      const result = await response.json();
+      console.log('Project created successfully:', result);
+      
+      // Close the modal
+      closeProjectModal();
+      
+      // Reload projects to show the new one
+      await loadProjects();
+      
+      // Show success message
+      showTemporaryMessage('Project created successfully!', 'success');
+    } else {
+      const errorData = await response.json();
+      throw new Error(errorData.error || 'Failed to create project');
+    }
+  } catch (error) {
+    console.error('Error creating project:', error);
+    showTemporaryMessage(`Error creating project: ${error.message}`, 'error');
+  }
+}
+
+// Helper function to show temporary messages
+function showTemporaryMessage(message, type = 'info') {
+  // Create a temporary message element
+  const messageDiv = document.createElement('div');
+  messageDiv.className = `temporary-message temporary-message-${type}`;
+  messageDiv.textContent = message;
+  
+  // Add it to the body
+  document.body.appendChild(messageDiv);
+  
+  // Remove it after 3 seconds
+  setTimeout(() => {
+    if (messageDiv.parentNode) {
+      messageDiv.parentNode.removeChild(messageDiv);
+    }
+  }, 3000);
 }

@@ -2,6 +2,7 @@ import path from "path";
 import { fileURLToPath } from "url";
 import { Server } from "@modelcontextprotocol/sdk/server/index.js";
 import fs from "fs";
+import { getProjectDataDir, getProjectTasksFilePath, getProjectMemoryDir } from "../models/projectModel.js";
 
 // Get project root directory
 const __filename = fileURLToPath(import.meta.url);
@@ -31,6 +32,16 @@ export function getGlobalServer(): Server | null {
  * Otherwise, fall back to env or project root.
  */
 export async function getDataDir(): Promise<string> {
+  // Prioritize DATA_DIR environment variable to avoid MCP server issues
+  if (process.env.DATA_DIR) {
+    if (path.isAbsolute(process.env.DATA_DIR)) {
+      return process.env.DATA_DIR;
+    } else {
+      // For relative DATA_DIR, use PROJECT_ROOT
+      return path.join(PROJECT_ROOT, process.env.DATA_DIR);
+    }
+  }
+
   const server = getGlobalServer();
   let rootPath: string | null = null;
 
@@ -59,29 +70,6 @@ export async function getDataDir(): Promise<string> {
     }
   }
 
-  // Handle process.env.DATA_DIR
-  if (process.env.DATA_DIR) {
-    if (path.isAbsolute(process.env.DATA_DIR)) {
-      // For absolute DATA_DIR: return DATA_DIR/<last folder name of rootPath>
-      if (rootPath) {
-        const lastFolderName = path.basename(rootPath);
-        const finalPath = path.join(process.env.DATA_DIR, lastFolderName);
-        return finalPath;
-      } else {
-        // Without rootPath, return DATA_DIR directly
-        return process.env.DATA_DIR;
-      }
-    } else {
-      // For relative DATA_DIR: return rootPath/DATA_DIR or PROJECT_ROOT/DATA_DIR
-      if (rootPath) {
-        return path.join(rootPath, process.env.DATA_DIR);
-      } else {
-        // Without rootPath, use PROJECT_ROOT
-        return path.join(PROJECT_ROOT, process.env.DATA_DIR);
-      }
-    }
-  }
-
   // Default logic when DATA_DIR is not set
   if (rootPath) {
     return path.join(rootPath, "data");
@@ -105,6 +93,27 @@ export async function getTasksFilePath(): Promise<string> {
 export async function getMemoryDir(): Promise<string> {
   const dataDir = await getDataDir();
   return path.join(dataDir, "memory");
+}
+
+/**
+ * Get project-aware memory directory path
+ */
+export async function getProjectMemoryDirPath(projectName?: string): Promise<string> {
+  return await getProjectMemoryDir(projectName);
+}
+
+/**
+ * Get project-aware tasks file path
+ */
+export async function getProjectTasksFilePathPath(projectName?: string): Promise<string> {
+  return await getProjectTasksFilePath(projectName);
+}
+
+/**
+ * Get project-aware data directory
+ */
+export async function getProjectDataDirPath(projectName?: string): Promise<string> {
+  return await getProjectDataDir(projectName);
 }
 
 /**

@@ -150,12 +150,13 @@ export async function splitTasks({
         backupFile = clearResult.backupFile;
 
         try {
-          // After clearing, create new tasks
-          createdTasks = await batchCreateOrUpdateTasks(
-            convertedTasks,
-            "append",
-            globalAnalysisResult
-          );
+                  // After clearing, create new tasks
+        createdTasks = await batchCreateOrUpdateTasks(
+          convertedTasks,
+          "append",
+          globalAnalysisResult,
+          false // No archiving for new task creation
+        );
           message += `\nSuccessfully created ${createdTasks.length} new tasks.`;
         } catch (error) {
           actionSuccess = false;
@@ -173,7 +174,8 @@ export async function splitTasks({
         createdTasks = await batchCreateOrUpdateTasks(
           convertedTasks,
           updateMode,
-          globalAnalysisResult
+          globalAnalysisResult,
+          false // No archiving for split tasks (new task creation)
         );
 
         // Generate message by mode

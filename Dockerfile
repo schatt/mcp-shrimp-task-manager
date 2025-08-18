@@ -4,19 +4,27 @@ FROM node:lts-alpine
 # Create app directory
 WORKDIR /mcp-shrimp-task-manager
 
-# Install app dependencies
+# Install dependencies
 COPY package*.json ./
-
-# Install dependencies without running lifecycle scripts
 RUN npm install --ignore-scripts
 
-# Bundle app source code
+# Copy source code
 COPY . .
 
-# Build the TypeScript code
+# Build the application
 RUN npm run build
 
-# Expose port if necessary (not required by MCP over stdio)
+# Expose MCP stdio transport (required for Docker MCP Gateway)
+# The gateway expects stdio transport, not HTTP
+ENV DOCKER_MCP_MODE=true
+ENV ENABLE_GUI=false
+ENV DATA_DIR=/app/ShrimpData
 
-# Command to run the MCP server
-CMD [ "npm", "run", "start" ]
+# Create data directory
+RUN mkdir -p /app/ShrimpData
+
+# Set the entrypoint to run our MCP server
+ENTRYPOINT ["node", "dist/index.js"]
+
+# Default command (can be overridden by the gateway)
+CMD []

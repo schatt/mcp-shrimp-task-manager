@@ -1,0 +1,22 @@
+version: '3.8'
+
+services:
+  mcp-shrimp-carmanager:
+    build: .
+    ports:
+      - "3001:3000"  # Use port 3001 to avoid conflicts
+    environment:
+      - ENABLE_GUI=true
+      - WEB_PORT=3000
+      - DATA_DIR=/app/ShrimpData
+    volumes:
+      # Mount CarManager's ShrimpData directory
+      - ~/code/github/CarManager/ShrimpData:/app/ShrimpData
+    restart: unless-stopped
+    container_name: mcp-shrimp-carmanager
+    # Optional: Add healthcheck
+    healthcheck:
+      test: ["CMD", "node", "-e", "console.log('MCP CarManager server is running')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3

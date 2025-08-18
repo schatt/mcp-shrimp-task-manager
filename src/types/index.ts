@@ -101,3 +101,22 @@ export interface TaskComplexityAssessment {
   };
   recommendations: string[]; // Recommendations for handling
 }
+
+// Project management types
+export interface Project {
+  id: string; // Unique project ID
+  name: string; // Project name (3-50 chars, alphanumeric + hyphens/underscores only)
+  description?: string; // Project description (optional)
+  active: boolean; // Whether the project is active
+  createdAt: Date; // Creation timestamp
+  updatedAt: Date; // Last updated timestamp
+}
+
+export interface ProjectConfig {
+  defaultProject: string; // Name of the default project
+  projects: Record<string, Project>; // Map of project names to project objects
+  globalSettings: {
+    templatesUse: string; // Template language (en, zh, etc.)
+    enableGui: boolean; // Whether to enable web GUI
+  };
+}

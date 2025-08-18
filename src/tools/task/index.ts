@@ -27,6 +27,9 @@ export { deleteTask, deleteTaskSchema } from "./deleteTask.js";
 // clearAllTasks
 export { clearAllTasks, clearAllTasksSchema } from "./clearAllTasks.js";
 
+// restoreArchivedTasks
+export { restoreArchivedTasks, restoreArchivedTasksSchema } from "./restoreArchivedTasks.js";
+
 // updateTaskContent
 export { updateTaskContent, updateTaskContentSchema } from "./updateTask.js";
 

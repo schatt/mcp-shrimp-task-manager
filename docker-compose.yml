@@ -1,0 +1,20 @@
+version: '3.8'
+
+services:
+  mcp-shrimp-task-manager:
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      - ENABLE_GUI=true
+      - WEB_PORT=3000
+           volumes:
+         # Mount data directory for persistence
+         - ~/code/Shrimp:/app/ShrimpData
+    restart: unless-stopped
+    # Optional: Add healthcheck
+    healthcheck:
+      test: ["CMD", "node", "-e", "console.log('MCP server is running')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3

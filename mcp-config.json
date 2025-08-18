@@ -1,0 +1,20 @@
+{
+    "mcpServers": {
+        "docker-mcp-gateway": {
+            "command": "docker",
+            "args": ["mcp", "gateway", "run"],
+            "env": {}
+        },
+        "shrimp-docker": {
+            "command": "docker",
+            "args": [
+                "run", "--rm", "-i",
+                "-v", "/Users/schatt/code/Shrimp:/app/ShrimpData",
+                "-e", "DOCKER_MCP_MODE=true",
+                "-e", "DATA_DIR=/app/ShrimpData",
+                "mcp-shrimp-task-manager:latest"
+            ],
+            "env": {}
+        }
+    }
+}
