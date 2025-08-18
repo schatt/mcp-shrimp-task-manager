@@ -9,7 +9,7 @@
 ### Prerrequisitos
 - Node.js 18+
 - npm o yarn
-- Cliente AI compatible con MCP (Claude Desktop, Cline, etc.)
+- Cliente AI compatible con MCP (Claude Code, etc.)
 
 ### Instalación
 

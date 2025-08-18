@@ -12,7 +12,7 @@
 ### Prerequisites
 - Node.js 18+ 
 - npm or yarn
-- MCP-compatible AI client (Claude Desktop, Cline, etc.)
+- MCP-compatible AI client (Claude Code, etc.)
 
 ### Installation
 
@@ -74,9 +74,9 @@ claude --dangerously-skip-permissions --mcp-config .mcp.json
 <details>
 <summary><b>Other AI Clients</b></summary>
 
-**Claude Desktop**: Add to `~/Library/Application Support/Claude/claude_desktop_config.json` (macOS) or `%APPDATA%\Claude\claude_desktop_config.json` (Windows)
+**Cline (VS Code Extension)**: A VS Code extension for AI-assisted coding. Add to VS Code settings.json under `cline.mcpServers`
 
-**Cline (VS Code)**: Add to VS Code settings.json under `cline.mcpServers`
+**Claude Desktop**: Add to `~/Library/Application Support/Claude/claude_desktop_config.json` (macOS) or `%APPDATA%\Claude\claude_desktop_config.json` (Windows)
 </details>
 
 ### Start Using
