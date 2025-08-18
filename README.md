@@ -117,7 +117,7 @@ Modern React interface for visual task management with drag-and-drop, real-time 
 ```bash
 cd tools/task-viewer
 npm install
-npm start
+npm run start:all
 # Access at http://localhost:5173
 ```
 
