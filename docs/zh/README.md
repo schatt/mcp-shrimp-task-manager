@@ -1,244 +1,72 @@
-[🇺🇸 English](../../README.md) | [🇩🇪 Deutsch](../de/README.md) | [🇫🇷 Français](../fr/README.md) | [🇰🇷 한국어](../ko/README.md) | [🇧🇷 Português](../pt/README.md) | [🇷🇺 Русский](../ru/README.md) | [🇨🇳 中文](README.md)
-
-## 目錄
-
-- [✨ 功能特點](#功能特點1)
-- [📖 使用指南](#使用指南)
-- [🖥️ 任務查看器](#任務查看器)
-- [🔬 研究模式](#研究模式)
-- [🧠 任務記憶功能](#任務記憶功能)
-- [📋 專案規範初始化](#專案規範初始化)
-- [🌐 網頁圖形介面](#網頁圖形介面)
-- [📚 文件資源](#文件資源)
-- [🔧 安裝與使用](#安裝與使用)
-- [🔌 在支援 MCP 的客戶端中使用](#客戶端中使用)
-- [💡 系統提示詞指導](#系統提示詞指導)
-- [🛠️ 可用工具一覽](#可用工具一覽)
-- [🏗️ 架構概述](#架構概述)
-- [🔧 技術實現](#技術實現)
-- [📄 許可協議](#許可協議)
-- [🤖 推薦模型](#推薦模型)
+[🇺🇸 English](../../README.md) | [🇩🇪 Deutsch](../de/README.md) | [🇪🇸 Español](../es/README.md) | [🇫🇷 Français](../fr/README.md) | [🇮🇹 Italiano](../it/README.md) | [🇮🇳 हिन्दी](../hi/README.md) | [🇰🇷 한국어](../ko/README.md) | [🇧🇷 Português](../pt/README.md) | [🇷🇺 Русский](../ru/README.md) | [🇨🇳 中文](README.md)
 
 # MCP 蝦米任務管理器
 
-[![Shrimp Task Manager Demo](/docs/yt.png)](https://www.youtube.com/watch?v=Arzu0lV09so)
+> 🦐 **AI 驅動開發的智能任務管理** - 將複雜專案分解為可管理的任務，跨會話維護上下文，加速您的開發工作流程。
+
+<div align="center">
+  
+[![Shrimp Task Manager Demo](../yt.png)](https://www.youtube.com/watch?v=Arzu0lV09so)
+
+**[觀看演示視頻](https://www.youtube.com/watch?v=Arzu0lV09so)** • **[快速開始](#-快速開始)** • **[文檔](#-文檔)**
 
 [![smithery badge](https://smithery.ai/badge/@cjo4m06/mcp-shrimp-task-manager)](https://smithery.ai/server/@cjo4m06/mcp-shrimp-task-manager)
+<a href="https://glama.ai/mcp/servers/@cjo4m06/mcp-shrimp-task-manager"><img width="380" height="200" src="https://glama.ai/mcp/servers/@cjo4m06/mcp-shrimp-task-manager/badge" alt="Shrimp Task Manager MCP server" /></a>
 
-> 🚀 基於 Model Context Protocol (MCP) 的智能任務管理系統，為 AI Agent 提供高效的程式開發工作流程框架。
+</div>
 
-蝦米任務管理器透過結構化的工作流程引導，協助 Agent 系統性規劃程式開發步驟，強化任務記憶管理機制，有效避免冗餘與重複的編程工作。
+## 🚀 快速開始
 
-## ✨ <a id="功能特點1"></a>功能特點
+### 前置要求
+- Node.js 18+ 
+- npm 或 yarn
+- 支援 MCP 的 AI 客戶端（Claude Code 等）
 
-- **任務規劃與分析**：深入理解與分析複雜任務需求
-- **智能任務拆分**：將大型任務自動拆分為可管理的小型任務
-- **依賴關係管理**：精確處理任務間的依賴關係，確保正確的執行順序
-- **執行狀態追蹤**：即時監控任務執行進度和狀態
-- **任務完整性驗證**：確保任務成果符合預期要求
-- **任務複雜度評估**：自動評估任務複雜度並提供最佳處理建議
-- **任務摘要自動更新**：完成任務時自動產生摘要，優化記憶效能
-- **任務記憶功能**：自動備份任務歷史記錄，提供長期記憶和參考能力
-- **思維鏈過程**：通過步驟化的推理系統性地分析複雜問題
-- **研究模式**：系統性技術研究功能，提供引導式工作流程來探索技術、最佳實踐和解決方案比較
-- **專案規範初始化**：定義專案標準和規則，維持大型專案的一致性
-- **<a id="網頁圖形介面"></a>網頁圖形介面**：提供選用的網頁圖形化使用者介面來管理任務。透過在您的 `.env` 檔案中設定 `ENABLE_GUI=true` 來啟用。啟用後，將會在您的 `DATA_DIR` 中建立一個包含存取網址的 `WebGUI.md` 檔案。您可以透過設定 `WEB_PORT` 來自訂網頁埠號（若未指定，系統將自動選擇可用的埠號）。
-- **<a id="任務查看器"></a>任務查看器**：基於 React 的現代化網頁介面，用於查看和管理多個配置文件的任務數據，具有拖放式標籤、即時搜尋和可配置自動刷新等進階功能。詳見[任務查看器文檔](../../tools/task-viewer)以了解設置和使用說明。
+### 安裝
 
-  ![任務查看器介面](../../tools/task-viewer/screenshot.png)
-  
-  ![任務查看器實際運行](../../tools/task-viewer/taskview.png)
+#### 安裝 Claude Code
 
-## 🧭 <a id="使用指南"></a>使用指南
-
-蝦米任務管理器提供結構化的 AI 輔助程式開發方法，通過引導式工作流程和系統化任務管理實現高效開發。
-
-### 什麼是蝦米？
-
-蝦米本質上是一個提示詞範本，通過一系列提示詞引導 AI Agent 更好地理解和適應您的專案。它確保 Agent 能夠更貼近您專案的特定需求和慣例。
-
-### 實際應用中的研究模式
-
-在深入任務規劃之前，您可以善用研究模式進行技術調查和知識收集。這在以下情況特別有用：
-
-- 您需要探索新的技術或框架
-- 您想要比較不同的解決方案方法
-- 您正在調查專案的最佳實踐
-- 您需要理解複雜的技術概念
-
-只需告訴 Agent「研究 [您的主題]」或「進入研究模式研究 [技術/問題]」即可開始系統性調查。研究發現將為您後續的任務規劃和開發決策提供資訊基礎。
-
-### 首次使用設置
-
-在使用新專案時，只需對 Agent 說「init project rules」（初始化專案規則）。這將引導 Agent 生成一份符合您專案特定需求和結構的規則檔案。
-
-### 任務規劃流程
-
-要開發或更新功能，使用命令「plan task [您的描述]」（規劃任務 [您的描述]）。系統將參考先前建立的規則，嘗試理解您的專案，搜尋相關程式碼區塊，並根據專案的當前狀態提出全面的計劃。
-
-### 反饋機制
-
-在規劃過程中，蝦米引導 Agent 進行多步驟思考。您可以審查這個過程，如果您覺得某個部分偏離了您的目標，可以直接打斷並提出您的觀點。Agent 將採納您的反饋並繼續思考過程。
-
-### 任務執行
-
-當您對規劃內容滿意後，使用「execute task [任務名稱或 ID]」（執行任務 [任務名稱或 ID]）來實施計劃。如果您不指定任務名稱或 ID，系統將自動識別並執行最優先的任務。
-
-### 連續模式
-
-如果您希望連續執行所有任務而不需要為每個任務手動干預，可以使用「continuous mode」（連續模式）自動處理整個任務隊列。
-
-### Token 限制注意事項
-
-由於 LLM 的 Token 限制，在長時間對話中可能會喪失上下文。如果發生這種情況，只需開啟新的聊天會話並請 Agent 繼續執行即可。系統將從上次中斷的地方繼續，無需重複任務細節或上下文。
-
-### 提示詞語言與客製化
-
-您可以透過設定 `TEMPLATES_USE` 環境變數來切換系統提示詞的語言。預設支援 `en`（英文）和 `zh`（繁體中文）。此外，您也可以複製現有的模板目錄（例如 `src/prompts/templates_en`）到 `DATA_DIR` 指定的位置，進行修改後，將 `TEMPLATES_USE` 指向您的客製化模板目錄名稱，以實現更深度的提示詞客製化
-
-## 🔬 <a id="研究模式"></a>研究模式
-
-蝦米任務管理器包含專門的研究模式，專為系統性技術調查和知識收集而設計。
-
-### 什麼是研究模式？
-
-研究模式是一個引導式工作流程系統，幫助 AI Agent 進行徹底且系統性的技術研究。它提供結構化的方法來探索技術、比較解決方案、調查最佳實踐，並為程式設計任務收集全面的資訊。
-
-### 主要功能
-
-- **系統性調查**：結構化工作流程確保研究主題的全面覆蓋
-- **多源研究**：結合網路搜尋和程式碼庫分析，實現完整理解
-- **狀態管理**：在多個會話中維護研究上下文和進度
-- **引導式探索**：防止研究變得不專注或偏離主題
-- **知識整合**：將研究發現與任務規劃和執行無縫整合
-
-### 何時使用研究模式
-
-研究模式特別適用於：
-
-- **技術探索**：調查新的框架、函式庫或工具
-- **最佳實踐研究**：尋找行業標準和推薦方法
-- **解決方案比較**：評估不同的技術方法或架構
-- **問題調查**：深入研究複雜的技術挑戰
-- **架構規劃**：研究設計模式和系統架構
-
-### 如何使用研究模式
-
-只需告訴 Agent 進入研究模式並指定您的主題：
-
-- **基本用法**：「進入研究模式研究 [您的主題]」
-- **特定研究**：「研究 [特定技術/問題]」
-- **比較分析**：「研究並比較 [選項 A 與選項 B]」
-
-系統將引導 Agent 通過結構化的研究階段，確保徹底調查的同時保持對您特定需求的專注。
-
-### 研究工作流程
-
-1. **主題定義**：明確定義研究範圍和目標
-2. **資訊收集**：系統性收集相關資訊
-3. **分析與綜合**：處理和組織研究發現
-4. **狀態更新**：定期進度追蹤和上下文保存
-5. **整合應用**：將研究結果應用到您的專案上下文中
-
-> **💡 建議**：為了獲得最佳的研究模式體驗，我們建議使用 **Claude 4 Sonnet**，它提供卓越的分析能力和全面的研究綜合功能。
-
-## 🧠 <a id="任務記憶功能"></a>任務記憶功能
-
-蝦米任務管理器具備長期記憶功能，可以自動保存任務執行的歷史記錄，並在規劃新任務時提供參考經驗。
-
-### 功能特點
-
-- 系統會自動將任務備份到 memory 目錄中
-- 備份文件按照時間順序命名，格式為 tasks_backup_YYYY-MM-DDThh-mm-ss.json
-- 任務規劃 Agent 會自動獲得關於如何利用記憶功能的指導
-
-### 優勢與效益
-
-- **避免重複工作**：參考過去任務，不必從零開始解決類似問題
-- **借鑒成功經驗**：利用已驗證有效的解決方案，提高開發效率
-- **學習與改進**：識別過去的錯誤或低效方案，持續優化工作流程
-- **知識沉澱**：隨著系統使用時間增長，形成持續擴展的知識庫
-
-通過有效利用任務記憶功能，系統能夠不斷積累經驗，智能化程度和工作效率將持續提升。
-
-## 📋 <a id="專案規範初始化"></a>專案規範初始化
-
-專案規範功能有助於維持代碼庫的一致性：
-
-- **標準化開發**：建立一致的編碼模式和實踐
-- **新開發者引導**：為專案貢獻提供明確的指南
-- **維持品質**：確保所有代碼符合既定的專案標準
-
-> **⚠️ 建議**：當專案規模不斷擴大或發生重大變更時，請初始化專案規範。這有助於在複雜度增加時維持一致性和品質。
-
-在以下情況使用 `init_project_rules` 工具設置或更新專案標準：
-
-- 啟動新的大型專案
-- 有新團隊成員加入
-- 實施重大架構變更
-- 採用新的開發慣例
-
-### 使用範例
-
-您可以透過簡單的自然語言指令輕鬆使用此功能：
-
-- **首次設定時**：只需對 Agent 說「初始化規則」或「初始化專案規則」
-- **需要更新時**：當專案發展變化時，對 Agent 說「更新規則」或「更新專案規則」
-
-當您的代碼庫擴展或經歷重大結構變化時，此工具特別有價值，有助於在整個專案生命週期中保持一致的開發實踐。
-
-## 📚 <a id="文件資源"></a>文件資源
-
-- [提示詞自定義指南](prompt-customization.md)：透過環境變數自定義工具提示詞的說明
-- [更新日誌](CHANGELOG.md)：記錄此專案的所有重要變更
-
-## 🔧 <a id="安裝與使用"></a>安裝與使用
-
-### Installing via Smithery
-
-To install 蝦米任務管理器 for Claude Desktop automatically via [Smithery](https://smithery.ai/server/@cjo4m06/mcp-shrimp-task-manager):
-
+**Windows 11（使用 WSL2）：**
 ```bash
-npx -y @smithery/cli install @cjo4m06/mcp-shrimp-task-manager --client claude
+# 首先，確保已安裝 WSL2（在 PowerShell 中以管理員身份執行）
+wsl --install
+
+# 進入 Ubuntu/WSL 環境
+wsl -d Ubuntu
+
+# 全域安裝 Claude Code
+npm install -g @anthropic-ai/claude-code
+
+# 啟動 Claude Code
+claude
 ```
 
-### Manual Installation
+**macOS/Linux：**
+```bash
+# 全域安裝 Claude Code
+npm install -g @anthropic-ai/claude-code
+
+# 啟動 Claude Code
+claude
+```
+
+#### 安裝蝦米任務管理器
 
 ```bash
-# 安裝依賴套件
+# 克隆儲存庫
+git clone https://github.com/cjo4m06/mcp-shrimp-task-manager.git
+cd mcp-shrimp-task-manager
+
+# 安裝依賴
 npm install
 
-# 建置並啟動服務
+# 建構專案
 npm run build
 ```
 
-## 🔌 <a id="客戶端中使用"></a>在支援 MCP 的客戶端中使用
+### 配置 Claude Code
 
-蝦米任務管理器可以與任何支援 Model Context Protocol 的客戶端一起使用，例如 Cursor IDE。
-
-### 在 Cursor IDE 中配置
-
-蝦米任務管理器提供兩種配置方式：全局配置和專案特定配置。
-
-#### ListRoots 協議支援
-
-蝦米任務管理器現在支援 **ListRoots 協議**，提供自動專案隔離和靈活的路徑配置功能：
-
-- **如果您的客戶端支援 ListRoots** (例如 Cursor IDE)：
-
-  - **絕對路徑模式**：在指定的 DATA_DIR 中建立專案資料夾，讓您可以使用全域 mcp.json 配置，Shrimp 會自動隔離專案
-  - **相對路徑模式**：在專案根目錄中建立 DATA_DIR 來存放 Shrimp 資料
-
-- **如果您的客戶端不支援 ListRoots**：
-  - DATA_DIR 保持舊版邏輯（建議使用絕對路徑）
-  - 建議向您的客戶端廠商要求支援 ListRoots 協議以獲得增強功能
-
-#### 全局配置
-
-1. 開啟 Cursor IDE 的全局設定檔案（通常位於 `~/.cursor/mcp.json`）
-2. 在 `mcpServers` 區段中添加以下配置：
-
-**選項 A：絕對路徑（專案隔離模式）**
+在您的專案目錄中創建 `.mcp.json` 文件：
 
 ```json
 {
@@ -247,7 +75,7 @@ npm run build
       "command": "node",
       "args": ["/path/to/mcp-shrimp-task-manager/dist/index.js"],
       "env": {
-        "DATA_DIR": "/Users/username/ShrimpData", // 絕對路徑 - 自動建立專案資料夾
+        "DATA_DIR": "/path/to/your/shrimp_data",
         "TEMPLATES_USE": "zh",
         "ENABLE_GUI": "false"
       }
@@ -256,16 +84,15 @@ npm run build
 }
 ```
 
-**選項 B：NPX 配合絕對路徑**
-
+配置範例：
 ```json
 {
   "mcpServers": {
     "shrimp-task-manager": {
-      "command": "npx",
-      "args": ["-y", "mcp-shrimp-task-manager"],
+      "command": "node",
+      "args": ["/home/fire/claude/mcp-shrimp-task-manager/dist/index.js"],
       "env": {
-        "DATA_DIR": "/Users/username/ShrimpData", // 絕對路徑 - 自動建立專案資料夾
+        "DATA_DIR": "/home/fire/claude/project/shrimp_data",
         "TEMPLATES_USE": "zh",
         "ENABLE_GUI": "false"
       }
@@ -274,21 +101,96 @@ npm run build
 }
 ```
 
-> ⚠️ 請將 `/path/to/mcp-shrimp-task-manager` 和 `/Users/username/ShrimpData` 替換為您的實際路徑。
->
-> 💡 **絕對路徑優勢**：透過 ListRoots 支援，Shrimp 會自動為每個專案建立獨立資料夾（例如 `/Users/username/ShrimpData/my-project/`、`/Users/username/ShrimpData/another-project/`），實現完美的專案隔離，只需要一個全域配置。
->
-> 💡 **可選設定：** 您可以在 `env` 區段中添加 `"WEB_PORT": "3000"` 來指定網頁 GUI 的自訂埠號。若未指定，系統將自動選擇可用的埠號。
+## ✨ 功能特點
 
-#### 專案特定配置
+### 核心功能
+- 🎯 **智能任務規劃** - 將複雜專案自動分解為結構化任務
+- 🔗 **依賴管理** - 自動追踪和管理任務間的依賴關係
+- 🧠 **記憶系統** - 跨會話保持上下文和專案知識
+- 🔍 **研究模式** - 系統性技術調查和知識收集
+- 📊 **任務查看器** - 現代化網頁介面用於任務可視化和管理
+- 🌐 **多語言支援** - 支援英文和繁體中文模板
+- 🤖 **AI 代理整合** - 與專門的 AI 代理無縫協作
 
-您也可以為每個專案設定專屬配置。此方法允許使用相對路徑進行專案內數據存放：
+## 📖 使用指南
 
-1. 在專案根目錄創建 `.cursor` 目錄
-2. 在該目錄下創建 `mcp.json` 文件，內容如下：
+### 基本工作流程
 
-**選項 A：相對路徑（專案內存放模式）**
+1. **初始化專案規則**
+   ```
+   "初始化專案規則"
+   ```
 
+2. **規劃任務**
+   ```
+   "規劃任務：實現使用者認證系統"
+   ```
+
+3. **執行任務**
+   ```
+   "執行任務 [任務 ID]"
+   ```
+
+4. **驗證完成**
+   ```
+   "驗證任務 [任務 ID]"
+   ```
+
+### 高級功能
+
+#### 🔬 研究模式
+進行深入的技術調查：
+```
+"進入研究模式研究 React 性能優化"
+```
+
+#### 🔄 連續模式
+自動執行所有排隊任務：
+```
+"啟用連續模式"
+```
+
+#### 🧠 任務記憶
+系統自動保存任務歷史供未來參考。存儲在 `memory/` 目錄中，格式為 `tasks_backup_YYYY-MM-DDThh-mm-ss.json`。
+
+## 🖥️ 任務查看器
+
+基於 React 的現代化網頁介面，提供：
+- 📋 全面的任務列表視圖
+- 🔍 即時搜尋和過濾
+- 🎨 拖放式標籤組織
+- 🤖 AI 代理管理
+- 🔄 可配置的自動刷新
+- 📊 專案歷史追踪
+
+![任務查看器介面](../../tools/task-viewer/screenshot.png)
+
+### 啟動任務查看器
+
+```bash
+cd tools/task-viewer
+npm install
+npm start
+```
+
+訪問 http://localhost:9998 查看介面。
+
+## 🔧 配置
+
+### 環境變數
+
+| 變數 | 描述 | 預設值 |
+|------|------|--------|
+| `DATA_DIR` | 任務數據存儲目錄 | `./data` |
+| `TEMPLATES_USE` | 語言模板（en/zh） | `en` |
+| `ENABLE_GUI` | 啟用網頁 GUI | `false` |
+| `WEB_PORT` | 網頁 GUI 端口 | 自動 |
+
+### MCP 客戶端配置
+
+#### Cursor IDE
+
+**全域配置（推薦）：**
 ```json
 {
   "mcpServers": {
@@ -296,17 +198,17 @@ npm run build
       "command": "node",
       "args": ["/path/to/mcp-shrimp-task-manager/dist/index.js"],
       "env": {
-        "DATA_DIR": ".shrimp", // 相對路徑 - 在專案根目錄建立資料夾
+        "DATA_DIR": "/Users/username/ShrimpData",
         "TEMPLATES_USE": "zh",
-        "ENABLE_GUI": "false"
+        "ENABLE_GUI": "true"
       }
     }
   }
 }
 ```
 
-**選項 B：NPX 配合相對路徑**
-
+**專案特定配置：**
+在專案根目錄創建 `.cursor/mcp.json`：
 ```json
 {
   "mcpServers": {
@@ -314,329 +216,117 @@ npm run build
       "command": "npx",
       "args": ["-y", "mcp-shrimp-task-manager"],
       "env": {
-        "DATA_DIR": "shrimp-data", // 相對路徑 - 在專案根目錄建立資料夾
+        "DATA_DIR": ".shrimp",
         "TEMPLATES_USE": "zh",
-        "ENABLE_GUI": "false"
+        "ENABLE_GUI": "true"
       }
     }
   }
 }
 ```
 
-**選項 C：絕對路徑（替代方案）**
+## 🛠️ 可用工具
 
-```json
-{
-  "mcpServers": {
-    "shrimp-task-manager": {
-      "command": "npx",
-      "args": ["-y", "mcp-shrimp-task-manager"],
-      "env": {
-        "DATA_DIR": "/Users/username/ShrimpData", // 絕對路徑配合專案隔離
-        "TEMPLATES_USE": "zh",
-        "ENABLE_GUI": "false"
-      }
-    }
-  }
-}
-```
+| 類別 | 工具 | 描述 |
+|------|------|------|
+| **規劃** | `plan_task` | 創建新任務 |
+| | `analyze_task` | 深度分析任務需求 |
+| | `split_tasks` | 拆分複雜任務 |
+| **執行** | `execute_task` | 執行任務並提供指導 |
+| | `verify_task` | 驗證任務完成 |
+| **管理** | `list_tasks` | 列出所有任務 |
+| | `query_task` | 搜尋任務 |
+| | `get_task_detail` | 獲取任務詳情 |
+| | `update_task` | 更新任務 |
+| | `delete_task` | 刪除任務 |
+| **認知** | `process_thought` | 思維鏈推理 |
+| | `reflect_task` | 反思和改進 |
+| | `research_mode` | 系統性研究 |
+| **專案** | `init_project_rules` | 初始化專案標準 |
 
-> ⚠️ 請將 `/path/to/mcp-shrimp-task-manager` 替換為您的實際路徑。
->
-> 💡 **相對路徑優勢**：資料存放在專案目錄內（例如 `./shrimp-data/`），方便根據需要選擇是否納入版本控制。
->
-> 💡 **可選設定：** 您可以在 `env` 區段中添加 `"WEB_PORT": "3000"` 來指定網頁 GUI 的自訂埠號。若未指定，系統將自動選擇可用的埠號。
+## 🏗️ 架構
 
-### ⚠️ 重要配置說明
-
-**DATA_DIR 參數**是蝦米任務管理器存儲任務數據、對話記錄等資訊的目錄。新的實作支援絕對路徑和相對路徑，並根據您的客戶端功能提供智慧化行為。
-
-#### 🚀 支援 ListRoots 協議（建議）
-
-如果您的客戶端支援 **ListRoots 協議**（如 Cursor IDE），蝦米任務管理器會自動偵測您的專案根目錄並提供增強功能：
-
-**絕對路徑模式（專案隔離）：**
-
-- 配置：`"DATA_DIR": "/Users/username/ShrimpData"`
-- 行為：自動建立 `{DATA_DIR}/{專案名稱}/`
-- 範例：對於專案 "my-app" → `/Users/username/ShrimpData/my-app/`
-- **優勢**：使用一個全域配置管理所有專案，完美隔離
-
-**相對路徑模式（專案內存放）：**
-
-- 配置：`"DATA_DIR": ".shrimp"` 或 `"DATA_DIR": "shrimp-data"`
-- 行為：在專案內建立 `{專案根目錄}/{DATA_DIR}/`
-- 範例：對於 DATA_DIR "shrimp-data" → `./shrimp-data/`
-- **優勢**：資料與專案一起存放，方便選擇是否納入版本控制
-
-#### ⚠️ 不支援 ListRoots 協議（舊版模式）
-
-如果您的客戶端**不支援 ListRoots**，系統會回退到舊版行為：
-
-- **強烈建議使用絕對路徑**以避免路徑解析問題
-- 相對路徑可能在不同環境下導致行為不一致
-- 建議向您的客戶端廠商要求 ListRoots 支援以獲得增強功能
-
-> **舊版警告**：沒有 ListRoots 支援時，使用相對路徑可能導致：
->
-> - 數據檔案找不到，導致系統初始化失敗
-> - 任務狀態丟失或無法正確保存
-> - 應用程式在不同環境下行為不一致
-> - 系統崩潰或無法啟動
-
-#### 💡 選擇合適的配置
-
-**使用絕對路徑（全域）當：**
-
-- 您想用一個配置管理多個專案
-- 您偏好集中式資料存放
-- 您想要自動專案隔離
-
-**使用相對路徑（專案特定）當：**
-
-- 您想讓資料存放在專案目錄內
-- 您在不同環境中工作
-- 您需要精確控制版本控制的內容
-
-**使用舊版模式當：**
-
-- 您的客戶端不支援 ListRoots 協議
-- 您需要與較舊的客戶端版本相容
-
-### 🔧 環境變數配置
-
-蝦米任務管理器支援透過環境變數自定義提示詞行為，讓您無需修改程式碼即可微調 AI 助手的回應。您可以在配置中或透過 `.env` 文件設置這些變數：
-
-```json
-{
-  "mcpServers": {
-    "shrimp-task-manager": {
-      "command": "node",
-      "args": ["/path/to/mcp-shrimp-task-manager/dist/index.js"],
-      "env": {
-        "DATA_DIR": "/path/to/project/data",
-        "MCP_PROMPT_PLAN_TASK": "自定義規劃指導...",
-        "MCP_PROMPT_EXECUTE_TASK_APPEND": "附加執行說明...",
-        "TEMPLATES_USE": "en",
-        "ENABLE_GUI": "false"
-      }
-    }
-  }
-}
-```
-
-提供兩種自定義方式：
-
-- **覆蓋模式**（`MCP_PROMPT_[FUNCTION_NAME]`）：完全替換預設提示詞
-- **追加模式**（`MCP_PROMPT_[FUNCTION_NAME]_APPEND`）：在現有提示詞基礎上增加內容
-
-此外，還有其他系統配置變數：
-
-- **DATA_DIR**：指定任務數據存儲的目錄
-- **TEMPLATES_USE**：指定提示詞使用的模板集。預設為 `en`。目前可用的選項有 `en` 和 `zh`。若要使用自定義模板，請將 `src/prompts/templates_en` 目錄複製到 `DATA_DIR` 指定的位置，重新命名複製的目錄（例如，`my_templates`），並將 `TEMPLATES_USE` 設置為新的目錄名稱（例如，`my_templates`）
-- **ENABLE_GUI**：啟用或停用網頁圖形化使用者介面。設定為 `true` 以啟用，`false` 以停用（預設）
-- **WEB_PORT**：指定網頁 GUI 的埠號。若未指定，系統將自動選擇可用的埠號。僅在 `ENABLE_GUI` 設定為 `true` 時生效
-
-有關自定義提示詞的詳細說明，包括支援的參數和範例，請參閱[提示詞自定義指南](prompt-customization.md)。
-
-## 💡 <a id="系統提示詞指導"></a>系統提示詞指導
-
-### Cursor IDE 配置
-
-您可以啟用 Cursor Settings => Features => Custom modes 功能，並配置以下兩個模式：
-
-#### TaskPlanner 模式
+### 核心組件
 
 ```
-你是一個專業的任務規劃專家，你必須與用戶進行交互，分析用戶的需求，並收集專案相關資訊，最終使用 「plan_task」 建立任務，當任務建立完成後必須總結摘要，並告知用戶使用「TaskExecutor」模式進行任務執行。
-你必須專心於任務規劃禁止使用 「execute_task」 來執行任務，
-嚴重警告你是任務規劃專家，你不能直接修改程式碼，你只能規劃任務，並且你不能直接修改程式碼，你只能規劃任務。
+mcp-shrimp-task-manager/
+├── src/
+│   ├── index.ts           # MCP 服務器入口
+│   ├── models/            # 任務數據模型
+│   ├── tools/             # MCP 工具實現
+│   │   ├── task/         # 任務管理工具
+│   │   ├── thought/      # 認知工具
+│   │   ├── research/     # 研究工具
+│   │   └── project/      # 專案工具
+│   ├── prompts/          # 多語言提示模板
+│   └── web/              # 網頁 GUI 服務器
+└── tools/task-viewer/    # React 任務查看器
 ```
 
-#### TaskExecutor 模式
+### 數據流
 
 ```
-你是一個專業的任務執行專家，當用戶有指定執行任務，則使用 「execute_task」 進行任務執行，
-沒有指定任務時則使用 「list_tasks」 尋找未執行的任務並執行，
-當執行完成後必須總結摘要告知用戶結論，
-你一次只能執行一個任務，當任務完成時除非用戶明確告知否則禁止進行下一則任務。
-用戶如果要求「連續模式」則按照順序連續執行所有任務
+用戶請求 → MCP 工具 → 任務處理 → 數據持久化 → 響應
+                ↓
+          提示模板生成
+                ↓
+          AI 代理執行
 ```
 
-> 💡 根據您的需求場景選擇適當的模式：
->
-> - 當需要規劃任務時使用 **TaskPlanner** 模式
-> - 當需要執行任務時使用 **TaskExecutor** 模式
+## 🚀 部署選項
 
-### 在其他工具中使用
+### Docker 部署
 
-如果您的工具不支援 Custom modes 功能，可以：
+```bash
+# 使用 Docker Compose
+docker-compose up -d
 
-- 在不同階段手動貼上相應的提示詞
-- 或直接使用簡單命令如 `請規劃以下任務：......` 或 `請開始執行任務...`
-
-## 🛠️ <a id="可用工具一覽"></a>可用工具一覽
-
-配置完成後，您可使用以下工具：
-
-| 功能分類     | 工具名稱             | 功能描述                   |
-| ------------ | -------------------- | -------------------------- |
-| **任務規劃** | `plan_task`          | 開始規劃任務               |
-| **任務分析** | `analyze_task`       | 深入分析任務需求           |
-|              | `process_thought`    | 針對複雜問題進行步驟化推理 |
-| **方案評估** | `reflect_task`       | 反思與改進方案構想         |
-| **研究調查** | `research_mode`      | 進入系統性技術研究模式     |
-| **專案管理** | `init_project_rules` | 初始化或更新專案標準與規則 |
-| **任務管理** | `split_tasks`        | 將任務拆分為子任務         |
-|              | `list_tasks`         | 顯示所有任務及狀態         |
-|              | `query_task`         | 搜尋並列出任務             |
-|              | `get_task_detail`    | 顯示完整任務詳情           |
-|              | `delete_task`        | 刪除未完成的任務           |
-| **任務執行** | `execute_task`       | 執行特定任務               |
-|              | `verify_task`        | 檢驗任務完成情況           |
-
-## 📄 <a id="許可協議"></a>許可協議
-
-此專案根據 MIT 許可協議授權 - 詳情請參閱 [LICENSE](../../LICENSE) 文件。
-
-## 🏗️ 架構概述
-
-### 核心架構
-
-MCP 蝦米任務管理器是一個基於模型上下文協議（MCP）的服務器，通過引導式工作流程和系統化任務分解，為 AI 代理提供結構化的任務管理功能。
-
-#### 1. **MCP 服務器基礎**
-- 基於 `@modelcontextprotocol/sdk` 實現 MCP 協議規範
-- 使用 stdio 傳輸與 AI 客戶端通信
-- 通過 JSON Schema 定義公開 16 個專門工具
-- 支持同步和異步操作
-
-#### 2. **任務數據模型** (`src/types/index.ts`, `src/models/taskModel.ts`)
-- **任務實體**：包含唯一 ID、名稱、描述、狀態和依賴關係的核心數據結構
-- **任務狀態**：PENDING → IN_PROGRESS → COMPLETED（或 BLOCKED）
-- **依賴關係圖**：管理任務關係和執行順序
-- **相關文件**：追踪與每個任務相關的文件（TO_MODIFY、REFERENCE、CREATE 等）
-- **持久化存儲**：JSON 文件存儲配合 Git 版本控制實現完整歷史記錄
-- **記憶系統**：自動備份和長期任務歷史保存
-
-#### 3. **工具系統架構** (`src/tools/`)
-系統提供三大類專門工具：
-
-**任務管理工具：**
-- `plan_task`：將自然語言轉換為結構化開發計劃
-- `analyze_task`：深度技術分析與複雜度評估
-- `split_tasks`：智能分解複雜任務為可管理的子任務
-- `execute_task`：提供分步實施指南的引導式實現
-- `verify_task`：完成驗證和質量保證
-- `list_tasks`、`query_task`、`get_task_detail`：任務檢查和檢索
-- `update_task`、`delete_task`、`clear_all_tasks`：任務操作
-
-**認知工具：**
-- `process_thought`：複雜問題解決的思維鏈推理框架
-- `reflect_task`：完成後分析和經驗提取
-- `research_mode`：引導式工作流程的系統性技術調查
-
-**專案工具：**
-- `init_project_rules`：建立專案特定的規範和標準
-
-#### 4. **提示模板系統** (`src/prompts/`)
-- **多語言支持**：英文和繁體中文模板
-- **基於模板生成**：模組化提示構建
-- **上下文感知提示**：基於任務狀態的動態提示生成
-- **可自定義模板**：通過環境變量覆蓋或擴展
-- **模板加載**：基於配置的動態模板選擇
-
-#### 5. **代理集成系統** (`src/utils/agentLoader.ts`)
-- **代理分配**：可將任務分配給專門的 AI 代理
-- **代理元數據**：存儲代理能力和專長
-- **代理匹配**：基於任務需求的智能代理選擇
-- **Claude 集成**：與 Claude 代理系統的無縫集成
-
-### 數據流與工作流程
-
-#### 1. **任務規劃階段**
+# 或使用 Docker 直接運行
+docker run -d \
+  --name shrimp-task-manager \
+  -p 9998:9998 \
+  -v $(pwd)/data:/data \
+  cjo4m06/shrimp-task-manager:latest
 ```
-用戶請求 → plan_task → analyze_task → split_tasks（如果複雜）
+
+### NPX 快速開始
+
+```bash
+# 創建新專案
+npx create-shrimp-task-manager my-project
+
+# 或全域安裝
+npm install -g @cjo4m06/mcp-shrimp-task-manager
 ```
-- 解析自然語言並轉換為結構化任務
-- 複雜度評估決定是否需要任務拆分
-- 自動識別和映射依賴關係
 
-#### 2. **執行階段**
+### 一鍵安裝腳本
+
+```bash
+curl -sSL https://raw.githubusercontent.com/cjo4m06/mcp-shrimp-task-manager/main/install.sh | bash
 ```
-execute_task → 實施指南 → 狀態更新 → 文件追踪
-```
-- 生成分步實施指導
-- 追踪和監控相關文件
-- 實時更新進度狀態
-- 創建 Git 提交以進行版本控制
 
-#### 3. **驗證階段**
-```
-verify_task → reflect_task → 任務摘要 → 記憶存儲
-```
-- 根據驗收標準驗證完成情況
-- 提取經驗教訓供未來參考
-- 生成並存儲任務摘要
-- 記憶系統為未來任務保存知識
+## 📚 文檔
 
-#### 4. **記憶與持久化**
-- **主要存儲**：DATA_DIR 中的 `tasks.json`
-- **版本控制**：Git 倉庫追踪所有更改
-- **備份系統**：自動帶時間戳的備份
-- **記憶目錄**：已完成任務的長期存儲
-- **專案隔離**：ListRoots 協議實現每個專案數據分離
+- [提示詞自定義指南](prompt-customization.md)
+- [更新日誌](CHANGELOG.md)
+- [部署指南](../../DEPLOYMENT.md)
+- [API 文檔](../api.md)
+- [工具文檔](../tools.md)
 
-### 關鍵設計原則
+## 🤝 貢獻
 
-1. **思維鏈推理**：工具引導 AI 進行結構化思維過程
-2. **迭代優化**：任務可以多次分析、拆分和優化
-3. **上下文保持**：Git 歷史和記憶系統防止跨會話的上下文丟失
-4. **語言靈活性**：雙語支持和可自定義模板
-5. **狀態管理**：持久存儲在對話之間維護任務狀態
-6. **引導式工作流程**：系統引導而非命令，確保一致性
+歡迎貢獻！請查看我們的[貢獻指南](../../CONTRIBUTING.md)。
 
-### 網頁介面
+## 📄 許可證
 
-#### 1. **內建網頁 GUI** (`src/web/webServer.ts`)
-- 可選的 Express.js 服務器（ENABLE_GUI=true）
-- 實時任務可視化
-- 自動端口選擇與回退
-- 生成包含訪問 URL 的 WebGUI.md
+本專案採用 MIT 許可證 - 詳見 [LICENSE](../../LICENSE) 文件。
 
-#### 2. **任務查看器工具** (`tools/task-viewer/`)
-- 獨立的 React 應用程序
-- 多配置文件支持不同專案
-- 實時任務監控與自動刷新
-- 拖放介面用於組織
-- 代理管理集成
+## 🙏 致謝
 
-### 集成點
+- [Model Context Protocol](https://modelcontextprotocol.io/) 團隊
+- [Anthropic](https://www.anthropic.com/) 的 Claude
+- 所有貢獻者和使用者
 
-- **MCP 協議**：AI 模型交互的標準協議
-- **文件系統**：任務數據的直接文件操作
-- **Git 集成**：任務歷史的版本控制
-- **環境變量**：豐富的配置選項
-- **Web API**：GUI 交互的 RESTful 端點
-
-## 🔧 技術實現
-
-- **Node.js**：高性能 JavaScript 運行環境
-- **TypeScript**：提供類型安全的開發環境
-- **MCP SDK**：與大型語言模型無縫交互的介面
-- **UUID**：生成唯一可靠的任務標識符
-- **Express.js**：可選 GUI 的網頁服務器
-- **Git**：任務歷史的版本控制
-
-## 🤖 <a id="推薦模型"></a>推薦模型
-
-為了獲得最佳體驗，建議使用以下模型：
-
-- **Claude 3.7**: 提供強大的理解和生成能力。
-- **Gemini 2.5**: Google 的最新模型，表現優異。
-
-由於不同模型的訓練方式和理解能力存在差異，使用其他模型可能會導致相同的提示詞產生不同的效果。本專案已針對 Claude 3.7 和 Gemini 2.5 進行了最佳化。
-
-## Star History
+## 🌟 Star History
 
 [![Star History Chart](https://api.star-history.com/svg?repos=cjo4m06/mcp-shrimp-task-manager&type=Timeline)](https://www.star-history.com/#cjo4m06/mcp-shrimp-task-manager&Timeline)

@@ -1,232 +1,261 @@
-[🇺🇸 English](../../README.md) | [🇩🇪 Deutsch](../de/README.md) | [🇫🇷 Français](../fr/README.md) | [🇰🇷 한국어](../ko/README.md) | [🇧🇷 Português](README.md) | [🇷🇺 Русский](../ru/README.md) | [🇨🇳 中文](../zh/README.md)
-
-## Índice
-
-- [✨ Funcionalidades](#funcionalidades1)
-- [🧭 Guia de Uso](#guia-uso)
-- [🖥️ Ferramenta Task Viewer](#task-viewer-ferramenta)
-- [🔬 Modo de Pesquisa](#modo-pesquisa)
-- [🤖 Sistema de Gerenciamento de Agentes](#sistema-gerenciamento-agentes)
-- [🧠 Função de Memória de Tarefas](#funcao-memoria-tarefas)
-- [📋 Inicialização de Regras do Projeto](#regras-projeto)
-- [🌐 Interface Web](#interface-web)
-- [📚 Recursos de Documentação](#documentacao)
-- [🔧 Instalação e Uso](#instalacao)
-- [🔌 Uso com Clientes Compatíveis com MCP](#clientes)
-- [💡 Guia de Prompts do Sistema](#prompt)
-- [🛠️ Visão Geral das Ferramentas Disponíveis](#ferramentas)
-- [🏗️ Visão Geral da Arquitetura](#visao-geral-arquitetura)
-- [📄 Licença](#licenca)
-- [🤖 Modelos Recomendados](#modelos-recomendados)
+[🇺🇸 English](../../README.md) | [🇩🇪 Deutsch](../de/README.md) | [🇪🇸 Español](../es/README.md) | [🇫🇷 Français](../fr/README.md) | [🇮🇹 Italiano](../it/README.md) | [🇮🇳 हिन्दी](../hi/README.md) | [🇰🇷 한국어](../ko/README.md) | [🇧🇷 Português](README.md) | [🇷🇺 Русский](../ru/README.md) | [🇨🇳 中文](../zh/README.md)
 
 # MCP Shrimp Task Manager
 
-[![Shrimp Task Manager Demo](/docs/yt.png)](https://www.youtube.com/watch?v=Arzu0lV09so)
+> 🦐 **Gestão inteligente de tarefas para desenvolvimento assistido por IA** - Divida projetos complexos em tarefas gerenciáveis, mantenha o contexto entre sessões e acelere seu fluxo de trabalho de desenvolvimento.
+
+<div align="center">
+  
+[![Shrimp Task Manager Demo](../yt.png)](https://www.youtube.com/watch?v=Arzu0lV09so)
+
+**[Assistir vídeo de demonstração](https://www.youtube.com/watch?v=Arzu0lV09so)** • **[Início rápido](#-início-rápido)** • **[Documentação](#-documentação)**
 
 [![smithery badge](https://smithery.ai/badge/@cjo4m06/mcp-shrimp-task-manager)](https://smithery.ai/server/@cjo4m06/mcp-shrimp-task-manager)
+<a href="https://glama.ai/mcp/servers/@cjo4m06/mcp-shrimp-task-manager"><img width="380" height="200" src="https://glama.ai/mcp/servers/@cjo4m06/mcp-shrimp-task-manager/badge" alt="Shrimp Task Manager MCP server" /></a>
 
-> 🚀 Um sistema inteligente de gerenciamento de tarefas baseado no Model Context Protocol (MCP), fornecendo uma estrutura eficiente de fluxo de trabalho de programação para Agentes de IA.
+</div>
 
-<a href="https://glama.ai/mcp/servers/@cjo4m06/mcp-shrimp-task-manager">
-  <img width="380" height="200" src="https://glama.ai/mcp/servers/@cjo4m06/mcp-shrimp-task-manager/badge" alt="Shrimp Task Manager MCP server" />
-</a>
+## 🚀 Início rápido
 
-O Shrimp Task Manager guia Agentes através de fluxos de trabalho estruturados para programação sistemática, aprimorando mecanismos de gerenciamento de memória de tarefas e evitando efetivamente trabalho de codificação redundante e repetitivo.
+### Pré-requisitos
+- Node.js 18+ 
+- npm ou yarn
+- Cliente IA compatível com MCP (Claude Code, etc.)
 
-## ✨ <a id="funcionalidades1"></a>Funcionalidades
+### Instalação
 
-- **Planejamento e Análise de Tarefas**: Compreensão profunda e análise de requisitos de tarefas complexas
-- **Decomposição Inteligente de Tarefas**: Divide automaticamente tarefas grandes em tarefas menores gerenciáveis
-- **Gerenciamento de Dependências**: Trata precisamente dependências entre tarefas, garantindo ordem de execução correta
-- **Rastreamento de Status de Execução**: Monitoramento em tempo real do progresso e status de execução de tarefas
-- **Verificação de Completude de Tarefas**: Garante que os resultados das tarefas atendam aos requisitos esperados
-- **Avaliação de Complexidade de Tarefas**: Avalia automaticamente a complexidade das tarefas e fornece sugestões de tratamento otimizadas
-- **Atualizações Automáticas de Resumo de Tarefas**: Gera automaticamente resumos após a conclusão das tarefas, otimizando o desempenho da memória
-- **Função de Memória de Tarefas**: Backup automático do histórico de tarefas, fornecendo capacidades de memória e referência de longo prazo
-- **Modo de Pesquisa**: Capacidades sistemáticas de pesquisa técnica com fluxos de trabalho guiados para explorar tecnologias, melhores práticas e comparações de soluções
-- **Inicialização de Regras do Projeto**: Define padrões e regras do projeto para manter consistência em projetos grandes
-- **<a id="interface-web"></a>Interface Web**: Fornece uma interface gráfica de usuário baseada na web opcional para gerenciamento de tarefas. Ative definindo `ENABLE_GUI=true` no seu arquivo `.env`. Quando ativado, um arquivo `WebGUI.md` contendo o endereço de acesso será criado no seu `DATA_DIR`. Você pode personalizar a porta da web definindo `WEB_PORT` (se não especificado, uma porta disponível será selecionada automaticamente).
-- **<a id="task-viewer-ferramenta"></a>Task Viewer**: Uma interface web moderna baseada em React para visualizar e gerenciar dados de tarefas em múltiplos perfis com recursos avançados como abas arrastar e soltar, pesquisa em tempo real e atualização automática configurável. Veja a [documentação do Task Viewer](../../tools/task-viewer) para instruções de configuração e uso.
+#### Instalar Claude Code
 
-  <kbd><img src="../../tools/task-viewer/task-viewer-interface.png" alt="Interface do Task Viewer" /></kbd>
-  
-  <kbd><img src="../../tools/task-viewer/task-details-view.png" alt="Visualização de Detalhes da Tarefa" /></kbd>
+**Windows 11 (com WSL2):**
+```bash
+# Primeiro, certifique-se de que o WSL2 está instalado (no PowerShell como administrador)
+wsl --install
 
-- **<a id="sistema-gerenciamento-agentes"></a>Gerenciamento de Agentes**: Sistema abrangente de gerenciamento de subagentes para tratamento especializado de tarefas. Atribua agentes de IA específicos às tarefas, gerencie metadados de agentes e aproveite o sistema de agentes do Claude para execução otimizada de tarefas.
+# Entre no ambiente Ubuntu/WSL
+wsl -d Ubuntu
 
-## 🧭 <a id="guia-uso"></a>Guia de Uso
+# Instale o Claude Code globalmente
+npm install -g @anthropic-ai/claude-code
 
-O Shrimp Task Manager oferece uma abordagem estruturada para programação assistida por IA através de fluxos de trabalho guiados e gerenciamento sistemático de tarefas.
-
-### O que é Shrimp?
-
-Shrimp é essencialmente um modelo de prompt que guia Agentes de IA para melhor compreender e trabalhar com seu projeto. Ele usa uma série de prompts para garantir que o Agente se alinhe estreitamente com as necessidades específicas e convenções do seu projeto.
-
-### Modo de Pesquisa na Prática
-
-Antes de mergulhar no planejamento de tarefas, você pode aproveitar o modo de pesquisa para investigação técnica e coleta de conhecimento. Isso é particularmente útil quando:
-
-- Você precisa explorar novas tecnologias ou frameworks
-- Você quer comparar diferentes abordagens de solução
-- Você está investigando melhores práticas para seu projeto
-- Você precisa entender conceitos técnicos complexos
-
-Simplesmente diga ao Agente "research [seu tópico]" ou "enter research mode for [tecnologia/problema]" para iniciar investigação sistemática. Os achados da pesquisa irão então informar seu planejamento de tarefas subsequente e decisões de desenvolvimento.
-
-### Configuração Inicial
-
-Ao trabalhar com um novo projeto, simplesmente diga ao Agente "init project rules". Isso guiará o Agente para gerar um conjunto de regras adaptadas aos requisitos específicos e estrutura do seu projeto.
-
-### Processo de Planejamento de Tarefas
-
-Para desenvolver ou atualizar funcionalidades, use o comando "plan task [sua descrição]". O sistema referenciará as regras previamente estabelecidas, tentará entender seu projeto, procurará por seções de código relevantes e proporá um plano abrangente baseado no estado atual do seu projeto.
-
-*[Outras seções permanecem em inglês pois a tradução está em andamento]*
-
-## 🏗️ <a id="visao-geral-arquitetura"></a>Visão Geral da Arquitetura
-
-### Arquitetura Central
-
-O MCP Shrimp Task Manager é construído como um servidor Model Context Protocol (MCP) que fornece capacidades estruturadas de gerenciamento de tarefas para agentes de IA através de fluxos de trabalho guiados e decomposição sistemática de tarefas.
-
-#### 1. **Fundamentos do Servidor MCP**
-- Construído sobre `@modelcontextprotocol/sdk` para conformidade com o protocolo MCP
-- Usa transporte stdio para comunicação com clientes de IA
-- Expõe 16 ferramentas especializadas via definições JSON Schema
-- Suporta operações síncronas e assíncronas
-
-#### 2. **Modelo de Dados de Tarefas** (`src/types/index.ts`, `src/models/taskModel.ts`)
-- **Entidade de Tarefa**: Estrutura de dados central com ID único, nome, descrição, status e dependências
-- **Estados de Tarefa**: PENDING → IN_PROGRESS → COMPLETED (ou BLOCKED)
-- **Grafo de Dependências**: Gerencia relacionamentos de tarefas e ordem de execução
-- **Arquivos Relacionados**: Rastreia arquivos associados a cada tarefa (TO_MODIFY, REFERENCE, CREATE, etc.)
-- **Persistência**: Armazenamento de arquivos JSON com versionamento Git para histórico completo
-- **Sistema de Memória**: Backups automáticos e preservação de histórico de tarefas de longo prazo
-
-#### 3. **Arquitetura do Sistema de Ferramentas** (`src/tools/`)
-O sistema fornece ferramentas especializadas organizadas em três categorias principais:
-
-**Ferramentas de Gerenciamento de Tarefas:**
-- `plan_task`: Converte linguagem natural em planos de desenvolvimento estruturados
-- `analyze_task`: Análise técnica profunda com avaliação de complexidade
-- `split_tasks`: Decomposição inteligente de tarefas complexas em subtarefas gerenciáveis
-- `execute_task`: Implementação guiada com instruções passo a passo
-- `verify_task`: Verificação de completude e garantia de qualidade
-- `list_tasks`, `query_task`, `get_task_detail`: Inspeção e recuperação de tarefas
-- `update_task`, `delete_task`, `clear_all_tasks`: Manipulação de tarefas
-
-**Ferramentas Cognitivas:**
-- `process_thought`: Framework de raciocínio em cadeia de pensamento para resolução de problemas complexos
-- `reflect_task`: Análise pós-conclusão e extração de aprendizado
-- `research_mode`: Investigação técnica sistemática com fluxos de trabalho guiados
-
-**Ferramentas de Projeto:**
-- `init_project_rules`: Estabelece convenções e padrões específicos do projeto
-
-#### 4. **Sistema de Templates de Prompt** (`src/prompts/`)
-- **Suporte Multi-idioma**: Templates em inglês e chinês tradicional
-- **Geração Baseada em Templates**: Construção modular de prompts
-- **Prompts Sensíveis ao Contexto**: Geração dinâmica de prompts baseada no estado da tarefa
-- **Templates Customizáveis**: Sobreposição ou extensão via variáveis de ambiente
-- **Carregamento de Templates**: Seleção dinâmica de templates baseada em configuração
-
-#### 5. **Sistema de Integração de Agentes** (`src/utils/agentLoader.ts`)
-- **Atribuição de Agentes**: Tarefas podem ser atribuídas a agentes de IA especializados
-- **Metadados de Agentes**: Armazena capacidades e especializações de agentes
-- **Correspondência de Agentes**: Seleção inteligente de agentes baseada nos requisitos das tarefas
-- **Integração com Claude**: Integração perfeita com o sistema de agentes do Claude
-
-### Fluxo de Dados e Fluxo de Trabalho
-
-#### 1. **Fase de Planejamento de Tarefas**
+# Inicie o Claude Code
+claude
 ```
-Solicitação do Usuário → plan_task → analyze_task → split_tasks (se complexo)
+
+**macOS/Linux:**
+```bash
+# Instale o Claude Code globalmente
+npm install -g @anthropic-ai/claude-code
+
+# Inicie o Claude Code
+claude
 ```
-- Linguagem natural é analisada e convertida em tarefas estruturadas
-- Avaliação de complexidade determina se a divisão de tarefas é necessária
-- Dependências são automaticamente identificadas e mapeadas
 
-#### 2. **Fase de Execução**
+#### Instalar Shrimp Task Manager
+
+```bash
+# Clone o repositório
+git clone https://github.com/cjo4m06/mcp-shrimp-task-manager.git
+cd mcp-shrimp-task-manager
+
+# Instale as dependências
+npm install
+
+# Construa o projeto
+npm run build
 ```
-execute_task → Guia de Implementação → Atualizações de Status → Rastreamento de Arquivos
+
+### Configurar Claude Code
+
+Crie um arquivo `.mcp.json` no diretório do seu projeto:
+
+```json
+{
+  "mcpServers": {
+    "shrimp-task-manager": {
+      "command": "node",
+      "args": ["/caminho/para/mcp-shrimp-task-manager/dist/index.js"],
+      "env": {
+        "DATA_DIR": "/caminho/para/seus/dados_shrimp",
+        "TEMPLATES_USE": "pt",
+        "ENABLE_GUI": "false"
+      }
+    }
+  }
+}
 ```
-- Guia de implementação passo a passo gerado
-- Arquivos relacionados rastreados e monitorados
-- Status de progresso atualizado em tempo real
-- Commits do Git criados para controle de versão
 
-#### 3. **Fase de Verificação**
+Exemplo de configuração:
+```json
+{
+  "mcpServers": {
+    "shrimp-task-manager": {
+      "command": "node",
+      "args": ["/home/fire/claude/mcp-shrimp-task-manager/dist/index.js"],
+      "env": {
+        "DATA_DIR": "/home/fire/claude/projeto/dados_shrimp",
+        "TEMPLATES_USE": "pt",
+        "ENABLE_GUI": "false"
+      }
+    }
+  }
+}
 ```
-verify_task → reflect_task → Resumo da Tarefa → Armazenamento na Memória
+
+Em seguida, inicie o Claude Code com sua configuração MCP personalizada:
+
+```bash
+claude --dangerously-skip-permissions --mcp-config .mcp.json
 ```
-- Conclusão verificada contra critérios de aceitação
-- Lições aprendidas extraídas para referência futura
-- Resumo da tarefa gerado e armazenado
-- Sistema de memória preserva conhecimento para tarefas futuras
 
-#### 4. **Memória e Persistência**
-- **Armazenamento Primário**: `tasks.json` no DATA_DIR
-- **Controle de Versão**: Repositório Git rastreia todas as mudanças
-- **Sistema de Backup**: Backups automáticos com timestamp
-- **Diretório de Memória**: Armazenamento de longo prazo de tarefas concluídas
-- **Isolamento de Projeto**: Protocolo ListRoots permite separação de dados por projeto
+<details>
+<summary><b>Outros clientes IA</b></summary>
 
-### Princípios de Design Chave
+**Cline (Extensão VS Code)**: Uma extensão do VS Code para codificação assistida por IA. Adicione ao VS Code settings.json sob `cline.mcpServers`
 
-1. **Raciocínio em Cadeia de Pensamento**: Ferramentas guiam a IA através de processos de pensamento estruturados
-2. **Refinamento Iterativo**: Tarefas podem ser analisadas, divididas e refinadas múltiplas vezes
-3. **Preservação de Contexto**: Histórico do Git e sistema de memória previnem perda de contexto entre sessões
-4. **Flexibilidade de Linguagem**: Suporte bilíngue com templates customizáveis
-5. **Gerenciamento com Estado**: Armazenamento persistente mantém estado da tarefa entre conversas
-6. **Fluxos de Trabalho Guiados**: Sistema guia ao invés de comandar, garantindo consistência
+**Claude Desktop**: Adicione a `~/Library/Application Support/Claude/claude_desktop_config.json` (macOS) ou `%APPDATA%\Claude\claude_desktop_config.json` (Windows)
+</details>
 
-### Interfaces Web
+### Começar a usar
 
-#### 1. **GUI Web Integrada** (`src/web/webServer.ts`)
-- Servidor Express.js opcional (ENABLE_GUI=true)
-- Visualização de tarefas em tempo real
-- Seleção automática de porta com fallback
-- Gera WebGUI.md com URL de acesso
+1. **Inicialize seu projeto**: `"init project rules"`
+2. **Planeje uma tarefa**: `"plan task: implementar autenticação de usuário"`
+3. **Execute tarefas**: `"execute task"` ou `"continuous mode"`
 
-#### 2. **Ferramenta Task Viewer** (`tools/task-viewer/`)
-- Aplicação React independente
-- Suporte multi-perfil para diferentes projetos
-- Monitoramento de tarefas em tempo real com atualização automática
-- Interface arrastar e soltar para organização
-- Integração de gerenciamento de agentes
+## 💡 O que é Shrimp?
 
-### Pontos de Integração
+Shrimp Task Manager é um servidor MCP (Model Context Protocol) que transforma como agentes IA abordam o desenvolvimento de software. Em vez de perder contexto ou repetir trabalho, Shrimp fornece:
 
-- **Protocolo MCP**: Protocolo padrão para interação com modelos de IA
-- **Sistema de Arquivos**: Manipulação direta de arquivos para dados de tarefas
-- **Integração Git**: Controle de versão para histórico de tarefas
-- **Variáveis de Ambiente**: Opções de configuração extensivas
-- **APIs Web**: Endpoints RESTful para interação com GUI
+- **🧠 Memória persistente**: Tarefas e progresso persistem entre sessões
+- **📋 Fluxos de trabalho estruturados**: Processos guiados para planejamento, execução e verificação
+- **🔄 Decomposição inteligente**: Decompõe automaticamente tarefas complexas em subtarefas gerenciáveis
+- **🎯 Preservação de contexto**: Nunca perca seu lugar, mesmo com limites de token
 
-## 🔧 Implementação Técnica
+## ✨ Recursos principais
 
-- **Node.js**: Ambiente de execução JavaScript de alta performance
-- **TypeScript**: Fornece ambiente de desenvolvimento type-safe
-- **MCP SDK**: Interface para interação perfeita com Large Language Models
-- **UUID**: Gera identificadores únicos e confiáveis para tarefas
-- **Express.js**: Servidor web para GUI opcional
-- **Git**: Controle de versão para histórico de tarefas
+### Gestão de tarefas
+- **Planejamento inteligente**: Análise profunda dos requisitos antes da implementação
+- **Decomposição de tarefas**: Divide grandes projetos em unidades atômicas e testáveis
+- **Rastreamento de dependências**: Gestão automática de relacionamentos entre tarefas
+- **Monitoramento de progresso**: Rastreamento de status e atualizações em tempo real
 
-*[Outras seções serão traduzidas quando a tradução completa for solicitada]*
+### Capacidades avançadas
+- **🔬 Modo de pesquisa**: Exploração sistemática de tecnologias e soluções
+- **🤖 Sistema de agentes**: Atribua agentes IA especializados a tarefas específicas ([Saiba mais](../agents.md))
+- **📏 Regras do projeto**: Defina e mantenha padrões de codificação em seu projeto
+- **💾 Memória de tarefas**: Backup e restauração automáticos do histórico de tarefas
 
-## 📄 <a id="licenca"></a>Licença
+### Interfaces web
+
+#### 🖥️ Visualizador de tarefas
+Interface React moderna para gestão visual de tarefas com arrastar e soltar, busca em tempo real e suporte multi-perfil.
+
+**Configuração rápida:**
+```bash
+cd tools/task-viewer
+npm install
+npm run start:all
+# Acesso em http://localhost:5173
+```
+
+[📖 Documentação completa do visualizador de tarefas](../../tools/task-viewer/README.md)
+
+<kbd><img src="../../tools/task-viewer/task-viewer-interface.png" alt="Interface do visualizador de tarefas" width="600"/></kbd>
+
+#### 🌐 GUI web
+Interface web leve opcional para visão geral rápida de tarefas.
+
+Ativar em `.env`: `ENABLE_GUI=true`
+
+## 📚 Documentação
+
+- [📖 Documentação completa](../README.md)
+- [🛠️ Ferramentas disponíveis](../tools.md)
+- [🤖 Gestão de agentes](../agents.md)
+- [🎨 Personalização de prompts](prompt-customization.md)
+- [🔧 Referência da API](../api.md)
+
+## 🎯 Casos de uso comuns
+
+<details>
+<summary><b>Desenvolvimento de recursos</b></summary>
+
+```
+Agente: "plan task: adicionar autenticação de usuário com JWT"
+# O agente analisa a base de código, cria subtarefas
+
+Agente: "execute task"
+# Implementa a autenticação passo a passo
+```
+</details>
+
+<details>
+<summary><b>Correção de bugs</b></summary>
+
+```
+Agente: "plan task: corrigir vazamento de memória no processamento de dados"
+# O agente pesquisa o problema, cria plano de correção
+
+Agente: "continuous mode"
+# Executa todas as tarefas de correção automaticamente
+```
+</details>
+
+<details>
+<summary><b>Pesquisa e aprendizado</b></summary>
+
+```
+Agente: "research: comparar React vs Vue para este projeto"
+# Análise sistemática com prós/contras
+
+Agente: "plan task: migrar componente para o framework escolhido"
+# Cria plano de migração baseado na pesquisa
+```
+</details>
+
+## 🛠️ Configuração
+
+### Variáveis de ambiente
+
+Crie um arquivo `.env`:
+
+```bash
+# Obrigatório
+DATA_DIR=/caminho/para/armazenamento/dados
+
+# Opcional
+ENABLE_GUI=true          # Ativar GUI web
+WEB_PORT=3000           # Porta web personalizada
+PROMPT_LANGUAGE=pt      # Idioma dos prompts (pt, en, zh, etc.)
+```
+
+### Comandos disponíveis
+
+| Comando | Descrição |
+|---------|-------------|
+| `init project rules` | Inicializar padrões do projeto |
+| `plan task [descrição]` | Criar um plano de tarefa |
+| `execute task [id]` | Executar tarefa específica |
+| `continuous mode` | Executar todas as tarefas sequencialmente |
+| `list tasks` | Mostrar todas as tarefas |
+| `research [tópico]` | Entrar em modo de pesquisa |
+| `reflect task [id]` | Revisar e melhorar tarefa |
+
+## 🤝 Contribuindo
+
+Nós acolhemos contribuições! Por favor, consulte nosso [Guia de contribuição](../../CONTRIBUTING.md) para detalhes.
+
+## 📄 Licença
 
 Este projeto está licenciado sob a Licença MIT - veja o arquivo [LICENSE](../../LICENSE) para detalhes.
 
-## <a id="modelos-recomendados"></a>Modelos Recomendados
+## 🌟 Créditos
 
-Para a melhor experiência, recomendamos usar os seguintes modelos:
+Criado por [cjo4m06](https://github.com/cjo4m06) e mantido pela comunidade.
 
-- **Claude 3.7**: Oferece fortes capacidades de compreensão e geração.
-- **Gemini 2.5**: O modelo mais recente do Google, tem excelente desempenho.
+---
 
-Devido às diferenças nos métodos de treinamento e capacidades de compreensão entre modelos, usar outros modelos pode levar a resultados variados para os mesmos prompts. Este projeto foi otimizado para Claude 3.7 e Gemini 2.5.
-
-## Star History
-
-[![Star History Chart](https://api.star-history.com/svg?repos=cjo4m06/mcp-shrimp-task-manager&type=Timeline)](https://www.star-history.com/#cjo4m06/mcp-shrimp-task-manager&Timeline)
+<p align="center">
+  <a href="https://github.com/cjo4m06/mcp-shrimp-task-manager">GitHub</a> •
+  <a href="https://github.com/cjo4m06/mcp-shrimp-task-manager/issues">Issues</a> •
+  <a href="https://github.com/cjo4m06/mcp-shrimp-task-manager/discussions">Discussões</a>
+</p>
