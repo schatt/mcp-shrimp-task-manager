@@ -496,12 +496,8 @@ export async function batchCreateOrUpdateTasks(
           description: taskData.description,
           notes: taskData.notes,
           // 後面會處理 dependencies
-<<<<<<< HEAD
-          updatedAt: getLocalDate(),
-=======
           // Dependencies will be processed later
-          updatedAt: new Date(),
->>>>>>> upstream/main
+          updatedAt: getLocalDate(),
           // 新增：保存實現指南（如果有）
           // New: Save implementation guide (if any)
           implementationGuide: taskData.implementationGuide,
@@ -546,7 +542,7 @@ export async function batchCreateOrUpdateTasks(
         notes: taskData.notes,
         status: TaskStatus.PENDING,
         dependencies: [], // 後面會填充
-        createdAt: new Date(),
+        createdAt: getLocalDate(),
         updatedAt: getLocalDate(),
         relatedFiles: taskData.relatedFiles,
         // 新增：保存實現指南（如果有）
@@ -591,8 +587,7 @@ export async function batchCreateOrUpdateTasks(
           if (taskNameToIdMap.has(dependencyName)) {
             dependencyTaskId = taskNameToIdMap.get(dependencyName)!;
           } else {
-            continue; // 跳過此依賴
-            continue; // Skip this dependency
+            continue; // 跳過此依賴 - Skip this dependency
           }
         } else {
           // 是UUID格式，但需要確認此ID是否對應實際存在的任務
@@ -601,8 +596,7 @@ export async function batchCreateOrUpdateTasks(
             (task) => task.id === dependencyTaskId
           );
           if (!idExists) {
-            continue; // 跳過此依賴
-            continue; // Skip this dependency
+            continue; // 跳過此依賴 - Skip this dependency
           }
         }
 
@@ -618,12 +612,7 @@ export async function batchCreateOrUpdateTasks(
   const allTasks = [...tasksToKeep, ...newTasks];
 
   // 寫入更新後的任務列表
-<<<<<<< HEAD
   await writeTasks(allTasks, `Bulk task operation: ${updateMode} mode, ${newTasks.length} tasks`);
-=======
-  // Write updated task list
-  await writeTasks(allTasks);
->>>>>>> upstream/main
 
   return newTasks;
 }
@@ -640,13 +629,11 @@ export async function canExecuteTask(
   }
 
   if (task.status === TaskStatus.COMPLETED) {
-    return { canExecute: false }; // 已完成的任務不需要再執行
-    return { canExecute: false }; // Completed tasks do not need to be executed again
+    return { canExecute: false }; // 已完成的任務不需要再執行 - Completed tasks do not need to be executed again
   }
 
   if (task.dependencies.length === 0) {
-    return { canExecute: true }; // 沒有依賴的任務可以直接執行
-    return { canExecute: true }; // Tasks without dependencies can be executed directly
+    return { canExecute: true }; // 沒有依賴的任務可以直接執行 - Tasks without dependencies can be executed directly
   }
 
   const allTasks = await readTasks();
@@ -702,11 +689,8 @@ export async function deleteTask(
   }
 
   // 執行刪除操作
-<<<<<<< HEAD
-  const deletedTask = tasks[taskIndex];
-=======
   // Execute delete operation
->>>>>>> upstream/main
+  const deletedTask = tasks[taskIndex];
   tasks.splice(taskIndex, 1);
   await writeTasks(tasks, `Delete task: ${deletedTask.name}`);
 
@@ -885,15 +869,9 @@ export async function clearAllTasks(): Promise<{
       (task) => task.status === TaskStatus.COMPLETED
     );
 
-<<<<<<< HEAD
-    // 創建備份文件名 - 使用本地時間
-    const timestamp = getLocalISOString()
-=======
     // 創建備份文件名
     // Create backup file name
-    const timestamp = new Date()
-      .toISOString()
->>>>>>> upstream/main
+    const timestamp = getLocalISOString()
       .replace(/:/g, "-")
       .replace(/\..+/, "")
       .replace(/[+\-]\d{2}-\d{2}$/, ""); // Remove timezone offset for filename
@@ -920,12 +898,8 @@ export async function clearAllTasks(): Promise<{
     );
 
     // 清空任務文件
-<<<<<<< HEAD
-    await writeTasks([], `Clear all tasks (${allTasks.length} tasks removed)`);
-=======
     // Clear task file
-    await writeTasks([]);
->>>>>>> upstream/main
+    await writeTasks([], `Clear all tasks (${allTasks.length} tasks removed)`);
 
     return {
       success: true,
@@ -992,7 +966,7 @@ export async function searchTasksWithCommand(
           stdout.split("\n").forEach((line) => {
             if (line.trim()) {
               // 格式通常是: 文件路徑:匹配內容
-          // Format is usually: file path:matching content
+              // Format is usually: file path:matching content
               const filePath = line.split(":")[0];
               if (filePath) {
                 matchedFiles.add(filePath);
@@ -1099,11 +1073,9 @@ export async function searchTasksWithCommand(
     if (a.completedAt && b.completedAt) {
       return b.completedAt.getTime() - a.completedAt.getTime();
     } else if (a.completedAt) {
-      return -1; // a完成了但b未完成，a排前面
-      return -1; // a is completed but b is not, a comes first
+      return -1; // a完成了但b未完成，a排前面 - a is completed but b is not, a comes first
     } else if (b.completedAt) {
-      return 1; // b完成了但a未完成，b排前面
-      return 1; // b is completed but a is not, b comes first
+      return 1; // b完成了但a未完成，b排前面 - b is completed but a is not, b comes first
     }
 
     // 否則按更新時間排序
@@ -1115,8 +1087,7 @@ export async function searchTasksWithCommand(
   // Pagination processing
   const totalResults = allTasks.length;
   const totalPages = Math.ceil(totalResults / pageSize);
-  const safePage = Math.max(1, Math.min(page, totalPages || 1)); // 確保頁碼有效
-  const safePage = Math.max(1, Math.min(page, totalPages || 1)); // Ensure page number is valid
+  const safePage = Math.max(1, Math.min(page, totalPages || 1)); // 確保頁碼有效 - Ensure page number is valid
   const startIndex = (safePage - 1) * pageSize;
   const endIndex = Math.min(startIndex + pageSize, totalResults);
   const paginatedTasks = allTasks.slice(startIndex, endIndex);
@@ -1200,8 +1171,7 @@ function escapeShellArg(arg: string): string {
   // Remove all control characters and special characters
   return arg
     .replace(/[\x00-\x1F\x7F]/g, "") // 控制字符
-    .replace(/[&;`$"'<>|]/g, ""); // Shell 特殊字符
-    .replace(/[&;`$"'<>|]/g, ""); // Shell special characters
+    .replace(/[&;`$"'<>|]/g, ""); // Shell 特殊字符 - Shell special characters
 }
 
 // 過濾當前任務列表
